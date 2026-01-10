@@ -30,7 +30,7 @@ public class TossPaymentClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${payment.toss.secret-key}")
+    @Value("${payment.toss.secret-key:test_secret_key_for_toss_payments}")
     private String secretKey;
 
     public TossConfirmResponse confirmPayment(String paymentKey, String orderId, Long amount) {

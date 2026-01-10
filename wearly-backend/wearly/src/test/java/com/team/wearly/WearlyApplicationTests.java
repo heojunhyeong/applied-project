@@ -1,4 +1,4 @@
-package com.team.wearly.wearly;
+package com.team.wearly;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

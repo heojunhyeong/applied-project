@@ -19,10 +19,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class Product {
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    //추가
+    @Column(nullable = false)
+    private Long sellerId;
 
     @Column(nullable = false)
     private String productName;

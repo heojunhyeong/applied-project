@@ -1,6 +1,5 @@
-package com.team.wearly.global.config;
+package com.team.wearly.domain.payment.entity;
 
-import com.team.wearly.domain.product.entity.enums.ProductCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,19 +8,18 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SecurityConfig {
+public class Payment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long quantity;
+    private String impUid;
 
 //    private Long userId;
-
-//    private Long productId;
 }

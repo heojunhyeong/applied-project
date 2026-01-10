@@ -1,6 +1,5 @@
-package com.team.wearly.global.config;
+package com.team.wearly.domain.order.entity;
 
-import com.team.wearly.domain.product.entity.enums.ProductCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SecurityConfig {
+public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +20,10 @@ public class SecurityConfig {
     @Column(nullable = false)
     private Long quantity;
 
-//    private Long userId;
+    @Column(nullable = false)
+    private Long price;
+
+//    private Long orderId;
 
 //    private Long productId;
 }

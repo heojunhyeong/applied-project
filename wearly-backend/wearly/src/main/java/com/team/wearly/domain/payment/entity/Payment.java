@@ -1,6 +1,6 @@
 package com.team.wearly.domain.payment.entity;
 
-import com.team.wearly.domain.membership.entity.enums.PaymentStatus;
+import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import com.team.wearly.domain.payment.entity.enums.PaymentMethod;
 import com.team.wearly.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;

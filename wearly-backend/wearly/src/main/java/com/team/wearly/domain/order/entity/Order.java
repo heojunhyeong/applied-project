@@ -1,6 +1,7 @@
 package com.team.wearly.domain.order.entity;
 
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
+import com.team.wearly.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,23 +12,32 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
+// order는 SQL 예약어인 경우가 많아 테이블명 명시했음. 참고바람
+@Table(name = "orders")
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order {
+public class Order extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 외부 노출용 고유 주문 번호 (예: ORD-20240110-UUID)
+    @Column(nullable = false, unique = true)
+    private String orderId;
+
     private Long userId;
 
     private Long totalPrice;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20) // 테스트용
     private OrderStatus orderStatus;
 
-    private LocalDateTime createdDate;
-
+    // 결제에 따른 상태 변경 메서드
+    public void updateStatus(OrderStatus status) {
+        this.orderStatus = status;
+    }
 }

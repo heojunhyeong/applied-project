@@ -2,7 +2,23 @@ spring:
   application:
     name: wearly
 
-  payment:
-    toss:
-      secret-key: ${TOSS_SECRET_KEY:default_key}
-      client-key: ${TOSS_CLIENT_KEY:default_key}
+
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/wearly?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    username: root
+#    password: root1234
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#  jpa:
+#    database-platform: org.hibernate.dialect.MySQLDialect
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+
+payment:
+  toss:
+    secret-key: ${TOSS_SECRET_KEY:default_key}
+    client-key: ${TOSS_CLIENT_KEY:default_key}

@@ -1,6 +1,6 @@
 package com.team.wearly.domain.membership.entity;
 
-import com.team.wearly.domain.membership.entity.enums.PaymentStatus;
+import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

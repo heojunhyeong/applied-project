@@ -5,9 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-// 주석 추가 예정
-// 프론트에서 보내줄 DTO
-// 토스 결제창에서 인증을 마치고 난 뒤 프론트에서 보내는 DTO
+/**
+ * 토스 결제창에서 인증을 마치고 나면 프론트엔드(React)에서 우리 서버로 결제 승인 요청을 보낼 때 사용하는 DTO
+ * 즉, 토스(React) -> 서버(Spring)
+ *
+ * @author 허준형
+ * @DateOfCreated 2026-01-10
+ * @DateOfEdit 2025-01-10
+ */
 @Getter
 @Setter
 @AllArgsConstructor

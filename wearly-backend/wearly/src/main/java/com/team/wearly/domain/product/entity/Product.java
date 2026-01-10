@@ -24,6 +24,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //추가
+    @Column(nullable = false)
+    private Long sellerId;
+
     @Column(nullable = false)
     private String productName;
 

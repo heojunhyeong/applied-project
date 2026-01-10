@@ -5,9 +5,9 @@ function BrandPage() {
   const { brand } = useParams();
 
   const brandNames = {
-    nike: "나이키",
-    adidas: "아디다스",
-    newbalance: "뉴발란스",
+    NIKE: "나이키",
+    ADIDAS: "아디다스",
+    NEW_BALANCE: "뉴발란스",
   };
 
   // 테스트용 상품 데이터

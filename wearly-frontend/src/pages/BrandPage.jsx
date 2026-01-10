@@ -4,33 +4,31 @@ import './BrandPage.css';
 function BrandPage() {
     const { brand } = useParams();
 
-    // 브랜드명 매핑 (URL → 표시명)
     const brandNames = {
         nike: '나이키',
         adidas: '아디다스',
-        newbalance: '뉴발란스',
-        'the-north-face': '더 노스 페이스'
+        newbalance: '뉴발란스'
     };
 
     // 테스트용 상품 데이터 (나중에 API로 교체)
     const products = [
         {
             id: 1,
-            name: `${brandNames[brand] || brand} 상품 1`,
-            price: '159,000원',
-            image: `/images/${brand}/product1.jpg`
+            name: `${brandNames[brand]} 에어맥스`,
+            price: '219,000원',
+            image: `/images/${brand}/나이키_에어맥스.png`
         },
         {
             id: 2,
-            name: `${brandNames[brand] || brand} 상품 2`,
-            price: '129,000원',
-            image: `/images/${brand}/product2.jpg`
+            name: `${brandNames[brand]} 에어맥스 TL 2.5`,
+            price: '229,000원',
+            image: `/images/${brand}/나이키_에어맥스_TL_2.5.png`
         },
         {
             id: 3,
-            name: `${brandNames[brand] || brand} 상품 3`,
-            price: '139,000원',
-            image: `/images/${brand}/product3.jpg`
+            name: `${brandNames[brand]} 에어 포스 1 GORE-TEX 비브람`,
+            price: '229,000원',
+            image: `/images/${brand}/에어_포스_1_GORE-TEX_비브람.png`
         }
     ];
 

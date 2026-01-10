@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: wearly
+
+  payment:
+    toss:
+      secret-key: ${TOSS_SECRET_KEY:default_key}
+      client-key: ${TOSS_CLIENT_KEY:default_key}

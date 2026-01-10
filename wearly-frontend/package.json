@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@tosspayments/payment-sdk": "^1.9.2"
+  }
+}

@@ -29,6 +29,10 @@ public class Membership {
 
     private MembershipStatus status;
 
+    // 외부 노출용 고유 주문 번호 (예: ORD-20240110-UUID)
+    @Column(nullable = false, unique = true)
+    private String orderId;
+
     @CreatedDate
     private LocalDateTime startDate;
 
@@ -38,6 +42,11 @@ public class Membership {
     private LocalDateTime nextPaymentDate;
 
     private LocalDateTime unsubscribeDate;
+
+    // 결제에 따른 상태 변경 메서드
+    public void updateStatus(MembershipStatus status) {
+        this.status = status;
+    }
 
 
 

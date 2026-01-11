@@ -1,0 +1,12 @@
+# JetBrains IDE 관련 (이미지에 보이는 .idea 폴더)
+.idea/
+*.iml
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+# 언어/프레임워크별 빌드 결과물 (예시)
+target/
+build/
+node_modules/

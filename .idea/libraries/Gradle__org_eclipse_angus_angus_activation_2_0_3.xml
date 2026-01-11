@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: org.eclipse.angus:angus-activation:2.0.3" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.eclipse.angus" artifactId="angus-activation" version="2.0.3" baseVersion="2.0.3" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.angus/angus-activation/2.0.3/7f80607ea5014fef0b1779e6c33d63a88a45a563/angus-activation-2.0.3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.angus/angus-activation/2.0.3/aaa10694a5fd68cea246df668309beed09a5f617/angus-activation-2.0.3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.angus/angus-activation/2.0.3/2639ddee2a9fc3d0cfa64a5a4226394089c1f97c/angus-activation-2.0.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

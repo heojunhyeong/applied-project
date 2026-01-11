@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: ch.qos.logback:logback-core:1.5.22" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="ch.qos.logback" artifactId="logback-core" version="1.5.22" baseVersion="1.5.22" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.22/7c3ee4420b36bd499fa4f9f18a81d54a64fe0218/logback-core-1.5.22.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.22/3228e9e40d0fe1753c32b8b00902dbb7dbf162b6/logback-core-1.5.22-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.22/5bc55532ecdf09b29f82f50fa1a85fadd7afd1b9/logback-core-1.5.22-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

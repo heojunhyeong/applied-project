@@ -2,7 +2,7 @@ package com.team.wearly.global.security.jwt;
 
 import com.team.wearly.domain.user.entity.enums.UserRole;
 import com.team.wearly.domain.user.repository.AdminRepository;
-import com.team.wearly.domain.user.repository.SellerRepository;
+import com.team.wearly.domain.seller.repository.SellerRepository;
 import com.team.wearly.domain.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

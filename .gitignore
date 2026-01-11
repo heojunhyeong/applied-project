@@ -1,0 +1,35 @@
+### OS ###
+.DS_Store
+Thumbs.db
+
+### IntelliJ / JetBrains ###
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+out/
+**/out/
+workspace.xml
+
+### Gradle ###
+.gradle/
+**/.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### Java ###
+*.class
+
+### Env ###
+.env
+**/.env
+
+### Node ###
+node_modules/
+**/node_modules/
+package-lock.json
+npm-debug.log*
+yarn.lock
+

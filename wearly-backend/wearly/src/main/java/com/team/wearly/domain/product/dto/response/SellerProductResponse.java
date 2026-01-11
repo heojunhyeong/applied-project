@@ -1,8 +1,9 @@
-package com.team.wearly.domain.product.seller.dto.response;
+package com.team.wearly.domain.product.dto.response;
 
 import com.team.wearly.domain.product.entity.Product;
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
+import com.team.wearly.domain.product.entity.enums.ProductStatus;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ public record SellerProductResponse(
         String imageUrl,
         Brand brand,
         ProductCategory productCategory,
+        ProductStatus status,
         LocalDateTime createdDate,
         LocalDateTime updatedDate
 ) {
@@ -30,6 +32,7 @@ public record SellerProductResponse(
                 p.getImageUrl(),
                 p.getBrand(),
                 p.getProductCategory(),
+                p.getStatus(),
                 p.getCreatedDate(),
                 p.getUpdatedDate()
         );

@@ -75,6 +75,13 @@ public class JwtTokenProvider {
         return createToken(claims, username);
     }
 
+    public String generateToken(Long userId, String username, String role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("role", role);
+        return createToken(claims, username);
+    }
+
     // 토큰 생성
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()

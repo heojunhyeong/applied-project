@@ -17,15 +17,14 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
-  payment:
-    toss:
-      secret-key: "test_secret_key_123456789012345678901234567890"
-      client-key: "test_client_key_123456789012345678901234567890"
+payment:
+  toss:
+    secret-key: "test_secret_key_123456789012345678901234567890"
+    client-key: "test_client_key_123456789012345678901234567890"
 
 server:
   port: 8080
 
-# JWT 설정
 jwt:
   secret: your-256-bit-secret-key-for-jwt-token-generation-at-least-32-characters-long
-  expiration: 86400000  # 24시간 (밀리초)
+  expiration: 86400000 # 24시간 (밀리초)

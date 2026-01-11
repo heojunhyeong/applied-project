@@ -65,14 +65,6 @@ public class TossPaymentClient {
             // @TODO 해당 예외 추후 커스텀 예외로 교체 에정
             throw new RuntimeException("토스 결제 승인 요청 실패", e);
         }
-// // Mock
-//        return new TossConfirmResponse(
-//                paymentKey,  // 프론트에서 보낸 키 그대로 사용
-//                orderId,     // 프론트에서 보낸 주문번호 그대로 사용
-//                "DONE",      // 상태는 무조건 성공(DONE)
-//                amount,      // 금액 그대로 사용
-//                "CARD",      // 결제수단은 카드로 가정
-//                "2024-01-10T10:00:00+09:00" // 승인 시간
-//        );
+
     }
 }

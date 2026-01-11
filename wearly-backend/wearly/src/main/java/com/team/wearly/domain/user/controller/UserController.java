@@ -14,14 +14,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/users")
 @RequiredArgsConstructor
+@RequestMapping("/api/users")
 public class UserController {
-    
+
     private final UserService userService;
-    
+
     /**
      * 회원가입 API
      * - USER: 즉시 가입 완료
@@ -41,7 +43,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-    
+
     /**
      * Validation 에러 처리
      * @NoAdminWord 등 Custom Validator의 에러 메시지도 여기서 처리됨

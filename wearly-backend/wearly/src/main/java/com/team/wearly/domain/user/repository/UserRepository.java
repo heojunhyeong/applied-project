@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserName(String userName);
 
     // 아이디(userName) 또는 닉네임(userNickname)에 키워드가 포함된 유저 검색
+    //findby 방식을 사용했을때 너무 난잡해보여서 query 어노테이션을 사용
     @Query("SELECT u FROM User u WHERE u.userName LIKE %:keyword% OR u.userNickname LIKE %:keyword%")
     List<User> searchByKeyword(@Param("keyword") String keyword);
 }

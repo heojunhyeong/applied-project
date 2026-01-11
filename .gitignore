@@ -1,25 +1,28 @@
-### IntelliJ IDEA ###
+# JetBrains IDE
 .idea/
 *.iml
-*.ipr
-*.iws
-out/
 
-### Gradle ###
-.gradle/
-build/
-
-### OS ###
+# OS
 .DS_Store
 Thumbs.db
 
-### Env ###
-.env
-**/.env
-
-### Node ###
+# Node / Front
 node_modules/
-**/node_modules/
-package-lock.json
-yarn.lock
-npm-debug.log*
+
+# Java / Gradle / Build outputs
+target/
+build/
+.gradle/
+out/
+
+# Module-specific outputs
+wearly-backend/wearly/.gradle/
+wearly-backend/wearly/out/
+
+# Spring Boot config (local only)
+wearly-backend/wearly/src/main/resources/application.yml
+wearly-backend/wearly/src/main/resources/application.yaml
+
+# (선택) profile 파일까지 로컬로만 쓸 거면 주석 해제
+# wearly-backend/wearly/src/main/resources/application-*.yml
+# wearly-backend/wearly/src/main/resources/application-*.yaml

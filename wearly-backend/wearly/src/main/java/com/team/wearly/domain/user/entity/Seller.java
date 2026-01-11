@@ -1,6 +1,5 @@
 package com.team.wearly.domain.user.entity;
 
-import com.team.wearly.domain.user.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,13 +12,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user")
+@Table(name = "seller")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +40,4 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updatedDate;
-
-//    private Long membership_id;
 }

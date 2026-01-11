@@ -6,6 +6,7 @@ import com.team.wearly.domain.order.dto.CartResponseDto;
 import com.team.wearly.domain.order.entity.Cart;
 import com.team.wearly.domain.order.repository.CartRepository;
 import com.team.wearly.domain.product.entity.Product;
+import com.team.wearly.domain.product.repository.ProductRepository;
 import com.team.wearly.domain.user.entity.User;
 import com.team.wearly.domain.user.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;

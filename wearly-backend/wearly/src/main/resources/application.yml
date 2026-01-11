@@ -2,23 +2,30 @@ spring:
   application:
     name: wearly
 
+  datasource:
+    url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: root
+    password: root1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/wearly?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#    username: root
-#    password: root1234
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#
-#  jpa:
-#    database-platform: org.hibernate.dialect.MySQLDialect
-#    hibernate:
-#      ddl-auto: update
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
+  jpa:
+    hibernate:
+      ddl-auto: update  # 테이블 자동 생성/수정 (회원가입 데이터 영구 저장)
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
-payment:
-  toss:
-    secret-key: ${TOSS_SECRET_KEY:default_key}
-    client-key: ${TOSS_CLIENT_KEY:default_key}
+  payment:
+    toss:
+      secret-key: "test_secret_key_123456789012345678901234567890"
+      client-key: "test_client_key_123456789012345678901234567890"
+
+server:
+  port: 8080
+
+# JWT 설정
+jwt:
+  secret: your-256-bit-secret-key-for-jwt-token-generation-at-least-32-characters-long
+  expiration: 86400000  # 24시간 (밀리초)

@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="87756819-e771-4769-b2f5-ecba0a7229b9" name="변경" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/controller/AuthController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/request/AllowedRole.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/request/LoginRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/request/NoAdminWord.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/request/Password.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/request/PasswordMatch.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/request/SignupRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/response/ErrorResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/response/LoginResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/dto/response/SignupResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/entity/Admin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/entity/Seller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/repository/AdminRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/repository/SellerRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/service/AuthService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/global/config/DataInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/global/security/jwt/JwtAuthenticationFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/global/security/jwt/JwtTokenProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/test/java/com/team/wearly/util/BcryptHashGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/wearly.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/payment/infrastructure/toss/TossPaymentClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/payment/infrastructure/toss/TossPaymentClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/entity/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/user/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/global/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/global/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/.package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/dist/tosspayments.cjs.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/dist/tosspayments.esm.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/types/clearTossPayments.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/types/clearTossPayments.test.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/types/constants.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/types/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/types/loadTossPayments.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment-sdk/types/loadTossPayments.test.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/PaymentStatus.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/billing/BillingAuthRequest.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/billing/requestBillingAuth.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/billing/requestPaymentGatewayBilling.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/client/PaymentGateway.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/models/CardCompany.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/models/EasyPay.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/models/Error.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/PaymentRequest.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/cancelPayment.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/logger.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/requestPayment/decideParameters.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/requestPayment/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/requestPayment/requestPayment.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/requestPayment/requestPaymentGatewayPayment.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/payment/requestPayment/validateParameters.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/public-interfaces/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/tosspayments.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/PostMessageListener.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/checkValidTosspaymentsScript.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/constants.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/device.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/envVariables.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/globalContext.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/log.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/postMessage.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/request.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/types.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/payment__types/types/utils/widget-key/isClientKeyTransformedIntoWidgetKey.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/Bank.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/Bank.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/Bank.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/CardCompany.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/CardCompany.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/CardCompany.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/EasyPayProvider.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/EasyPayProvider.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/EasyPayProvider.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/MobileCarrier.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/MobileCarrier.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/MobileCarrier.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/dist/index.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/Bank.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/Bank.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/Bank.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/CardCompany.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/CardCompany.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/CardCompany.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/EasyPayProvider.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/EasyPayProvider.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/EasyPayProvider.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/MobileCarrier.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/MobileCarrier.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/MobileCarrier.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/esm/index.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/src/Bank.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/src/CardCompany.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/src/EasyPayProvider.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/src/MobileCarrier.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/src/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/tsconfig.esm.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/@tosspayments/sdk-constants/tsconfig.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/readme.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/async-return-type.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/asyncify.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/basic.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/camel-case.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/camel-cased-properties-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/camel-cased-properties.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/conditional-except.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/conditional-keys.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/conditional-pick.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/delimiter-case.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/delimiter-cased-properties-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/delimiter-cased-properties.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/entries.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/entry.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/exact.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/except.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/fixed-length-array.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/get.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/has-optional-keys.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/has-required-keys.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/includes.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/internal.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/invariant-of.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/iterable-element.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/join.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/jsonify.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/kebab-case.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/kebab-cased-properties-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/kebab-cased-properties.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/last-array-element.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/literal-to-primitive.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/literal-union.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/merge-exclusive.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/merge.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/multidimensional-array.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/multidimensional-readonly-array.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/mutable.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/numeric.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/observable-like.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/opaque.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/optional-keys-of.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/package-json.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/partial-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/partial-on-undefined-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/pascal-case.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/pascal-cased-properties-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/pascal-cased-properties.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/primitive.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/promisable.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/promise-value.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/readonly-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/readonly-tuple.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/remove-index-signature.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/replace.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/require-all-or-none.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/require-at-least-one.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/require-exactly-one.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/required-keys-of.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/schema.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/screaming-snake-case.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/set-non-nullable.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/set-optional.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/set-required.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/set-return-type.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/simplify.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/snake-case.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/snake-cased-properties-deep.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/snake-cased-properties.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/split.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/spread.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/string-key-of.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/stringified.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/trim.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/tsconfig-json.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/typed-array.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/union-to-intersection.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/value-of.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wearly-frontend/node_modules/type-fest/source/writable.d.ts" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/wearly-backend/wearly">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="wearly" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="package.json" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;yunhyuk12&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/heojunhyeong/applied-project.git&quot;,
+    &quot;accountId&quot;: &quot;c764d0fa-63a9-4d19-8e2d-724ae7ff2ad0&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="382it9JTRyaksr2t46ELGvjY69q" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.C:/applied-project/wearly-backend/wearly/build.gradle.executor": "Run",
+    "Gradle.WearlyApplicationTests.executor": "Run",
+    "Gradle.wearly 빌드.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.WearlyApplication.executor": "Run",
+    "git-widget-placeholder": "Merging develop",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/applied-project",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "모듈",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ],
+    "stardust.markdown.MarkdownSplitEditorSuppressor:keyList": []
+  }
+}]]></component>
+  <component name="RunManager" selected="Gradle.WearlyApplicationTests">
+    <configuration name="check_admin.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/wearly-backend/wearly/database/check_admin.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
+    <configuration name="create_database.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/wearly-backend/wearly/database/create_database.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
+    </configuration>
+    <configuration name="C:/applied-project/wearly-backend/wearly/build.gradle" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/wearly-backend/wearly/build.gradle" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="WearlyApplicationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/wearly-backend/wearly" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;com.team.wearly.WearlyApplicationTests&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="WearlyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="wearly.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.team.wearly.WearlyApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.team.wearly.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.WearlyApplicationTests" />
+        <item itemvalue="Spring Boot.WearlyApplication" />
+        <item itemvalue="Gradle.C:/applied-project/wearly-backend/wearly/build.gradle" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="디폴트 작업">
+      <changelist id="87756819-e771-4769-b2f5-ecba0a7229b9" name="변경" comment="" />
+      <created>1768004279275</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768004279275</updated>
+      <workItem from="1768004280694" duration="1203000" />
+      <workItem from="1768006041010" duration="76000" />
+      <workItem from="1768006118407" duration="1751000" />
+      <workItem from="1768007904284" duration="82000" />
+      <workItem from="1768008011509" duration="1795000" />
+      <workItem from="1768049778326" duration="130000" />
+      <workItem from="1768049943042" duration="1791000" />
+      <workItem from="1768055430520" duration="4390000" />
+      <workItem from="1768061376836" duration="2469000" />
+      <workItem from="1768064180623" duration="3720000" />
+      <workItem from="1768090073793" duration="316000" />
+    </task>
+    <task id="LOCAL-00001" summary="제발">
+      <option name="closed" value="true" />
+      <created>1768006538825</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1768006538825</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="제발" />
+    <option name="LAST_COMMIT_MESSAGE" value="제발" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

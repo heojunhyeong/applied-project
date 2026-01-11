@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "user")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Builder
@@ -34,9 +35,6 @@ public class User {
 
     @Column(nullable = false, unique = true, length = 12)
     private String userNickname;
-
-    @Enumerated(EnumType.STRING)
-    private UserRole userRole;
 
     @CreatedDate
     private LocalDateTime createdDate;

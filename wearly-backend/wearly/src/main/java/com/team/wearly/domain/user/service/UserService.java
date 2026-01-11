@@ -3,6 +3,7 @@ package com.team.wearly.domain.user.service;
 import com.team.wearly.domain.user.dto.request.SignupRequest;
 import com.team.wearly.domain.user.dto.response.SignupResponse;
 
+public interface UserService {
     /**
      * 회원가입 메인 로직
      * - USER: user 테이블에 저장

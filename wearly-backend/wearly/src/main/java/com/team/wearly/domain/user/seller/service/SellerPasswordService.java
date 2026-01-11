@@ -1,9 +1,8 @@
 package com.team.wearly.domain.user.seller.service;
 
-import com.team.wearly.domain.user.entity.User;
-import com.team.wearly.domain.user.entity.enums.UserRole;
+import com.team.wearly.domain.user.entity.Seller;
+import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.user.seller.dto.request.SellerPasswordChangeRequest;
-import com.team.wearly.domain.user.seller.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,11 @@ public class SellerPasswordService {
 
     private static final Long FIXED_SELLER_ID = 1L;
 
-    private final SellerRepository userRepository;
+    private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
 
     public void changePassword(SellerPasswordChangeRequest request) {
-        User seller = userRepository.findByIdAndUserRole(FIXED_SELLER_ID, UserRole.SELLER)
+        Seller seller = sellerRepository.findById(FIXED_SELLER_ID)
                 .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다."));
 
         // 1. 현재 비밀번호 검증

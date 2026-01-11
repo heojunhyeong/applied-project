@@ -5,7 +5,7 @@ import com.team.wearly.domain.order.dto.CartResponseDto;
 
 import java.util.List;
 
-public interface OrderService {
+public interface CartService {
     // 장바구니 조회
     List<CartResponseDto> getCartItems(Long userId);
 

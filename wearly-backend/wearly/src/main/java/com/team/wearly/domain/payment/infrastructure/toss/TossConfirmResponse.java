@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-//@AllArgsConstructor // Mock전용 테스트
+@AllArgsConstructor
 public class TossConfirmResponse {
     private String paymentKey;
     private String orderId;

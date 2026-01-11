@@ -2,13 +2,12 @@ package com.team.wearly.domain.user.service;
 
 import com.team.wearly.domain.user.dto.request.SignupRequest;
 import com.team.wearly.domain.user.dto.response.SignupResponse;
-import com.team.wearly.domain.user.entity.Admin;
 import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.user.entity.User;
 import com.team.wearly.domain.user.entity.enums.UserRole;
 import com.team.wearly.domain.user.repository.AdminRepository;
-import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.user.repository.UserRepository;
+import com.team.wearly.domain.user.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

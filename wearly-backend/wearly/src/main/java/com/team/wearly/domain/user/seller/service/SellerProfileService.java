@@ -1,9 +1,9 @@
 package com.team.wearly.domain.user.seller.service;
 
 import com.team.wearly.domain.user.entity.Seller;
+import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.user.seller.dto.request.SellerProfileUpdateRequest;
 import com.team.wearly.domain.user.seller.dto.response.SellerProfileResponse;
-import com.team.wearly.domain.user.seller.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

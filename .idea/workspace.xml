@@ -5,16 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87756819-e771-4769-b2f5-ecba0a7229b9" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/controller/CartController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/dto/CartRequestDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/dto/CartResponseDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/repository/CartRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/service/CartService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/service/CartServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/entity/Cart.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/entity/Cart.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/service/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/order/service/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/product/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/product/entity/Product.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wearly-backend/wearly/src/main/java/com/team/wearly/domain/product/repository/ProductRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,8 +44,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="package.json" />
-        <option value="Interface" />
         <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>

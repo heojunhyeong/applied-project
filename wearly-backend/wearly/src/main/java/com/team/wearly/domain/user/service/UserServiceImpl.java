@@ -121,22 +121,22 @@ public class UserServiceImpl implements UserService {
     private void checkDuplicates(SignupRequest request) {
         // 아이디 중복 체크 (모든 테이블)
         if (userRepository.existsByUserName(request.getUserId()) ||
-            sellerRepository.existsByUserName(request.getUserId()) ||
-            adminRepository.existsByUserName(request.getUserId())) {
+                sellerRepository.existsByUserName(request.getUserId()) ||
+                adminRepository.existsByUserName(request.getUserId())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다");
         }
 
         // 이메일 중복 체크 (모든 테이블)
         if (userRepository.existsByUserEmail(request.getUserEmail()) ||
-            sellerRepository.existsByUserEmail(request.getUserEmail()) ||
-            adminRepository.existsByUserEmail(request.getUserEmail())) {
+                sellerRepository.existsByUserEmail(request.getUserEmail()) ||
+                adminRepository.existsByUserEmail(request.getUserEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다");
         }
 
         // 닉네임 중복 체크 (모든 테이블)
         if (userRepository.existsByUserNickname(request.getNickName()) ||
-            sellerRepository.existsByUserNickname(request.getNickName()) ||
-            adminRepository.existsByUserNickname(request.getNickName())) {
+                sellerRepository.existsByUserNickname(request.getNickName()) ||
+                adminRepository.existsByUserNickname(request.getNickName())) {
             throw new IllegalArgumentException("이미 존재하는 닉네임입니다");
         }
     }

@@ -1,15 +1,20 @@
 package com.team.wearly.domain.order.controller;
 
+import com.team.wearly.domain.order.dto.OrderDetailResponse;
+import com.team.wearly.domain.order.dto.OrderHistoryResponse;
 import com.team.wearly.domain.order.entity.Order;
 import com.team.wearly.domain.order.entity.dto.request.OrderCreateRequest;
-import com.team.wearly.domain.order.entity.service.OrderService;
+import com.team.wearly.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/users/orders")
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
@@ -25,7 +30,23 @@ public class OrderController {
      * @DateOfEdit 2025-01-11
      */
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody OrderCreateRequest request) {
-        return ResponseEntity.ok(orderService.createOrder(request));
+    public ResponseEntity<Order> createOrder(
+            Authentication authentication,
+            @RequestBody OrderCreateRequest request) {
+
+        Long userId = Long.parseLong(authentication.getName());
+//        Long userId = 1L; 테스트용
+        return ResponseEntity.ok(orderService.createOrder(userId, request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderHistoryResponse>> getMyOrders(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(orderService.getOrderHistory(userId));
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderId) {
+        return ResponseEntity.ok(orderService.getOrderDetail(orderId));
     }
 }

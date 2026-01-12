@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
 
@@ -70,4 +71,7 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
             @Param("reviewId") Long reviewId,
             @Param("sellerId") Long sellerId
     );
+
+    Optional<ProductReview> findByReviewerIdAndOrderIdAndProductId(Long reviewerId, String orderId, Long productId);
+    List<ProductReview> findAllByProductIdOrderByCreatedDateDesc(Long productId);
 }

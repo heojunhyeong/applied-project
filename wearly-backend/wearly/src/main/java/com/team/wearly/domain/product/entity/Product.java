@@ -89,8 +89,6 @@ public class Product {
     @Column(nullable = true)
     private Long sellerId;  // 상품을 등록한 seller의 ID
 
-
-
     // 판매 상태 변경 메서드
     public void updateStatus(ProductStatus status) {
         this.status = status;

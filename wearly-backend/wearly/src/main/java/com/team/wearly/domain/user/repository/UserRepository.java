@@ -2,7 +2,10 @@ package com.team.wearly.domain.user.repository;
 
 import com.team.wearly.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -12,5 +15,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserEmail(String userEmail);
     boolean existsByUserNickname(String userNickname);
     boolean existsByUserName(String userName);
+
+    // 아이디(userName) 또는 닉네임(userNickname)에 키워드가 포함된 유저 검색
+    //findby 방식을 사용했을때 너무 난잡해보여서 query 어노테이션을 사용
+    @Query("SELECT u FROM User u WHERE u.userName LIKE %:keyword% OR u.userNickname LIKE %:keyword%")
+    List<User> searchByKeyword(@Param("keyword") String keyword);
 }
 

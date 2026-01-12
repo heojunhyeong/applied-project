@@ -1,17 +1,13 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Java CI with Gradle
+# 워크플로우 이름
+name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
+    types: [ closed ]
 
 jobs:
+  # 백엔드 빌드 & 테스트
   build:
     runs-on: ubuntu-latest
     permissions:
@@ -22,14 +18,14 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root1234
-          MYSQL_DATABASE: wearly
+          MYSQL_DATABASE: Wearly_MySQL
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
@@ -40,10 +36,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v4
         with:
           build-root-directory: wearly-backend/wearly
 
@@ -51,14 +45,28 @@ jobs:
         run: chmod +x gradlew
         working-directory: ./wearly-backend/wearly
 
-      - name: Build with Gradle Wrapper
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot1234 --silent; then
+              echo "MySQL is ready!"
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          echo "MySQL failed to start"
+          exit 1
+
+      - name: Build with Gradle
         run: ./gradlew clean build --no-daemon
         working-directory: ./wearly-backend/wearly
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/Wearly_MySQL?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root1234
 
-      - name: Run tests
-        run: ./gradlew test --no-daemon
-        working-directory: ./wearly-backend/wearly
-
+  # 프론트엔드 빌드
   frontend-build:
     runs-on: ubuntu-latest
 
@@ -73,7 +81,7 @@ jobs:
           cache-dependency-path: wearly-frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./wearly-frontend
 
       - name: Build frontend
@@ -85,23 +93,27 @@ jobs:
         working-directory: ./wearly-frontend
         continue-on-error: true
 
-  dependency-submission:
+  # EC2 배포 (PR merge 시)
+  deploy:
+    needs: [build, frontend-build]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    if: github.event.pull_request.merged == true
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.8.1
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-        with:
-          build-root-directory: wearly-backend/wearly
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@3.35.27.165 << EOF
+            cd /home/ec2-user/wearly
+            git fetch origin
+            git checkout ${{ github.event.pull_request.base.ref }}
+            git reset --hard origin/${{ github.event.pull_request.base.ref }}
+            docker-compose down
+            docker-compose build --no-cache
+            docker-compose up -d
+            docker system prune -f
+          EOF

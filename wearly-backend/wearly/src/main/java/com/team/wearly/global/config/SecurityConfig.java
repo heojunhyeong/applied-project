@@ -52,7 +52,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/users/signup").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()  // 로그인 API 허용
+                .requestMatchers("/api/payment/**").permitAll()
                 .requestMatchers("/api/payment/**", "/api/orders/**").permitAll()
+                .requestMatchers("/api/seller/**").hasRole("SELLER") //SELLER파트 전용
+                .requestMatchers("/api/products/seller/**").hasRole("SELLER")
                 .anyRequest().authenticated()  // 나머지는 JWT 토큰 필요
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

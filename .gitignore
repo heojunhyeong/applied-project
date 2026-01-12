@@ -10,3 +10,4 @@ Thumbs.db
 target/
 build/
 node_modules/.env
+.env

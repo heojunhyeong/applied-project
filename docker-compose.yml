@@ -1,0 +1,62 @@
+services:
+  mysql:
+    image: mysql:8.0
+    expose:
+      - 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - db-net
+
+  wearly-backend:
+    build: ./wearly-backend/wearly
+    image: wearly-backend-server:v1
+    expose:
+      - 8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
+      #MAIL_USERNAME: ${MAIL_USERNAME}
+      #MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+    networks:
+      - backend-net
+      - db-net
+
+  wearly-frontend:
+    build: ./wearly-frontend
+    image: wearly-frontend-server:v1
+    depends_on:
+      - wearly-backend
+    networks:
+      - frontend-net
+
+  nginx:
+    build: ./nginx
+    image: wearly-nginx:v1
+    ports:
+      - 70:80
+    depends_on:
+      - wearly-backend
+      - wearly-frontend
+    networks:
+      - backend-net
+      - frontend-net
+
+networks:
+  backend-net:
+  frontend-net:
+  db-net:
+
+volumes:
+  mysql_data:

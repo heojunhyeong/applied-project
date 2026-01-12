@@ -2,6 +2,7 @@ package com.team.wearly.domain.product.entity;
 
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
+import com.team.wearly.domain.product.entity.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,10 +24,6 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // 판매자 식별자 (JWT 붙이면 토큰에서 꺼낸 sellerId로 채우게 됨)
-    @Column(nullable = false)
-    private Long sellerId;
 
     @Column(nullable = false)
     private String productName;
@@ -55,6 +52,7 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductCategory productCategory;
 
+//    private Long sellerId;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

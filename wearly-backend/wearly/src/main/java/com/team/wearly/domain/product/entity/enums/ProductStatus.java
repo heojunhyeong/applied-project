@@ -1,7 +1,6 @@
 package com.team.wearly.domain.product.entity.enums;
 
 public enum ProductStatus {
-    ACTIVE, //판매중
-    INACTIVE, //판매중지
-    DELETED //소프트 삭제
+    ON_SALE,      // 판매 중
+    SOLD_OUT      // 판매 중단
 }

@@ -27,28 +27,16 @@ public class PaymentService {
 
     @Transactional
     public void confirmPayment(String paymentKey, String orderId, Long amount) {
-
-        // 토스 서버에 최종 승인 요청
+        // 1. 토스 승인 요청
         TossConfirmResponse response = tossPaymentClient.confirmPayment(paymentKey, orderId, amount);
 
-        // 승인 결과를 바탕으로 Payment 엔티티 생성
-        Payment payment = Payment.builder()
-                .paymentKey(response.getPaymentKey())
-                .orderId(response.getOrderId())
-                .amount(response.getTotalAmount())
-                // 승인 성공 시 DONE
-                .status(PaymentStatus.DONE)
-                // 문자열을 Enum으로 변환
-                .method(PaymentMethod.valueOf(response.getMethod()))
-                .build();
-
-        // DB에 결제 내역 저장
-        paymentRepository.save(payment);
-
-        if (orderId.startsWith("ORD")) {
-            completeOrder(orderId);
-        } else if (orderId.startsWith("MEM")) {
-            completeMembership(orderId);
+        try {
+            // 2. 우리 서버 DB 작업 (결제 저장, 주문 상태 변경 등)
+            savePaymentAndCompleteOrder(response);
+        } catch (Exception e) {
+            // 3. 만약 우리 DB 작업 중 에러 발생 시, 토스 결제 취소 API 호출
+            tossPaymentClient.cancelPayment(paymentKey, "서버 내부 오류로 인한 자동 결제 취소");
+            throw new RuntimeException("결제 처리 중 서버 오류가 발생하여 자동 취소되었습니다.");
         }
     }
 
@@ -75,5 +63,22 @@ public class PaymentService {
             case "계좌이체", "TRANSFER" -> PaymentMethod.TRANSFER;
             default -> PaymentMethod.CARD; // 기본값
         };
+    }
+
+    private void savePaymentAndCompleteOrder(TossConfirmResponse response) {
+        Payment payment = Payment.builder()
+                .paymentKey(response.getPaymentKey())
+                .orderId(response.getOrderId())
+                .amount(response.getTotalAmount())
+                .status(PaymentStatus.DONE)
+                .method(convertToEnum(response.getMethod()))
+                .build();
+        paymentRepository.save(payment);
+
+        if (response.getOrderId().startsWith("ORD")) {
+            completeOrder(response.getOrderId());
+        } else if (response.getOrderId().startsWith("MEM")) {
+            completeMembership(response.getOrderId());
+        }
     }
 }

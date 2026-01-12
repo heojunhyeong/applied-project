@@ -19,9 +19,9 @@ public class SellerProductService {
 
     private final SellerProductRepository sellerProductRepository;
 
-    // 목록/상세 조회 시 DELETED 제외
+    // 목록/상세 조회 시
     private static final List<ProductStatus> VISIBLE_STATUSES =
-            List.of(ProductStatus.ACTIVE, ProductStatus.INACTIVE);
+            List.of(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT);
 
     /** 1) 상품 등록 */
     @Transactional
@@ -35,7 +35,7 @@ public class SellerProductService {
                 .imageUrl(request.imageUrl().trim())
                 .brand(request.brand())
                 .productCategory(request.productCategory())
-                .status(ProductStatus.ACTIVE) // 등록은 기본 ACTIVE 추천
+                .status(ProductStatus.ON_SALE) // 등록은 기본 ACTIVE 추천
                 .build();
 
         Product saved = sellerProductRepository.save(product);
@@ -85,6 +85,6 @@ public class SellerProductService {
                 .orElseThrow(() -> new IllegalArgumentException("내 상품이 아니거나 상품이 존재하지 않습니다."));
 
         // 소프트 삭제: status만 변경
-        product.changeStatus(ProductStatus.DELETED);
+        product.changeStatus(ProductStatus.SOLD_OUT);
     }
 }

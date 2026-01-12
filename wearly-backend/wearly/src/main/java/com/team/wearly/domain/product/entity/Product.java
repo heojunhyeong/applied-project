@@ -3,10 +3,7 @@ package com.team.wearly.domain.product.entity;
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,27 +14,29 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //추가
+    // 판매자 식별자
     @Column(nullable = false)
     private Long sellerId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String productName;
 
     @Column(nullable = false)
     private Long price;
 
+    // 재고는 null 허용이면 OK. (근데 보통 0 기본값 추천)
     @Column(nullable = true)
     private Long stockQuantity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String description;
 
     @CreatedDate
@@ -46,26 +45,22 @@ public class Product {
     @LastModifiedDate
     private LocalDateTime updatedDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private Brand brand;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private ProductCategory productCategory;
 
+    // 기본값 세팅 (Builder로 만들 때 status를 안 넣어도 ON_SALE)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductStatus status;
-
-    // 등록 시 기본값 ACTIVE 보장
-    @PrePersist
-    public void prePersist() {
-        if (this.status == null) {
-            this.status = ProductStatus.ACTIVE;
-        }
-    }
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private ProductStatus status = ProductStatus.ON_SALE;
 
     public void update(
             String productName,
@@ -85,23 +80,18 @@ public class Product {
         this.productCategory = productCategory;
     }
 
+    /**  판매 상태 변경 (이 메서드 하나만 남겨) */
     public void changeStatus(ProductStatus status) {
         this.status = status;
     }
 
+    /**  소프트 삭제 = 판매중단 */
     public void softDelete() {
-        this.status = ProductStatus.DELETED;
+        this.status = ProductStatus.SOLD_OUT;
     }
-    @Column(nullable = true)
-    private Long sellerId;  // 상품을 등록한 seller의 ID
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private ProductStatus status = ProductStatus.ON_SALE;
-
-    // 판매 상태 변경 메서드
-    public void updateStatus(ProductStatus status) {
-        this.status = status;
+    /**  다시 판매중 */
+    public void restore() {
+        this.status = ProductStatus.ON_SALE;
     }
 }

@@ -2,7 +2,6 @@ package com.team.wearly.domain.product.entity;
 
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
-import com.team.wearly.domain.product.entity.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,16 +51,5 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductCategory productCategory;
 
-    @Column(nullable = true)
-    private Long sellerId;  // 상품을 등록한 seller의 ID
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private ProductStatus status = ProductStatus.ON_SALE;
-
-    // 판매 상태 변경 메서드
-    public void updateStatus(ProductStatus status) {
-        this.status = status;
-    }
+//    private Long sellerId;
 }

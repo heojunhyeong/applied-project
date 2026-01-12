@@ -7,7 +7,7 @@ import com.team.wearly.domain.review.dto.response.SellerReviewResponse;
 import com.team.wearly.domain.review.entity.enums.ReviewReportStatus;
 import com.team.wearly.domain.review.entity.enums.ReviewStatus;
 import com.team.wearly.domain.review.service.SellerReviewService;
-import com.team.wearly.domain.seller.entity.Seller;
+import com.team.wearly.domain.user.entity.Seller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;

@@ -54,13 +54,14 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductStatus status;
+    @Builder.Default
+    private ProductStatus status = ProductStatus.ON_SALE;
 
     // 등록 시 기본값 ACTIVE 보장
     @PrePersist
     public void prePersist() {
         if (this.status == null) {
-            this.status = ProductStatus.ACTIVE;
+            this.status = ProductStatus.ON_SALE;
         }
     }
 
@@ -82,20 +83,13 @@ public class Product {
         this.productCategory = productCategory;
     }
 
-    public void changeStatus(ProductStatus status) {
-        this.status = status;
-    }
-
     public void softDelete() {
-        this.status = ProductStatus.DELETED;
+        this.status = ProductStatus.SOLD_OUT;
     }
     @Column(nullable = true)
     private Long sellerId;  // 상품을 등록한 seller의 ID
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private ProductStatus status = ProductStatus.ON_SALE;
+
 
     // 판매 상태 변경 메서드
     public void updateStatus(ProductStatus status) {

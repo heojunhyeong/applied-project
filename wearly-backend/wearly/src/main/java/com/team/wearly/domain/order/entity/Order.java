@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 // order는 SQL 예약어인 경우가 많아 테이블명 명시했음. 참고바람
@@ -35,6 +37,26 @@ public class Order extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 20) // 테스트용
     private OrderStatus orderStatus;
+
+    // 주문 상품들 (1:N)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    // 배송 정보 (1:1)
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private OrderDelivery orderDelivery;
+
+    // Order.java 내부 연관관계 메서드
+    public void addOrderDetail(OrderDetail detail) {
+        this.orderDetails.add(detail);
+        detail.assignOrder(this);
+    }
+
+    public void setOrderDelivery(OrderDelivery delivery) {
+        this.orderDelivery = delivery;
+        delivery.assignOrder(this);
+    }
 
     // 결제에 따른 상태 변경 메서드
     public void updateStatus(OrderStatus status) {

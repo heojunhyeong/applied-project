@@ -30,7 +30,8 @@ public class TossPaymentClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${payment.toss.secret-key:test_secret_key_for_toss_payments}")
+
+    @Value("${payment.toss.secret-key:}")
     private String secretKey;
 
     public TossConfirmResponse confirmPayment(String paymentKey, String orderId, Long amount) {
@@ -66,5 +67,31 @@ public class TossPaymentClient {
             throw new RuntimeException("토스 결제 승인 요청 실패", e);
         }
 
+
+
+    }
+
+    // 결제 취소 메서드
+    // TODO: 주석 추가 예정
+    public void cancelPayment(String paymentKey, String cancelReason) {
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
+
+        String authorizations = Base64.getEncoder()
+                .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Basic " + authorizations);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("cancelReason", cancelReason);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(params, headers);
+
+        try {
+            restTemplate.postForEntity(url, entity, String.class);
+        } catch (Exception e) {
+            System.err.println("결제 취소 실패: " + e.getMessage());
+        }
     }
 }

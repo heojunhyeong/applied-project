@@ -9,4 +9,4 @@ Thumbs.db
 # 언어/프레임워크별 빌드 결과물 (예시)
 target/
 build/
-node_modules/
+node_modules/.env

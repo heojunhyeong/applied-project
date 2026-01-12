@@ -35,9 +35,27 @@ public class Seller {
     @Column(nullable = false, unique = true, length = 12)
     private String userNickname;
 
+    //소개, 연락처 추가
+    @Column(length = 255)
+    private String introduction;
+
+    @Column(length = 20)
+    private String phoneNumber;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
     @LastModifiedDate
     private LocalDateTime updatedDate;
+
+    // 메서드 추가
+    public void changePassword(String encodePassword) {
+        this.userPassword = encodePassword;
+    }
+
+    public void updateProfile(String userNickname, String introduction, String phoneNumber) {
+        this.userNickname = userNickname;
+        this.introduction = introduction;
+        this.phoneNumber = phoneNumber;
+    }
 }

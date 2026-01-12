@@ -12,4 +12,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     boolean existsByUserEmail(String userEmail);
     boolean existsByUserNickname(String userNickname);
     boolean existsByUserName(String userName);
+
+    // 내 닉네임 제외 중복 체크(프로필 수정용)
+    boolean existsByUserNicknameAndIdNot(String userNickname, Long id);
 }

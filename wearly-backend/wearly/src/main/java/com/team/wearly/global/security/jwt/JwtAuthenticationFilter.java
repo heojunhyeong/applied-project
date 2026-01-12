@@ -1,8 +1,5 @@
 package com.team.wearly.global.security.jwt;
 
-import com.team.wearly.domain.user.entity.Admin;
-import com.team.wearly.domain.user.entity.Seller;
-import com.team.wearly.domain.user.entity.User;
 import com.team.wearly.domain.user.entity.enums.UserRole;
 import com.team.wearly.domain.user.repository.AdminRepository;
 import com.team.wearly.domain.user.repository.SellerRepository;

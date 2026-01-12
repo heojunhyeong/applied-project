@@ -21,4 +21,3 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.userName LIKE %:keyword% OR u.userNickname LIKE %:keyword%")
     List<User> searchByKeyword(@Param("keyword") String keyword);
 }
-

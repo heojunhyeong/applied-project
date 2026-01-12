@@ -2,9 +2,11 @@ package com.team.wearly.domain.product.entity;
 
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
-import com.team.wearly.domain.product.entity.enums.ProductStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,7 +20,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -56,39 +57,11 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductStatus status;
+    @Builder.Default
+    private ProductStatus status = ProductStatus.ON_SALE;
 
-    // 등록 시 기본값 ACTIVE 보장
-    @PrePersist
-    public void prePersist() {
-        if (this.status == null) {
-            this.status = ProductStatus.ACTIVE;
-        }
-    }
-
-    public void update(
-            String productName,
-            Long price,
-            Long stockQuantity,
-            String description,
-            String imageUrl,
-            Brand brand,
-            ProductCategory productCategory
-    ) {
-        this.productName = productName;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.brand = brand;
-        this.productCategory = productCategory;
-    }
-
-    public void changeStatus(ProductStatus status) {
+    // 판매 상태 변경 메서드
+    public void updateStatus(ProductStatus status) {
         this.status = status;
-    }
-
-    public void softDelete() {
-        this.status = ProductStatus.DELETED;
     }
 }

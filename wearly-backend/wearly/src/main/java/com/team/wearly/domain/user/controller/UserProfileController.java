@@ -42,5 +42,5 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfileService.updateProfile(user.getId(), request));
     }
 
-
+    //프로필 페이지 이미지 변경 시작할게요~!~!~
 }

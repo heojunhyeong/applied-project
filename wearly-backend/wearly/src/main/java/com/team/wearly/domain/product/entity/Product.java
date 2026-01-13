@@ -72,7 +72,8 @@ public class Product {
             String description,
             String imageUrl,
             Brand brand,
-            ProductCategory productCategory
+            ProductCategory productCategory,
+            ProductStatus status
     ) {
         this.productName = productName;
         this.price = price;
@@ -81,6 +82,7 @@ public class Product {
         this.imageUrl = imageUrl;
         this.brand = brand;
         this.productCategory = productCategory;
+        this.status = status;
     }
 
     public void softDelete() {
@@ -88,8 +90,6 @@ public class Product {
     }
     @Column(nullable = true)
     private Long sellerId;  // 상품을 등록한 seller의 ID
-
-
 
     // 판매 상태 변경 메서드
     public void updateStatus(ProductStatus status) {

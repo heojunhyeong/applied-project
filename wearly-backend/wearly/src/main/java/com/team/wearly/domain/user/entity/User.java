@@ -56,5 +56,20 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
+    // 소프트 삭제를 위한 필드
+    @Column(nullable = true)
+    private LocalDateTime deletedAt;
+
 //    private Long membership_id;
+
+    // 소프트 삭제 메서드
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // 회원 정보 수정 메서드
+    public void updateInfo(String userEmail, String userNickname) {
+        this.userEmail = userEmail;
+        this.userNickname = userNickname;
+    }
 }

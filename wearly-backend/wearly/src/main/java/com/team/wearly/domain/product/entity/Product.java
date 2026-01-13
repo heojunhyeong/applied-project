@@ -72,7 +72,8 @@ public class Product {
             String description,
             String imageUrl,
             Brand brand,
-            ProductCategory productCategory
+            ProductCategory productCategory,
+            ProductStatus status
     ) {
         this.productName = productName;
         this.price = price;
@@ -81,6 +82,7 @@ public class Product {
         this.imageUrl = imageUrl;
         this.brand = brand;
         this.productCategory = productCategory;
+        this.status = status;
     }
 
     public void softDelete() {

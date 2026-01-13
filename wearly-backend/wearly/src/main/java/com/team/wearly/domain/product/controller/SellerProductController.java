@@ -68,7 +68,12 @@ public class SellerProductController {
         return ResponseEntity.ok(sellerProductService.updateMyProduct(seller.getId(), productId, request));
     }
 
-    /** 5) 내 상품 삭제 (소프트 삭제로 status 변경) */
+    /**
+     * 5) 내 상품 삭제 (소프트 삭제)
+     * - 결제/배송 상태와 무관하게 소프트 삭제 처리 (status=DELETED)
+     * - 삭제된 상품은 내 상품 목록/상세/수정에서 조회되지 않음
+     * - 추후 환불/취소 정책은 주문/결제 도메인에서 별도 처리 예정
+     */
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteMyProduct(
             Authentication authentication,

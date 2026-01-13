@@ -19,7 +19,7 @@ public class SellerProductService {
 
     private final SellerProductRepository sellerProductRepository;
 
-    // 목록/상세 조회 시
+    // 목록/상세 조회 시: "노출되는 상품"만
     private static final List<ProductStatus> VISIBLE_STATUSES =
             List.of(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT);
 
@@ -35,7 +35,7 @@ public class SellerProductService {
                 .imageUrl(request.imageUrl().trim())
                 .brand(request.brand())
                 .productCategory(request.productCategory())
-                .status(ProductStatus.ON_SALE) // 등록은 기본 ACTIVE 추천
+                .status(ProductStatus.ON_SALE) // 등록 기본값
                 .build();
 
         Product saved = sellerProductRepository.save(product);
@@ -71,20 +71,22 @@ public class SellerProductService {
                 request.description().trim(),
                 request.imageUrl().trim(),
                 request.brand(),
-                request.productCategory()
+                request.productCategory(),
+                request.status()
         );
 
         return SellerProductResponse.from(product);
     }
 
-    /** 5) 내 상품 삭제 (소프트 삭제) */
+    /** 5) 내 상품 삭제 (결제/배송 상태 상관없이 소프트 삭제) */
+    /** 삭제 시 목록/상세/수정 에서 조회 자체가 안됨*/
+    /** 추후 환불/취소 정책은 주문 도메인에서 처리*/
     @Transactional
     public void deleteMyProduct(Long sellerId, Long productId) {
         Product product = sellerProductRepository
                 .findByIdAndSellerIdAndStatusIn(productId, sellerId, VISIBLE_STATUSES)
                 .orElseThrow(() -> new IllegalArgumentException("내 상품이 아니거나 상품이 존재하지 않습니다."));
 
-        // 소프트 삭제: status만 변경
-        product.updateStatus(ProductStatus.SOLD_OUT);
+        product.updateStatus(ProductStatus.DELETED);
     }
 }

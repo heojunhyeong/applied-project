@@ -35,9 +35,10 @@ public class OrderController {
             @RequestBody OrderCreateRequest request) {
 
         Long userId = Long.parseLong(authentication.getName());
-//        Long userId = 1L; 테스트용
         return ResponseEntity.ok(orderService.createOrder(userId, request));
     }
+
+
 
     @GetMapping
     public ResponseEntity<List<OrderHistoryResponse>> getMyOrders(Authentication authentication) {

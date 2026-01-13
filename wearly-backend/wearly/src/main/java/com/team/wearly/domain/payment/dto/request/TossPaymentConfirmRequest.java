@@ -24,6 +24,5 @@ public class TossPaymentConfirmRequest {
     // 우리가 만든 주문 번호
     private String orderId;
 
-    // 총 결제 금액
     private Long amount;
 }

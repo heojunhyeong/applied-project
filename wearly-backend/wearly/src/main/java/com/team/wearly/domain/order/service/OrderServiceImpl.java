@@ -50,6 +50,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order createOrder(Long userId, OrderCreateRequest request) {
+
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId가 null입니다.");
+        }
+
         // 주문번호 생성
         String orderId = "ORD-" + LocalDate.now().toString().replace("-", "")
                 + "-" + UUID.randomUUID().toString().substring(0, 8);

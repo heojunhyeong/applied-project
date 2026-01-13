@@ -1,7 +1,11 @@
 package com.team.wearly.domain.user.service;
 
+import com.team.wearly.domain.user.dto.request.UpdateSellerRequest;
+import com.team.wearly.domain.user.dto.request.UpdateUserRequest;
 import com.team.wearly.domain.user.dto.response.UserAdminResponse;
+import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.user.entity.User;
+import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import java.util.List;
 public class AdminUserService {
 
     private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
     /**
      * 회원 목록 조회 (검색 기능 포함)
@@ -34,5 +39,73 @@ public class AdminUserService {
         return users.stream()
                 .map(UserAdminResponse::from)
                 .toList();
+    }
+
+    /**
+     * User 소프트 삭제
+     */
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + userId));
+        
+        user.softDelete();
+    }
+
+    /**
+     * User 정보 수정
+     */
+    @Transactional
+    public void updateUser(Long userId, UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + userId));
+        
+        // 이메일 중복 체크 (본인 제외)
+        if (userRepository.existsByUserEmail(request.getUserEmail()) && 
+            !user.getUserEmail().equals(request.getUserEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + request.getUserEmail());
+        }
+        
+        // 닉네임 중복 체크 (본인 제외)
+        if (userRepository.existsByUserNickname(request.getUserNickname()) && 
+            !user.getUserNickname().equals(request.getUserNickname())) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다: " + request.getUserNickname());
+        }
+        
+        user.updateInfo(request.getUserEmail(), request.getUserNickname());
+    }
+
+    /**
+     * Seller 소프트 삭제
+     */
+    @Transactional
+    public void deleteSeller(Long sellerId) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다: " + sellerId));
+        
+        seller.softDelete();
+    }
+
+    /**
+     * Seller 정보 수정
+     */
+    @Transactional
+    public void updateSeller(Long sellerId, UpdateSellerRequest request) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다: " + sellerId));
+        
+        // 이메일 중복 체크 (본인 제외)
+        if (sellerRepository.existsByUserEmail(request.getUserEmail()) && 
+            !seller.getUserEmail().equals(request.getUserEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + request.getUserEmail());
+        }
+        
+        // 닉네임 중복 체크 (본인 제외)
+        if (sellerRepository.existsByUserNicknameAndIdNot(request.getUserNickname(), sellerId)) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다: " + request.getUserNickname());
+        }
+        
+        seller.updateProfile(request.getUserNickname(), request.getIntroduction(), request.getPhoneNumber());
+        seller.updateEmail(request.getUserEmail());
     }
 }

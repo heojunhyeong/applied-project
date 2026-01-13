@@ -48,6 +48,10 @@ public class Seller {
     @LastModifiedDate
     private LocalDateTime updatedDate;
 
+    // 소프트 삭제를 위한 필드
+    @Column(nullable = true)
+    private LocalDateTime deletedAt;
+
     // 메서드 추가
     public void changePassword(String encodePassword) {
         this.userPassword = encodePassword;
@@ -57,5 +61,15 @@ public class Seller {
         this.userNickname = userNickname;
         this.introduction = introduction;
         this.phoneNumber = phoneNumber;
+    }
+
+    // 소프트 삭제 메서드
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // 이메일 업데이트 메서드
+    public void updateEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }

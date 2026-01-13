@@ -27,15 +27,29 @@ public class PaymentController {
             Authentication authentication, // 인증 정보 추가
             @RequestBody TossPaymentConfirmRequest request) {
 
-        Long userId = Long.parseLong(authentication.getName());
+//        Long userId = Long.parseLong(authentication.getName());
+//
+//        paymentService.confirmPayment(
+//                request.getPaymentKey(),
+//                request.getOrderId(),
+//                request.getAmount()
+//        );
+//        return ResponseEntity.ok().build();
+
+        // 테스트용, 위 주석으로 교체 필요
+        Long userId;
+        if (authentication == null) {
+            userId = 2L;
+        } else {
+            userId = Long.parseLong(authentication.getName());
+        }
 
         paymentService.confirmPayment(
-                userId,
                 request.getPaymentKey(),
                 request.getOrderId(),
                 request.getAmount()
         );
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("결제 승인 성공!");
     }
 
     @PostMapping("/{orderId}/cancel")
@@ -58,7 +72,20 @@ public class PaymentController {
             Authentication authentication,
             @RequestBody BillingConfirmRequest request) {
 
-        Long userId = Long.parseLong(authentication.getName());
+//        Long userId = Long.parseLong(authentication.getName());
+//
+//        // 빌링키 발급 및 멤버십 활성화 로직 실행
+//        paymentService.confirmBilling(userId, request.getAuthKey(), request.getCustomerKey());
+//
+//        return ResponseEntity.ok("멤버십 정기 결제가 성공적으로 등록되었습니다.");
+
+        // 테스트용, 위 주석으로 교체 필요
+        Long userId;
+        if (authentication == null) {
+            userId = 2L;
+        } else {
+            userId = Long.parseLong(authentication.getName());
+        }
 
         // 빌링키 발급 및 멤버십 활성화 로직 실행
         paymentService.confirmBilling(userId, request.getAuthKey(), request.getCustomerKey());
@@ -68,7 +95,18 @@ public class PaymentController {
 
     @PostMapping("/membership/terminate")
     public ResponseEntity<String> terminateMembership(Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
+//        Long userId = Long.parseLong(authentication.getName());
+//        membershipService.reserveTermination(userId);
+//        return ResponseEntity.ok("다음 결제일부터 멤버십이 갱신되지 않습니다. 이번 달 혜택은 유지됩니다.");
+
+        // 테스트용, 위 주석으로 교체 필요
+        Long userId;
+        if (authentication == null) {
+            userId = 2L;
+        } else {
+            userId = Long.parseLong(authentication.getName());
+        }
+
         membershipService.reserveTermination(userId);
         return ResponseEntity.ok("다음 결제일부터 멤버십이 갱신되지 않습니다. 이번 달 혜택은 유지됩니다.");
     }

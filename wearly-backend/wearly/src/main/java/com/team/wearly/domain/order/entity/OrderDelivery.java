@@ -1,5 +1,6 @@
 package com.team.wearly.domain.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.wearly.domain.order.entity.enums.Carrier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class OrderDelivery {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
+    @JsonIgnore
     private Order order;
 
     // Order 엔티티에서 호출할 내부용 메서드

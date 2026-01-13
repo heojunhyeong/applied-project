@@ -35,6 +35,8 @@ public class Order extends BaseTimeEntity {
 
     private Long totalPrice;
 
+    private Long couponDiscountPrice;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20) // 테스트용
     private OrderStatus orderStatus;
@@ -57,6 +59,14 @@ public class Order extends BaseTimeEntity {
     public void setOrderDelivery(OrderDelivery delivery) {
         this.orderDelivery = delivery;
         delivery.assignOrder(this);
+    }
+
+    public void cancel() {
+        if (this.orderStatus == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("이미 취소된 주문입니다.");
+        }
+
+        this.orderStatus = OrderStatus.CANCELLED;
     }
 
     // 결제에 따른 상태 변경 메서드

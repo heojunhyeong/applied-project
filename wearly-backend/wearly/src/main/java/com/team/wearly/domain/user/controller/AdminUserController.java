@@ -1,13 +1,14 @@
 package com.team.wearly.domain.user.controller;
 
+import com.team.wearly.domain.user.dto.request.UpdateSellerRequest;
+import com.team.wearly.domain.user.dto.request.UpdateUserRequest;
 import com.team.wearly.domain.user.dto.response.UserAdminResponse;
 import com.team.wearly.domain.user.service.AdminUserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,10 +26,59 @@ public class AdminUserController {
      * 2. 검색 조회: GET /api/admin/users?keyword=~~~
      */
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<UserAdminResponse>> getUsers(
             @RequestParam(required = false) String keyword) {
 
         List<UserAdminResponse> response = adminUserService.getUsers(keyword);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 관리자용 User 소프트 삭제 API
+     * DELETE /api/admin/users/{userId}
+     */
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        adminUserService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 관리자용 User 정보 수정 API
+     * PUT /api/admin/users/{userId}
+     */
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> updateUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserRequest request) {
+        adminUserService.updateUser(userId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 관리자용 Seller 소프트 삭제 API
+     * DELETE /api/admin/users/sellers/{sellerId}
+     */
+    @DeleteMapping("/sellers/{sellerId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteSeller(@PathVariable Long sellerId) {
+        adminUserService.deleteSeller(sellerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 관리자용 Seller 정보 수정 API
+     * PUT /api/admin/users/sellers/{sellerId}
+     */
+    @PutMapping("/sellers/{sellerId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> updateSeller(
+            @PathVariable Long sellerId,
+            @Valid @RequestBody UpdateSellerRequest request) {
+        adminUserService.updateSeller(sellerId, request);
+        return ResponseEntity.ok().build();
     }
 }

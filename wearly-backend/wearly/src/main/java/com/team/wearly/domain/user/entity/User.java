@@ -36,11 +36,25 @@ public class User {
     @Column(nullable = false, unique = true, length = 12)
     private String userNickname;
 
+    //연락처
+    @Column(length = 255)
+    private String introduction;
+
+    //소개
+    @Column(length = 20)
+    private String phoneNumber;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
     @LastModifiedDate
     private LocalDateTime updatedDate;
+
+    public void updateProfile(String userNickname, String introduction, String phoneNumber) {
+        this.userNickname = userNickname;
+        this.introduction = introduction;
+        this.phoneNumber = phoneNumber;
+    }
 
     // 소프트 삭제를 위한 필드
     @Column(nullable = true)

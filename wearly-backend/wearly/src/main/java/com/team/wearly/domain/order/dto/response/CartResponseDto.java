@@ -1,4 +1,4 @@
-package com.team.wearly.domain.order.dto;
+package com.team.wearly.domain.order.dto.response;
 
 import com.team.wearly.domain.order.entity.Cart;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.team.wearly.domain.order.dto;
+package com.team.wearly.domain.order.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

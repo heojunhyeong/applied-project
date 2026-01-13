@@ -1,7 +1,7 @@
 package com.team.wearly.domain.order.service;
 
-import com.team.wearly.domain.order.dto.CartRequestDto;
-import com.team.wearly.domain.order.dto.CartResponseDto;
+import com.team.wearly.domain.order.dto.request.CartRequestDto;
+import com.team.wearly.domain.order.dto.response.CartResponseDto;
 
 import java.util.List;
 

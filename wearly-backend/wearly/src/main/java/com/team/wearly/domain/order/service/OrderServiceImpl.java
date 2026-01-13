@@ -1,7 +1,7 @@
 package com.team.wearly.domain.order.service;
 
-import com.team.wearly.domain.order.dto.OrderDetailResponse;
-import com.team.wearly.domain.order.dto.OrderHistoryResponse;
+import com.team.wearly.domain.order.dto.response.OrderDetailResponse;
+import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
 import com.team.wearly.domain.order.entity.Cart;
 import com.team.wearly.domain.order.entity.Order;
 import com.team.wearly.domain.order.entity.OrderDelivery;

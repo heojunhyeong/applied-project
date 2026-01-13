@@ -20,4 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //findby 방식을 사용했을때 너무 난잡해보여서 query 어노테이션을 사용
     @Query("SELECT u FROM User u WHERE u.userName LIKE %:keyword% OR u.userNickname LIKE %:keyword%")
     List<User> searchByKeyword(@Param("keyword") String keyword);
+
+    // 내(user) 닉네임 제외 중복 체크(프로필 수정용)
+    boolean existsByUserNicknameAndIdNot(String userNickname, Long id);
 }

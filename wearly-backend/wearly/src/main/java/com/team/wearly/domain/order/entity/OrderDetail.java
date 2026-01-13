@@ -22,6 +22,8 @@ public class OrderDetail {
     private Long quantity;
     private Long price;
 
+    private Long sellerId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     @JsonIgnore

@@ -8,6 +8,8 @@ public enum OrderStatus {
     IN_DELIVERY,
     DELIVERY_COMPLETED,
 
+    CANCELLED,
+
     //반품 처리를 위한 항목
     RETURN_REQUESTED,
     RETURN_COMPLETED,

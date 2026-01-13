@@ -60,6 +60,18 @@ public class Order extends BaseTimeEntity {
 
     // 결제에 따른 상태 변경 메서드
     public void updateStatus(OrderStatus status) {
+        // 이미 결제 완료된 건을 다시 결제 완료로 바꾸려 할 때 에러 발생
+        if (this.orderStatus == OrderStatus.PAID && status == OrderStatus.PAID) {
+            throw new IllegalStateException("이미 결제가 완료된 주문입니다.");
+        }
         this.orderStatus = status;
     }
+    public void cancel() {
+        if (this.orderStatus == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("이미 취소된 주문입니다.");
+        }
+        this.orderStatus = OrderStatus.CANCELLED;
+    }
+
+
 }

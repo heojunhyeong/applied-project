@@ -40,4 +40,8 @@ public class Payment extends BaseTimeEntity { // 생성/수정일 상속 권장
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod method;
+
+    public void markAsCancelled() {
+        this.status = PaymentStatus.CANCELED;
+    }
 }

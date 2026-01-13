@@ -59,73 +59,73 @@ public class PaymentService {
     }
 
 
-//    @Transactional
-//    public void confirmBilling(Long userId, String authKey, String customerKey) {
-//
-//        // 빌링키 발급
-//        TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
-//        String billingKey = billingResponse.getBillingKey();
-//
-//        // 멤버십 신청 정보 확인
-//        Membership membership = membershipRepository.findByUserId(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
-//
-//        // 빌링키 저장
-//        membership.registerBillingInfo(billingKey);
-//
-//        // 첫 달 요금 즉시 결제 실행
-//        // 멤버십용 주문번호 생성 (예: MEM-20260113-UUID)
-//        String membershipOrderId = "MEM-" + LocalDate.now().toString().replace("-", "")
-//                + "-" + UUID.randomUUID().toString().substring(0, 8);
-//        Long amount = 4900L; // 멤버십 가격 (실제로는 정책에 따라 가져오기)
-//
-//        try {
-//            TossConfirmResponse paymentResponse = tossPaymentClient.executeBillingPayment(
-//                    billingKey,
-//                    customerKey,
-//                    membershipOrderId,
-//                    amount,
-//                    "웨어리 프리미엄 멤버십 첫 달 결제"
-//            );
-//
-//            // 결제 성공 내역 저장 (기존 단건 결제 시 사용한 메서드 재활용 가능)
-//            savePaymentAndCompleteOrder(paymentResponse);
-//
-//        } catch (Exception e) {
-//            // 최초 결제 실패 시 멤버십 활성화를 취소하거나 예외 처리
-//            membership.updateStatus(MembershipStatus.EXPIRED);
-//            throw new RuntimeException("멤버십 최초 결제에 실패하여 구독이 활성화되지 않았습니다.");
-//        }
-//    }
-
     @Transactional
     public void confirmBilling(Long userId, String authKey, String customerKey) {
 
-        // 1. 빌링키 발급 (가짜 키로 대체)
-        // TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
-        // String billingKey = billingResponse.getBillingKey();
-        String billingKey = "test_billing_key_12345";
+        // 빌링키 발급
+        TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
+        String billingKey = billingResponse.getBillingKey();
 
-        // 2. 멤버십 신청 정보 확인 (위 SQL로 넣은 데이터가 조회됨)
+        // 멤버십 신청 정보 확인
         Membership membership = membershipRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
 
-        // 3. 빌링키 저장 및 상태 변경 (ACTIVE로 변하고 결제일 세팅됨)
+        // 빌링키 저장
         membership.registerBillingInfo(billingKey);
 
-        // 4. 첫 달 요금 즉시 결제 실행 (테스트를 위해 주석 처리)
-    /*
-    try {
-        // 실제 결제 API 호출 생략
-        // savePaymentAndCompleteOrder(paymentResponse);
-    } catch (Exception e) {
-        membership.updateStatus(MembershipStatus.EXPIRED);
-        throw new RuntimeException("멤버십 최초 결제에 실패...");
-    }
-    */
+        // 첫 달 요금 즉시 결제 실행
+        // 멤버십용 주문번호 생성 (예: MEM-20260113-UUID)
+        String membershipOrderId = "MEM-" + LocalDate.now().toString().replace("-", "")
+                + "-" + UUID.randomUUID().toString().substring(0, 8);
+        Long amount = 4900L; // 멤버십 가격 (실제로는 정책에 따라 가져오기)
 
-        System.out.println("테스트: 멤버십 활성화 성공! 유저 ID: " + userId);
+        try {
+            TossConfirmResponse paymentResponse = tossPaymentClient.executeBillingPayment(
+                    billingKey,
+                    customerKey,
+                    membershipOrderId,
+                    amount,
+                    "웨어리 프리미엄 멤버십 첫 달 결제"
+            );
+
+            // 결제 성공 내역 저장 (기존 단건 결제 시 사용한 메서드 재활용 가능)
+            savePaymentAndCompleteOrder(paymentResponse);
+
+        } catch (Exception e) {
+            // 최초 결제 실패 시 멤버십 활성화를 취소하거나 예외 처리
+            membership.updateStatus(MembershipStatus.EXPIRED);
+            throw new RuntimeException("멤버십 최초 결제에 실패하여 구독이 활성화되지 않았습니다.");
+        }
     }
+
+//    @Transactional
+//    public void confirmBilling(Long userId, String authKey, String customerKey) {
+//
+//        // 1. 빌링키 발급 (가짜 키로 대체)
+//        // TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
+//        // String billingKey = billingResponse.getBillingKey();
+//        String billingKey = "test_billing_key_12345";
+//
+//        // 2. 멤버십 신청 정보 확인 (위 SQL로 넣은 데이터가 조회됨)
+//        Membership membership = membershipRepository.findByUserId(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
+//
+//        // 3. 빌링키 저장 및 상태 변경 (ACTIVE로 변하고 결제일 세팅됨)
+//        membership.registerBillingInfo(billingKey);
+//
+//        // 4. 첫 달 요금 즉시 결제 실행 (테스트를 위해 주석 처리)
+//    /*
+//    try {
+//        // 실제 결제 API 호출 생략
+//        // savePaymentAndCompleteOrder(paymentResponse);
+//    } catch (Exception e) {
+//        membership.updateStatus(MembershipStatus.EXPIRED);
+//        throw new RuntimeException("멤버십 최초 결제에 실패...");
+//    }
+//    */
+//
+//        System.out.println("테스트: 멤버십 활성화 성공! 유저 ID: " + userId);
+//    }
 
     @Transactional
     public void executeScheduledPayment(Membership membership) {

@@ -95,20 +95,20 @@ public class PaymentController {
 
     @PostMapping("/membership/terminate")
     public ResponseEntity<String> terminateMembership(Authentication authentication) {
-//        Long userId = Long.parseLong(authentication.getName());
-//        membershipService.reserveTermination(userId);
-//        return ResponseEntity.ok("다음 결제일부터 멤버십이 갱신되지 않습니다. 이번 달 혜택은 유지됩니다.");
-
-        // 테스트용, 위 주석으로 교체 필요
-        Long userId;
-        if (authentication == null) {
-            userId = 2L;
-        } else {
-            userId = Long.parseLong(authentication.getName());
-        }
-
+        Long userId = Long.parseLong(authentication.getName());
         membershipService.reserveTermination(userId);
         return ResponseEntity.ok("다음 결제일부터 멤버십이 갱신되지 않습니다. 이번 달 혜택은 유지됩니다.");
+
+        // 테스트용, 위 주석으로 교체 필요
+//        Long userId;
+//        if (authentication == null) {
+//            userId = 2L;
+//        } else {
+//            userId = Long.parseLong(authentication.getName());
+//        }
+//
+//        membershipService.reserveTermination(userId);
+//        return ResponseEntity.ok("다음 결제일부터 멤버십이 갱신되지 않습니다. 이번 달 혜택은 유지됩니다.");
     }
 
     /**

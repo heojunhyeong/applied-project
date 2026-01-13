@@ -95,4 +95,11 @@ public class Product {
     public void updateStatus(ProductStatus status) {
         this.status = status;
     }
+
+    public void decreaseStock(Long quantity) {
+        if (this.stockQuantity < quantity) {
+            throw new IllegalStateException("상품 [" + this.productName + "]의 재고가 부족합니다. (잔여: " + this.stockQuantity + ")");
+        }
+        this.stockQuantity -= quantity;
+    }
 }

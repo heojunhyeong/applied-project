@@ -34,7 +34,20 @@ public class OrderController {
             Authentication authentication,
             @RequestBody OrderCreateRequest request) {
 
-        Long userId = Long.parseLong(authentication.getName());
+//        Long userId = Long.parseLong(authentication.getName());
+//        return ResponseEntity.ok(orderService.createOrder(userId, request));
+
+        //테스트용, 위 주석으로 교체 필요
+        Long userId;
+        if (authentication == null || authentication.getName() == null) {
+            userId = 2L; // DB에 넣은 테스트 유저 ID
+        } else {
+            try {
+                userId = Long.parseLong(authentication.getName());
+            } catch (NumberFormatException e) {
+                userId = 2L; // 형식이 맞지 않을 경우 대비
+            }
+        }
         return ResponseEntity.ok(orderService.createOrder(userId, request));
     }
 

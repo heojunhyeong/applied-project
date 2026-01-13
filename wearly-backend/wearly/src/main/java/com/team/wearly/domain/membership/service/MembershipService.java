@@ -25,7 +25,7 @@ public class MembershipService {
 
         // 바로 삭제하는 것이 아니라 '해지 예약' 상태로 변경
         // 이렇게 하면 스케줄러가 이 유저를 결제 대상에서 제외합니다.
-        membership.updateStatus(MembershipStatus.CANCEL_RESERVED);
+        membership.updateStatus(MembershipStatus.CANCELLATION_RESERVED);
         log.info("유저 {} 멤버십 해지 예약 완료", userId);
     }
 }

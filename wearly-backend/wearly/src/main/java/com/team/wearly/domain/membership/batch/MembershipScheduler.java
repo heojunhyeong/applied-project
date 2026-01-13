@@ -46,11 +46,13 @@ public class MembershipScheduler {
     // 매일 새벽 12시 30분에 실행
     @Scheduled(cron = "0 30 0 * * *")
     public void processTerminations() {
+        // [수정] CANCEL_RESERVED -> CANCELLATION_RESERVED
         List<Membership> reservedUsers = membershipRepository.findAllByStatusAndNextPaymentDateBefore(
-                MembershipStatus.CANCEL_RESERVED, LocalDateTime.now());
+                MembershipStatus.CANCELLATION_RESERVED, LocalDateTime.now());
 
         for (Membership m : reservedUsers) {
-            m.updateStatus(MembershipStatus.INACTIVE);
+            // [수정] INACTIVE -> EXPIRED
+            m.updateStatus(MembershipStatus.EXPIRED);
             log.info("유저 {} 멤버십 이용기간 만료 및 완전 종료", m.getUserId());
         }
     }

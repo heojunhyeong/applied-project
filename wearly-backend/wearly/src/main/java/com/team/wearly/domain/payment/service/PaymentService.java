@@ -4,6 +4,7 @@ import com.team.wearly.domain.membership.entity.Membership;
 import com.team.wearly.domain.membership.entity.enums.MembershipStatus;
 import com.team.wearly.domain.membership.repository.MembershipRepository;
 import com.team.wearly.domain.order.entity.Order;
+import com.team.wearly.domain.order.entity.OrderDetail;
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
 import com.team.wearly.domain.order.repository.OrderRepository;
 import com.team.wearly.domain.payment.dto.response.TossBillingConfirmResponse;
@@ -13,6 +14,7 @@ import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import com.team.wearly.domain.payment.infrastructure.toss.TossConfirmResponse;
 import com.team.wearly.domain.payment.infrastructure.toss.TossPaymentClient;
 import com.team.wearly.domain.payment.repository.PaymentRepository;
+import com.team.wearly.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,70 +34,97 @@ public class PaymentService {
     private final MembershipRepository membershipRepository;
 
     @Transactional
-    public void confirmPayment(Long userId, String paymentKey, String orderId, Long amount) {
+    public void confirmPayment(String paymentKey, String orderId, Long amount) {
 
+        // 주문 정보 조회
         Order order = orderRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("주문 정보를 찾을 수 없습니다."));
 
-        if (!order.getUserId().equals(userId)) {
-            throw new RuntimeException("주문자 정보가 일치하지 않습니다.");
+        // 금액 검증 (상품 총액 - 쿠폰 할인액 == 실제 결제 금액)
+        long expectedAmount = order.getTotalPrice() - order.getCouponDiscountPrice();
+        if (expectedAmount != amount) {
+            throw new IllegalArgumentException("결제 금액 정합성이 맞지 않습니다. (기대 금액: " + expectedAmount + ", 실제 금액: " + amount + ")");
         }
 
-        if (!order.getTotalPrice().equals(amount)) {
-            throw new RuntimeException("결제 금액이 일치하지 않습니다.");
-        }
+        // 상태 변경
+        order.updateStatus(OrderStatus.PAID);
 
-        // 1. 토스 승인 요청
-        TossConfirmResponse response = tossPaymentClient.confirmPayment(paymentKey, orderId, amount);
+        // 재고 차감
+        for (OrderDetail detail : order.getOrderDetails()) {
+            Product product = detail.getProduct();
 
-        try {
-            // 2. 우리 서버 DB 작업 (결제 저장, 주문 상태 변경 등)
-            order.updateStatus(OrderStatus.PAID);
-            savePaymentAndCompleteOrder(response);
-        } catch (Exception e) {
-            // 3. 만약 우리 DB 작업 중 에러 발생 시, 토스 결제 취소 API 호출
-            tossPaymentClient.cancelPayment(paymentKey, "서버 내부 오류로 인한 자동 결제 취소");
-            throw new RuntimeException("결제 처리 중 서버 오류가 발생하여 자동 취소되었습니다.");
+            // 주문 상세에 담긴 수량만큼 해당 상품의 재고를 차감
+            product.decreaseStock(detail.getQuantity());
         }
     }
+
+
+//    @Transactional
+//    public void confirmBilling(Long userId, String authKey, String customerKey) {
+//
+//        // 빌링키 발급
+//        TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
+//        String billingKey = billingResponse.getBillingKey();
+//
+//        // 멤버십 신청 정보 확인
+//        Membership membership = membershipRepository.findByUserId(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
+//
+//        // 빌링키 저장
+//        membership.registerBillingInfo(billingKey);
+//
+//        // 첫 달 요금 즉시 결제 실행
+//        // 멤버십용 주문번호 생성 (예: MEM-20260113-UUID)
+//        String membershipOrderId = "MEM-" + LocalDate.now().toString().replace("-", "")
+//                + "-" + UUID.randomUUID().toString().substring(0, 8);
+//        Long amount = 4900L; // 멤버십 가격 (실제로는 정책에 따라 가져오기)
+//
+//        try {
+//            TossConfirmResponse paymentResponse = tossPaymentClient.executeBillingPayment(
+//                    billingKey,
+//                    customerKey,
+//                    membershipOrderId,
+//                    amount,
+//                    "웨어리 프리미엄 멤버십 첫 달 결제"
+//            );
+//
+//            // 결제 성공 내역 저장 (기존 단건 결제 시 사용한 메서드 재활용 가능)
+//            savePaymentAndCompleteOrder(paymentResponse);
+//
+//        } catch (Exception e) {
+//            // 최초 결제 실패 시 멤버십 활성화를 취소하거나 예외 처리
+//            membership.updateStatus(MembershipStatus.EXPIRED);
+//            throw new RuntimeException("멤버십 최초 결제에 실패하여 구독이 활성화되지 않았습니다.");
+//        }
+//    }
 
     @Transactional
     public void confirmBilling(Long userId, String authKey, String customerKey) {
 
-        // 빌링키 발급
-        TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
-        String billingKey = billingResponse.getBillingKey();
+        // 1. 빌링키 발급 (가짜 키로 대체)
+        // TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
+        // String billingKey = billingResponse.getBillingKey();
+        String billingKey = "test_billing_key_12345";
 
-        // 멤버십 신청 정보 확인
+        // 2. 멤버십 신청 정보 확인 (위 SQL로 넣은 데이터가 조회됨)
         Membership membership = membershipRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
 
-        // ` 빌링키 저장
+        // 3. 빌링키 저장 및 상태 변경 (ACTIVE로 변하고 결제일 세팅됨)
         membership.registerBillingInfo(billingKey);
 
-        // 첫 달 요금 즉시 결제 실행
-        // 멤버십용 주문번호 생성 (예: MEM-20260113-UUID)
-        String membershipOrderId = "MEM-" + LocalDate.now().toString().replace("-", "")
-                + "-" + UUID.randomUUID().toString().substring(0, 8);
-        Long amount = 4900L; // 멤버십 가격 (실제로는 정책에 따라 가져오기)
+        // 4. 첫 달 요금 즉시 결제 실행 (테스트를 위해 주석 처리)
+    /*
+    try {
+        // 실제 결제 API 호출 생략
+        // savePaymentAndCompleteOrder(paymentResponse);
+    } catch (Exception e) {
+        membership.updateStatus(MembershipStatus.EXPIRED);
+        throw new RuntimeException("멤버십 최초 결제에 실패...");
+    }
+    */
 
-        try {
-            TossConfirmResponse paymentResponse = tossPaymentClient.executeBillingPayment(
-                    billingKey,
-                    customerKey,
-                    membershipOrderId,
-                    amount,
-                    "웨어리 프리미엄 멤버십 첫 달 결제"
-            );
-
-            // 5. 결제 성공 내역 저장 (기존 단건 결제 시 사용한 메서드 재활용 가능)
-            savePaymentAndCompleteOrder(paymentResponse);
-
-        } catch (Exception e) {
-            // 최초 결제 실패 시 멤버십 활성화를 취소하거나 예외 처리
-            membership.updateStatus(MembershipStatus.INACTIVE);
-            throw new RuntimeException("멤버십 최초 결제에 실패하여 구독이 활성화되지 않았습니다.");
-        }
+        System.out.println("테스트: 멤버십 활성화 성공! 유저 ID: " + userId);
     }
 
     @Transactional
@@ -122,7 +151,6 @@ public class PaymentService {
         } catch (Exception e) {
             // 결제 실패 시 처리 (예: 상태를 PAYMENT_FAILED로 바꾸고 사용자에게 알림 발송 등)
             log.error("정기 결제 실패 - 유저ID: {}, 사유: {}", membership.getUserId(), e.getMessage());
-            // 필요 시 membership.updateStatus(MembershipStatus.INACTIVE);
         }
     }
 

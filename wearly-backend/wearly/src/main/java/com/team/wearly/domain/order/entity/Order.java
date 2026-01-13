@@ -31,6 +31,7 @@ public class Order extends BaseTimeEntity {
     private String orderId;
 
     private Long userId;
+    private Long sellerId;   // 추가
 
     private Long totalPrice;
 
@@ -59,19 +60,57 @@ public class Order extends BaseTimeEntity {
     }
 
     // 결제에 따른 상태 변경 메서드
-    public void updateStatus(OrderStatus status) {
-        // 이미 결제 완료된 건을 다시 결제 완료로 바꾸려 할 때 에러 발생
-        if (this.orderStatus == OrderStatus.PAID && status == OrderStatus.PAID) {
-            throw new IllegalStateException("이미 결제가 완료된 주문입니다.");
-        }
-        this.orderStatus = status;
-    }
-    public void cancel() {
-        if (this.orderStatus == OrderStatus.CANCELLED) {
-            throw new IllegalStateException("이미 취소된 주문입니다.");
-        }
-        this.orderStatus = OrderStatus.CANCELLED;
-    }
+    public void updateStatus(OrderStatus nextStatus) {
 
+        // 같은 상태로 변경 방지(선택)
+        if (this.orderStatus == nextStatus) {
+            return; // 또는 throw new IllegalArgumentException("이미 해당 상태입니다.");
+        }
 
+        // BEFORE_PAID -> PAID or CANCELLED
+        if (this.orderStatus == OrderStatus.BEFORE_PAID) {
+            if (nextStatus != OrderStatus.PAID && nextStatus != OrderStatus.CANCELLED) {
+                throw new IllegalStateException("BEFORE_PAID 상태에서는 PAID 또는 CANCELLED로만 변경할 수 있습니다.");
+            }
+        }
+
+        // PAID -> WAIT_CHECK or CANCELLED(선택)
+        else if (this.orderStatus == OrderStatus.PAID) {
+            if (nextStatus != OrderStatus.WAIT_CHECK && nextStatus != OrderStatus.CANCELLED) {
+                throw new IllegalStateException("PAID 상태에서는 WAIT_CHECK(또는 CANCELLED)로만 변경할 수 있습니다.");
+            }
+        }
+
+        // WAIT_CHECK -> CHECK
+        else if (this.orderStatus == OrderStatus.WAIT_CHECK) {
+            if (nextStatus != OrderStatus.CHECK) {
+                throw new IllegalStateException("WAIT_CHECK 상태에서는 CHECK로만 변경할 수 있습니다.");
+            }
+        }
+
+        // CHECK -> IN_DELIVERY
+        else if (this.orderStatus == OrderStatus.CHECK) {
+            if (nextStatus != OrderStatus.IN_DELIVERY) {
+                throw new IllegalStateException("CHECK 상태에서는 IN_DELIVERY로만 변경할 수 있습니다.");
+            }
+        }
+
+        // IN_DELIVERY -> DELIVERY_COMPLETED
+        else if (this.orderStatus == OrderStatus.IN_DELIVERY) {
+            if (nextStatus != OrderStatus.DELIVERY_COMPLETED) {
+                throw new IllegalStateException("IN_DELIVERY 상태에서는 DELIVERY_COMPLETED로만 변경할 수 있습니다.");
+            }
+        }
+
+        // DELIVERY_COMPLETED / CANCELLED -> 변경 불가
+        else if (this.orderStatus == OrderStatus.DELIVERY_COMPLETED || this.orderStatus == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("최종 상태에서는 변경할 수 없습니다.");
+        }
+
+        else {
+            throw new IllegalArgumentException("허용되지 않은 주문 상태 변경입니다.");
+        }
+
+        this.orderStatus = nextStatus;
+    }
 }

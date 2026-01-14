@@ -27,18 +27,6 @@ public class AdminOrderController {
     public ResponseEntity<List<AdminOrderResponse>> getOrders(
             @RequestParam(required = false) String nickname) {
         
-        // 디버깅: 현재 인증 정보 확인
-        org.springframework.security.core.Authentication auth = 
-            org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            System.out.println("=== AdminOrderController 인증 정보 ===");
-            System.out.println("Principal: " + auth.getPrincipal());
-            System.out.println("Authorities: " + auth.getAuthorities());
-            System.out.println("=====================================");
-        } else {
-            System.out.println("=== AdminOrderController: 인증 정보 없음 ===");
-        }
-        
         List<AdminOrderResponse> response = adminOrderService.getOrders(nickname);
         return ResponseEntity.ok(response);
     }

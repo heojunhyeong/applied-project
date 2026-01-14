@@ -59,6 +59,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/payment/**", "/api/orders/**", "/api/users/orders/**").permitAll()
                 .requestMatchers("/api/users/reviews").permitAll()
                 .requestMatchers("/api/password/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ADMIN 전용
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //SELLER파트 전용
                 .requestMatchers("/api/products/seller/**").hasRole("SELLER")
                 .anyRequest().authenticated()  // 나머지는 JWT 토큰 필요

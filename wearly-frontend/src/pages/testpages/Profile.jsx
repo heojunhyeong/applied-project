@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import './Profile.css';
+//http://localhost:5173/profile/upload
 
 const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null); // 선택한 이미지 미리보기용
     const [uploading, setUploading] = useState(false);
     const [imageUrl, setImageUrl] = useState(null);
     const [error, setError] = useState(null);
-    const [userType, setUserType] = useState('users'); // 'users' 또는 'seller'
+    const [userType, setUserType] = useState('users');
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -17,6 +19,13 @@ const Profile = () => {
             }
             setSelectedFile(file);
             setError(null);
+
+            // 선택한 이미지 미리보기 생성
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -30,24 +39,38 @@ const Profile = () => {
         setError(null);
 
         try {
-            // 토큰 체크 제거 (테스트용)
-            // const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            // if (!token) {
-            //     throw new Error('로그인이 필요합니다.');
-            // }
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
             // 사용자 타입에 따라 URL 결정
-            const apiUrl = userType === 'users'
-                ? 'http://localhost:8080/api/users/profile/presigned-url'
-                : 'http://localhost:8080/api/seller/profile/presigned-url';
+            const baseUrl = 'http://localhost:8080';
+            const profileUrl = userType === 'users'
+                ? `${baseUrl}/api/users/profile`
+                : `${baseUrl}/api/seller/profile`;
 
-            // 1. Presigned URL 요청 (토큰 없이)
+            const presignedUrlEndpoint = userType === 'users'
+                ? `${baseUrl}/api/users/profile/presigned-url`
+                : `${baseUrl}/api/seller/profile/presigned-url`;
+
+            // 0. 프로필 정보 먼저 조회 (userNickname 필요)
+            const profileResponse = await fetch(profileUrl, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            if (!profileResponse.ok) {
+                throw new Error('프로필 정보를 가져올 수 없습니다.');
+            }
+
+            const profileData = await profileResponse.json();
+
+            // 1. Presigned URL 요청
             const response = await fetch(
-                apiUrl,
+                presignedUrlEndpoint,
                 {
                     method: 'POST',
                     headers: {
-                        // 'Authorization': `Bearer ${token}`,  // 제거
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ contentType: selectedFile.type })
@@ -76,12 +99,36 @@ const Profile = () => {
             }
 
             // 3. Public URL 생성
-            const bucket = 'wearly-project'; // 실제 버킷 이름으로 변경
-            const region = 'ap-northeast-2'; // 실제 리전으로 변경
+            const bucket = 'wearly-project';
+            const region = 'ap-northeast-2';
             const publicUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+
+            // 4. DB에 이미지 URL 저장 (기존 프로필 정보 포함)
+            const imageUpdateUrl = userType === 'users'
+                ? `${baseUrl}/api/users/profile/image`
+                : `${baseUrl}/api/seller/profile/image`;
+
+            const updateResponse = await fetch(imageUpdateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userNickname: profileData.userNickname,
+                    introduction: profileData.introduction || null,
+                    phoneNumber: profileData.phoneNumber || null,
+                    imageUrl: publicUrl
+                })
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error('이미지 URL 저장에 실패했습니다.');
+            }
 
             setImageUrl(publicUrl);
             setUploading(false);
+            alert('프로필 이미지가 업로드되었습니다!');
         } catch (err) {
             console.error('업로드 실패:', err);
             setError(err.message || '업로드에 실패했습니다.');
@@ -104,10 +151,6 @@ const Profile = () => {
                     <option value="users">일반 사용자 (USER)</option>
                     <option value="seller">판매자 (SELLER)</option>
                 </select>
-                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                    현재 선택: {userType === 'users' ? '일반 사용자' : '판매자'}
-                    ({userType === 'users' ? '/api/users/profile/presigned-url' : '/api/seller/profile/presigned-url'})
-                </p>
             </div>
 
             <div className="upload-section">
@@ -117,6 +160,23 @@ const Profile = () => {
                     onChange={handleFileChange}
                     className="file-input"
                 />
+
+                {/* 선택한 이미지 미리보기 */}
+                {previewUrl && (
+                    <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+                        <h3>선택한 이미지 미리보기</h3>
+                        <img
+                            src={previewUrl}
+                            alt="미리보기"
+                            style={{
+                                maxWidth: '300px',
+                                maxHeight: '300px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px'
+                            }}
+                        />
+                    </div>
+                )}
 
                 {selectedFile && (
                     <div className="file-info">
@@ -146,9 +206,6 @@ const Profile = () => {
                     <h3>업로드된 이미지</h3>
                     <img src={imageUrl} alt="프로필" className="uploaded-image" />
                     <p className="image-url">URL: {imageUrl}</p>
-                    <p style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-                        저장 경로: {imageUrl.split('.amazonaws.com/')[1]}
-                    </p>
                 </div>
             )}
         </div>

@@ -26,5 +26,13 @@ import lombok.NoArgsConstructor;
 
         @Enumerated(EnumType.STRING)
         private SettlementStatus status;
+
+        public void updateStatus(SettlementStatus status) {
+            this.status = status;
+        }
+
+        public void completeSettlement() {
+            this.status = SettlementStatus.COMPLETED;
+        }
     }
 

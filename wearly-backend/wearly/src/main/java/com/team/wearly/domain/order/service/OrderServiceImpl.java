@@ -110,6 +110,7 @@ public class OrderServiceImpl implements OrderService {
                     .quantity(request.getQuantity())
                     .price(product.getPrice())
                     .product(product)
+                    .sellerId(product.getSellerId())
                     .build();
             order.addOrderDetail(detail);
 
@@ -121,10 +122,12 @@ public class OrderServiceImpl implements OrderService {
             }
 
             for (Cart cart : selectedCarts) {
+
                 OrderDetail detail = OrderDetail.builder()
                         .quantity(cart.getQuantity())
                         .price(cart.getProduct().getPrice())
                         .product(cart.getProduct())
+                        .sellerId(cart.getProduct().getSellerId())
                         .build();
                 order.addOrderDetail(detail);
             }

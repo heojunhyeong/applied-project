@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 
 @RequiredArgsConstructor
@@ -46,5 +48,20 @@ public class SettlementService {
 
             settlementRepository.save(settlement);
         }
+
+
+    }
+
+    @Transactional
+    public void markAsSettlementTarget(String orderId) {
+        List<Settlement> settlements = settlementRepository.findAllByOrderId(orderId);
+        settlements.forEach(s -> s.updateStatus(SettlementStatus.CONFIRMED));
+    }
+
+
+    @Transactional
+    public void cancelSettlement(String orderId) {
+        List<Settlement> settlements = settlementRepository.findAllByOrderId(orderId);
+        settlements.forEach(s -> s.updateStatus(SettlementStatus.CANCELLED));
     }
 }

@@ -3,8 +3,9 @@ spring:
     name: wearly
 
   datasource:
-    url: jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     #url: jdbc:mysql://mysql:3306/Wearly_MySQL
+    #url: jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
     password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -27,6 +28,23 @@ spring:
         static: ${AWS_REGION_STATIC}
       s3:
         bucket: ${AWS_S3_BUCKET}
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  frontend-url: http://localhost:8080
+
 
 payment:
   toss:

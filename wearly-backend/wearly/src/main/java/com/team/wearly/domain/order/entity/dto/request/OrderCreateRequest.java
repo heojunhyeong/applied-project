@@ -15,7 +15,11 @@ public class OrderCreateRequest {
 
 
     private List<Long> cartItemIds;
+    private Long productId;
+    private Long quantity;
     private String address;
     private String detailAddress;
     private Long zipCode;
+
+    private Long userCouponId;
 }

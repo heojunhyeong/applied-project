@@ -58,7 +58,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/seller/profile").permitAll()  // eller profile 이미지 업로드 테스트용
                             .requestMatchers("/api/payment/**", "/api/orders/**", "/api/users/orders/**").permitAll()
                 .requestMatchers("/api/users/reviews").permitAll()
-//                .requestMatchers("/api/payment/**", "/api/orders/**").permitAll()
+                .requestMatchers("/api/password/**").permitAll()
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //SELLER파트 전용
                 .requestMatchers("/api/products/seller/**").hasRole("SELLER")
                 .anyRequest().authenticated()  // 나머지는 JWT 토큰 필요

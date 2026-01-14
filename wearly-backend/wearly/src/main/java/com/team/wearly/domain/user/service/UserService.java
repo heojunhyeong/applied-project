@@ -11,4 +11,10 @@ public interface UserService {
      * - ADMIN 단어 차단: 이메일, 닉네임, 비밀번호 등 모든 필드에서 검증
      */
     SignupResponse signup(SignupRequest request);
+
+
+    public void requestPasswordReset(String email);
+
+    public void resetPassword(String token, String newPassword);
+
 }

@@ -80,4 +80,9 @@ public class User {
         this.imageUrl = imageUrl;
     }
 
+
+    // 패스워드 재설정 메서드
+    public void changePassword(String encryptedPassword) {
+        this.userPassword = encryptedPassword;
+    }
 }

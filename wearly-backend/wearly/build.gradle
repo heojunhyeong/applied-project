@@ -52,6 +52,12 @@ dependencies {
 
     // validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // 스프링 부트가 .env를 읽게 해주는 라이브러리
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 }
 
 

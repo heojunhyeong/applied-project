@@ -2,16 +2,24 @@ package com.team.wearly.domain.user.service;
 
 import com.team.wearly.domain.user.dto.request.SignupRequest;
 import com.team.wearly.domain.user.dto.response.SignupResponse;
+import com.team.wearly.domain.user.entity.PasswordResetToken;
 import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.user.entity.User;
 import com.team.wearly.domain.user.entity.enums.UserRole;
 import com.team.wearly.domain.user.repository.AdminRepository;
+import com.team.wearly.domain.user.repository.PasswordResetTokenRepository;
 import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.user.repository.UserRepository;
+import com.team.wearly.global.exception.CustomException;
+import com.team.wearly.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +29,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final SellerRepository sellerRepository;
     private final AdminRepository adminRepository;
+    private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenRepository tokenRepository;
+
+    @Value("${app.frontend-url:http://localhost:8080}")
+    private String frontendUrl;
 
     /**
      * 회원가입 메인 로직
@@ -186,5 +199,58 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException("닉네임에는 'admin'이라는 단어는 사용할 수 없습니다");
             }
         }
+    }
+
+
+
+
+
+    // 재설정 링크 발송
+    // TODO: 주석 추가 필요
+    @Transactional
+    @Override
+    public void requestPasswordReset(String email) {
+        User user = userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String token = UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiredAt(LocalDateTime.now().plusMinutes(30))
+                .used(false)
+                .build();
+
+        tokenRepository.save(resetToken);
+
+        // 링크 생성 (Postman 테스트 시 이 링크가 메일로 감)
+        String resetLink = frontendUrl + "/api/password/reset?token=" + token;
+
+        mailService.sendPasswordResetMail(user.getUserEmail(), resetLink);
+    }
+
+
+    // 비밀번호 변경 메서드
+    // TODO: 주석 추가 필요
+    @Transactional
+    @Override
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESET_TOKEN_NOT_FOUND));
+
+        if (resetToken.isUsed()) {
+            throw new CustomException(ErrorCode.RESET_TOKEN_ALREADY_USED);
+        }
+
+        if (resetToken.isExpired()) {
+            throw new CustomException(ErrorCode.RESET_TOKEN_EXPIRED);
+        }
+
+        User user = resetToken.getUser();
+        // User 엔티티의 changePassword 메서드 사용 (암호화 필수)
+        user.changePassword(passwordEncoder.encode(newPassword));
+
+        resetToken.use();
     }
 }

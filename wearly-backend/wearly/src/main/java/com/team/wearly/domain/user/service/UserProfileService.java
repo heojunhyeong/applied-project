@@ -46,4 +46,13 @@ public class UserProfileService {
         return UserProfileResponse.from(user);
     }
 
+    // S3업로드 후 url을 DB에 저장
+    @Transactional
+    public UserProfileResponse updateProfileImage(Long userId, String imageUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        user.updateImageUrl(imageUrl);
+        return UserProfileResponse.from(user);
+    }
+
 }

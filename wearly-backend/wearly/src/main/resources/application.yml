@@ -3,8 +3,9 @@ spring:
     name: wearly
 
   datasource:
-    url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-#    url: jdbc:mysql://mysql:3306/Wearly_MySQL
+    #url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://mysql:3306/Wearly_MySQL
+    #url: jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
     password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,6 +17,17 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  # aws/s3
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      region:
+        static: ${AWS_REGION_STATIC}
+      s3:
+        bucket: ${AWS_S3_BUCKET}
 
 
   mail:
@@ -38,7 +50,6 @@ payment:
   toss:
     secret-key: "test_sk_ZLKGPx4M3MnpbbMpP9KEVBaWypv1"
     client-key: "test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml"
-
 
 server:
   port: 8080

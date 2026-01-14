@@ -20,8 +20,8 @@ public record SellerProfileUpdateRequest(
                 regexp = "^(|01[016789][-]?\\d{3,4}[-]?\\d{4}|02[-]?\\d{3,4}[-]?\\d{4}|0[3-6][1-5][-]?\\d{3,4}[-]?\\d{4})$",
                 message = "전화번호 형식이 올바르지 않습니다."
         )
-        String phoneNumber
+        String phoneNumber,
 
-        // 추후 이미지 추가 예정
+        String imageUrl
 ) {
 }

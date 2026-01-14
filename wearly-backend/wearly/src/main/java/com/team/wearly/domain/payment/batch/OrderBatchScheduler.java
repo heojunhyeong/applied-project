@@ -31,7 +31,7 @@ public class OrderBatchScheduler {
 
         LocalDateTime limit = LocalDateTime.now().minusMinutes(30);
         // 결제 대기 중인 주문들 조회
-        List<Order> pendingOrders = orderRepository.findAllByOrderStatusAndCreatedAtBefore(
+        List<Order> pendingOrders = orderRepository.findAllByOrderStatusAndCreatedDateBefore(
                 OrderStatus.BEFORE_PAID, limit);
 
         for (Order order : pendingOrders) {

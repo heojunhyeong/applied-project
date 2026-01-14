@@ -61,7 +61,7 @@ public class UserProfileController {
         return ResponseEntity.ok(new ProfileImagePresignedUrlResponse(result[0], result[1]));
     }
 
-    // 4) 프로필 이미지(URL) 저장
+    // 4) 프로필 이미지(URL) 등록/수정
     @PatchMapping("/image")
     public ResponseEntity<UserProfileResponse> updateProfileImage(
             Authentication authentication,

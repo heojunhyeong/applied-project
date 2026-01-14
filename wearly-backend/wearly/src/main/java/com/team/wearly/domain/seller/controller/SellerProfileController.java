@@ -1,11 +1,14 @@
 package com.team.wearly.domain.seller.controller;
 
+import com.team.wearly.domain.user.dto.request.ProfileImagePresignedUrlRequest;
+import com.team.wearly.domain.user.dto.response.ProfileImagePresignedUrlResponse;
 import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.seller.dto.request.SellerPasswordChangeRequest;
 import com.team.wearly.domain.seller.dto.request.SellerProfileUpdateRequest;
 import com.team.wearly.domain.seller.dto.response.SellerProfileResponse;
 import com.team.wearly.domain.seller.service.SellerPasswordService;
 import com.team.wearly.domain.seller.service.SellerProfileService;
+import com.team.wearly.global.service.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ public class SellerProfileController {
 
     private final SellerProfileService sellerProfileService;
     private final SellerPasswordService sellerPasswordService;
+    private final S3Service s3Service;
 
     private Seller getSeller(Authentication authentication) {
         Object principal = authentication.getPrincipal();
@@ -54,5 +58,29 @@ public class SellerProfileController {
         Seller seller = getSeller(authentication);
         sellerPasswordService.changePassword(seller.getId(), request);
         return ResponseEntity.noContent().build();
+    }
+
+    // 4) 판매자 프로필 이미지 업로드를 위한 URL 생성
+    @PostMapping("/presigned-url")
+    public ResponseEntity<ProfileImagePresignedUrlResponse> getPresignedUrl(
+            Authentication authentication,
+            @Valid @RequestBody ProfileImagePresignedUrlRequest request
+    ){
+        //Long testSellerId = 1L; // 테스트용
+        //var result = s3Service.createPresignedUrl(testSellerId, request.contentType(), "seller"); //테스트용
+        Seller seller = getSeller(authentication);
+        var result = s3Service.createPresignedUrl(seller.getId(), request.contentType(), "seller");
+
+        return ResponseEntity.ok(new ProfileImagePresignedUrlResponse(result[0], result[1]));
+    }
+
+    // 5) 프로필 이미지(URL) 저장
+    @PatchMapping("/image")
+    public ResponseEntity<SellerProfileResponse> updateProfileImage(
+            Authentication authentication,
+            @Valid @RequestBody SellerProfileUpdateRequest request
+    ){
+        Seller seller = getSeller(authentication);
+        return ResponseEntity.ok(sellerProfileService.updateProfileImage(seller.getId(), request.imageUrl()));
     }
 }

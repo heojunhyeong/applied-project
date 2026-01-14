@@ -46,4 +46,13 @@ public class SellerProfileService {
 
         return SellerProfileResponse.from(seller);
     }
+
+    // S3업로드 후 url을 DB에 저장
+    @Transactional
+    public SellerProfileResponse updateProfileImage(Long sellerId, String imageUrl) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다."));
+        seller.updateImageUrl(imageUrl);
+        return SellerProfileResponse.from(seller);
+    }
 }

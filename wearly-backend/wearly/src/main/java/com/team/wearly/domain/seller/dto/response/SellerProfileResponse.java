@@ -11,6 +11,7 @@ public record SellerProfileResponse(
         String userNickname,
         String introduction,
         String phoneNumber,
+        String imageUrl,
         LocalDateTime createdDate,
         LocalDateTime updatedDate
 ) {
@@ -22,6 +23,7 @@ public record SellerProfileResponse(
                 seller.getUserNickname(),
                 seller.getIntroduction(),
                 seller.getPhoneNumber(),
+                seller.getImageUrl(),
                 seller.getCreatedDate(),
                 seller.getUpdatedDate()
         );

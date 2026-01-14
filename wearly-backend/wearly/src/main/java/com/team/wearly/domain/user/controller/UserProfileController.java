@@ -1,8 +1,11 @@
 package com.team.wearly.domain.user.controller;
 
+import com.team.wearly.domain.user.dto.request.ProfileImagePresignedUrlRequest;
 import com.team.wearly.domain.user.dto.request.UserProfileUpdateRequest;
+import com.team.wearly.domain.user.dto.response.ProfileImagePresignedUrlResponse;
 import com.team.wearly.domain.user.dto.response.UserProfileResponse;
 import com.team.wearly.domain.user.entity.User;
+import com.team.wearly.global.service.S3Service;
 import com.team.wearly.domain.user.service.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
+    private final S3Service s3Service;
 
     private User getUser(Authentication authentication) {
         Object principal = authentication.getPrincipal();
@@ -42,5 +46,29 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfileService.updateProfile(user.getId(), request));
     }
 
-    //프로필 페이지 이미지 변경 시작할게요~!~!~
+    // 3) 사용자(user) 프로필 이미지 업로드를 위한 URL 생성
+    @PostMapping("/presigned-url")
+    public ResponseEntity<ProfileImagePresignedUrlResponse> getPresignedUrl(
+            Authentication authentication,
+            @Valid @RequestBody ProfileImagePresignedUrlRequest request
+    ){
+
+        //Long testUserId = 1L;  // 테스트용
+        //var result = s3Service.createPresignedUrl(testUserId, request.contentType(), "users"); // 테스트용
+        User user = getUser(authentication);
+        var result = s3Service.createPresignedUrl(user.getId(), request.contentType(), "users");
+
+        return ResponseEntity.ok(new ProfileImagePresignedUrlResponse(result[0], result[1]));
+    }
+
+    // 4) 프로필 이미지(URL) 저장
+    @PatchMapping("/image")
+    public ResponseEntity<UserProfileResponse> updateProfileImage(
+            Authentication authentication,
+            @Valid @RequestBody UserProfileUpdateRequest request
+    ){
+        User user = getUser(authentication);
+        return ResponseEntity.ok(userProfileService.updateProfileImage(user.getId(), request.imageUrl()));
+    }
+
 }

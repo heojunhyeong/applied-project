@@ -44,6 +44,8 @@ public class User {
     @Column(length = 20)
     private String phoneNumber;
 
+    private String imageUrl;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
@@ -72,4 +74,10 @@ public class User {
         this.userEmail = userEmail;
         this.userNickname = userNickname;
     }
+
+    // 프로필 이미지 수정(변경) 메서드
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
 }

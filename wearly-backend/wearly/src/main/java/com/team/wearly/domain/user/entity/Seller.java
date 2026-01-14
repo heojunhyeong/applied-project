@@ -42,6 +42,8 @@ public class Seller {
     @Column(length = 20)
     private String phoneNumber;
 
+    private String imageUrl;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
@@ -71,5 +73,10 @@ public class Seller {
     // 이메일 업데이트 메서드
     public void updateEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    // 프로필 이미지 수정(변경) 메서드
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

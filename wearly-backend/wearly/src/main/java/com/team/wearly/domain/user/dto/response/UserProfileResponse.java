@@ -11,6 +11,7 @@ public record UserProfileResponse(
         String userNickname,
         String introduction,
         String phoneNumber,
+        String imageUrl,
         LocalDateTime createdDate,
         LocalDateTime updatedDate
 ) {
@@ -22,6 +23,7 @@ public record UserProfileResponse(
                 user.getUserNickname(),
                 user.getIntroduction(),
                 user.getPhoneNumber(),
+                user.getImageUrl(),
                 user.getCreatedDate(),
                 user.getUpdatedDate()
         );

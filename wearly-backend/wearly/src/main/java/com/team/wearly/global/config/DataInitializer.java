@@ -3,6 +3,8 @@ package com.team.wearly.global.config;
 import com.team.wearly.domain.user.entity.Admin;
 import com.team.wearly.domain.user.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
     
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
@@ -39,16 +43,9 @@ public class DataInitializer {
                         .build();
                 
                 Admin savedAdmin = adminRepository.save(admin);
-                System.out.println("========================================");
-                System.out.println("기본 관리자 계정이 생성되었습니다.");
-                System.out.println("테이블: admin");
-                System.out.println("사용자명(ID): admin123");
-                System.out.println("비밀번호: admin123!");
-                System.out.println("이메일: admin@wearly.com");
-                System.out.println("닉네임: 관리자");
-                System.out.println("========================================");
+                logger.info("기본 관리자 계정이 생성되었습니다. 테이블: admin, 사용자명: admin123, 이메일: admin@wearly.com, 닉네임: 관리자");
             } else {
-                System.out.println("기본 관리자 계정(admin123)이 이미 admin 테이블에 존재합니다.");
+                logger.info("기본 관리자 계정(admin123)이 이미 admin 테이블에 존재합니다.");
             }
         };
     }

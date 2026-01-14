@@ -11,6 +11,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderId(String orderId);
     List<Order> findAllByUserIdOrderByCreatedDateDesc(Long userId);
 
+
     // 전체 주문 조회 (최신순)
     List<Order> findAllByOrderByCreatedDateDesc();
 

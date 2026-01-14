@@ -14,6 +14,7 @@ import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import com.team.wearly.domain.payment.infrastructure.toss.TossConfirmResponse;
 import com.team.wearly.domain.payment.infrastructure.toss.TossPaymentClient;
 import com.team.wearly.domain.payment.repository.PaymentRepository;
+import com.team.wearly.domain.payment.repository.SettlementRepository;
 import com.team.wearly.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,32 +33,41 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final MembershipRepository membershipRepository;
+    private final SettlementService settlementService;
 
     @Transactional
     public void confirmPayment(String paymentKey, String orderId, Long amount) {
 
-        // 주문 정보 조회
+        Order idempotence = orderRepository.findByOrderId(orderId).orElseThrow();
+        if (idempotence.getOrderStatus() == OrderStatus.PAID) {
+            log.warn("이미 처리된 주문입니다. orderId: {}", orderId);
+            return;
+        }
+
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문 정보를 찾을 수 없습니다."));
 
-        // 금액 검증 (상품 총액 - 쿠폰 할인액 == 실제 결제 금액)
         long expectedAmount = order.getTotalPrice() - order.getCouponDiscountPrice();
         if (expectedAmount != amount) {
-            throw new IllegalArgumentException("결제 금액 정합성이 맞지 않습니다. (기대 금액: " + expectedAmount + ", 실제 금액: " + amount + ")");
+            throw new IllegalArgumentException("결제 금액 정합성 오류");
         }
 
-        // 상태 변경
-        order.updateStatus(OrderStatus.PAID);
+        try {
+            TossConfirmResponse response = tossPaymentClient.confirmPayment(paymentKey, orderId, amount);
 
-        // 재고 차감
-        for (OrderDetail detail : order.getOrderDetails()) {
-            Product product = detail.getProduct();
+            for (OrderDetail detail : order.getOrderDetails()) {
+                Product product = detail.getProduct();
+                product.decreaseStock(detail.getQuantity());
+            }
 
-            // 주문 상세에 담긴 수량만큼 해당 상품의 재고를 차감
-            product.decreaseStock(detail.getQuantity());
+            savePaymentAndCompleteOrder(response);
+
+        } catch (Exception e) {
+            log.error("결제 처리 중 에러 발생 - 보상 트랜잭션 실행: {}", e.getMessage());
+            tossPaymentClient.cancelPayment(paymentKey, "시스템 오류: " + e.getMessage());
+            throw new RuntimeException("결제 처리에 실패하여 자동 취소되었습니다.", e);
         }
     }
-
 
     @Transactional
     public void confirmBilling(Long userId, String authKey, String customerKey) {
@@ -160,6 +170,8 @@ public class PaymentService {
 
         // 주문 상태를 PAID(결제완료)로 변경
         order.updateStatus(OrderStatus.PAID);
+        settlementService.createSettlementData(order);
+
     }
 
     private void completeMembership(String orderId) {
@@ -168,6 +180,7 @@ public class PaymentService {
 
         // 멤버십 상태를 ACTIVE(활성)로 변경
         membership.updateStatus(MembershipStatus.ACTIVE);
+
     }
 
 
@@ -199,7 +212,7 @@ public class PaymentService {
         };
     }
 
-    private void savePaymentAndCompleteOrder(TossConfirmResponse response) {
+    public void savePaymentAndCompleteOrder(TossConfirmResponse response) {
         Payment payment = Payment.builder()
                 .paymentKey(response.getPaymentKey())
                 .orderId(response.getOrderId())
@@ -215,4 +228,8 @@ public class PaymentService {
             completeMembership(response.getOrderId());
         }
     }
+
+    // 추가부분
+
+
 }

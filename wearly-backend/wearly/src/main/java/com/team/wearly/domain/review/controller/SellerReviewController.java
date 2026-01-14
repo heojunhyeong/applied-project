@@ -101,7 +101,6 @@ public class SellerReviewController {
             @RequestBody SellerReviewRequest.ReviewReportCreateRequest request
     ) {
         Seller seller = getSeller(authentication);
-        System.out.println("sellerId from token = " + seller.getId());
         Long reporterId = seller.getId(); // 최소 구현 (판매자 PK를 reporterId로 저장)
         sellerReviewService.reportReview(seller.getId(), reporterId, reviewId, request.reason());
 

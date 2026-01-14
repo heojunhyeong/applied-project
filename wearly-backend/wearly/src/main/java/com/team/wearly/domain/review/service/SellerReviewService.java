@@ -11,6 +11,8 @@ import com.team.wearly.domain.review.entity.enums.ReviewStatus;
 import com.team.wearly.domain.review.repository.ProductReviewRepository;
 import com.team.wearly.domain.review.repository.ReviewReportRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SellerReviewService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SellerReviewService.class);
 
     private final ProductReviewRepository productReviewRepository;
     private final ReviewReportRepository reviewReportRepository;
@@ -78,12 +82,6 @@ public class SellerReviewService {
         if (reason == null) throw new ResponseStatusException(BAD_REQUEST, "reason은 필수");
 
         boolean exists = productReviewRepository.existsSellerReview(reviewId, sellerId);
-
-        System.out.println("====== REVIEW REPORT DEBUG ======");
-        System.out.println("sellerId(from token) = " + sellerId);
-        System.out.println("reviewId(path)       = " + reviewId);
-        System.out.println("existsSellerReview   = " + exists);
-        System.out.println("=================================");
 
         if (!exists) {
             throw new ResponseStatusException(FORBIDDEN, "본인 상품 리뷰만 신고 접수 가능");

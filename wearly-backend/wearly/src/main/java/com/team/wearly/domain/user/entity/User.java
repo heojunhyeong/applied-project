@@ -72,4 +72,9 @@ public class User {
         this.userEmail = userEmail;
         this.userNickname = userNickname;
     }
+
+    // 패스워드 재설정 메서드
+    public void changePassword(String encryptedPassword) {
+        this.userPassword = encryptedPassword;
+    }
 }

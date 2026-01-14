@@ -16,12 +16,29 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  frontend-url: http://localhost:8080
+
 
 payment:
   toss:
     secret-key: "test_sk_ZLKGPx4M3MnpbbMpP9KEVBaWypv1"
     client-key: "test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml"
+
 
 server:
   port: 8080

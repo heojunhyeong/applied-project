@@ -21,12 +21,14 @@ public record SellerProductUpsertRequest(
         @Min(value = 0, message = "재고는 0 이상이어야 합니다.")
         Long stockQuantity,
 
-        @NotBlank(message = "설명은 필수입니다.")
-        @Size(max = 2000, message = "설명은 2000자 이내여야 합니다.")
+        // [수정] 설명 -> 상세 이미지 URL로 용도 변경
+        @NotBlank(message = "상세 설명 이미지는 필수입니다.")
+        @Size(max = 2000, message = "상세 이미지 URL은 2000자 이내여야 합니다.")
         String description,
 
-        @NotBlank(message = "이미지 URL은 필수입니다.")
-        @Size(max = 1000, message = "이미지 URL은 1000자 이내여야 합니다.")
+        // [수정] 썸네일 이미지
+        @NotBlank(message = "썸네일 이미지는 필수입니다.")
+        @Size(max = 1000, message = "썸네일 이미지 URL은 1000자 이내여야 합니다.")
         String imageUrl,
 
         @NotNull(message = "브랜드는 필수입니다.")

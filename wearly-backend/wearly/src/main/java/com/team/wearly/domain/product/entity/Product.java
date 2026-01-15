@@ -34,7 +34,8 @@ public class Product {
     @Column(nullable = true)
     private Long stockQuantity;
 
-    @Column(nullable = false)
+    // TEXT 타입을 사용하여 긴 URL도 안전하게 저장
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @CreatedDate

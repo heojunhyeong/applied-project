@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
         private Long id;
 
         private String orderId;
+        private Long productId;
         private Long sellerId;
         private Long totalAmount;
         private Long commission;

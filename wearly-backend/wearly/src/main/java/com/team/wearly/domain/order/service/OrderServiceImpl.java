@@ -5,14 +5,12 @@ import com.team.wearly.domain.coupon.entity.enums.CouponType;
 import com.team.wearly.domain.coupon.repository.UserCouponRepository;
 import com.team.wearly.domain.order.dto.response.OrderDetailResponse;
 import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
-import com.team.wearly.domain.order.entity.Cart;
-import com.team.wearly.domain.order.entity.Order;
-import com.team.wearly.domain.order.entity.OrderDelivery;
-import com.team.wearly.domain.order.entity.OrderDetail;
+import com.team.wearly.domain.order.entity.*;
 import com.team.wearly.domain.order.entity.dto.request.OrderCreateRequest;
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
 import com.team.wearly.domain.order.repository.CartRepository;
 import com.team.wearly.domain.order.repository.OrderRepository;
+import com.team.wearly.domain.payment.service.SettlementService;
 import com.team.wearly.domain.product.entity.Product;
 import com.team.wearly.domain.product.repository.ProductRepository;
 import com.team.wearly.domain.review.entity.ProductReview;
@@ -37,7 +35,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
-    private final UserCouponRepository  userCouponRepository;
+    private final UserCouponRepository userCouponRepository;
+    private final SettlementService settlementService;
 
     /**
      * 주문 로직
@@ -45,8 +44,9 @@ public class OrderServiceImpl implements OrderService {
      * 최초 주문 상태는 {@link OrderStatus#BEFORE_PAID} 로 설정된다
      * 단일 주문 상품 정보(사이트에서 주문하기 클릭)시 바로 구매로 우선 처리하고
      * 단일 주문 상품 정보가 없을 시 장바구니 구매로 처리한다
-     *
+     * <p>
      * TODO: 주석 보완 필요
+     *
      * @param request 주문 생성을 위한 요청 객체
      *                - userId: 주문을 생성하는 사용자 ID
      * @return 생성되어 저장된 Order 엔티티
@@ -122,12 +122,16 @@ public class OrderServiceImpl implements OrderService {
             }
 
             for (Cart cart : selectedCarts) {
-
                 OrderDetail detail = OrderDetail.builder()
                         .quantity(cart.getQuantity())
                         .price(cart.getProduct().getPrice())
                         .product(cart.getProduct())
                         .sellerId(cart.getProduct().getSellerId())
+                        .detailStatus(OrderStatus.BEFORE_PAID) // 초기 상태 명시
+                        .build();
+
+                OrderDeliveryDetail deliveryDetail = OrderDeliveryDetail.builder()
+                        .orderDetail(detail)
                         .build();
                 order.addOrderDetail(detail);
             }
@@ -208,5 +212,39 @@ public class OrderServiceImpl implements OrderService {
                             .build();
                 }).collect(Collectors.toList()))
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void confirmPurchase(Long userId, String orderId, Long orderDetailId) {
+        Order order = orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
+
+        if (!order.getUserId().equals(userId)) {
+            throw new SecurityException("본인의 주문만 구매 확정할 수 있습니다.");
+        }
+
+        OrderDetail targetDetail = order.getOrderDetails().stream()
+                .filter(d -> d.getId().equals(orderDetailId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 상품 상세 내역이 없습니다."));
+
+        if (targetDetail.getDetailStatus() != OrderStatus.DELIVERY_COMPLETED) {
+            throw new IllegalStateException("배송 완료된 상품만 구매 확정이 가능합니다.");
+        }
+
+        targetDetail.updateDetailStatus(OrderStatus.PURCHASE_CONFIRMED);
+
+        settlementService.markItemAsSettlementTarget(
+                orderId,                       // String
+                targetDetail.getSellerId(),    // Long
+                targetDetail.getProduct().getId() // Long
+        );
+
+        boolean allConfirmed = order.getOrderDetails().stream()
+                .allMatch(d -> d.getDetailStatus() == OrderStatus.PURCHASE_CONFIRMED);
+        if (allConfirmed) {
+            order.updateStatus(OrderStatus.PURCHASE_CONFIRMED);
+        }
     }
 }

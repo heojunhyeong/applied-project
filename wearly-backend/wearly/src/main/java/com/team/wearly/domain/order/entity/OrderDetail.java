@@ -34,6 +34,14 @@ public class OrderDetail {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToOne(mappedBy = "orderDetail", cascade = CascadeType.ALL)
+    private OrderDeliveryDetail deliveryDetail;
+
+    public void setDeliveryDetail(OrderDeliveryDetail deliveryDetail) {
+        this.deliveryDetail = deliveryDetail;
+        deliveryDetail.assignOrderDetail(this);
+    }
+
     // Order 엔티티에서 호출할 내부용 메서드
     protected void assignOrder(Order order) {
         this.order = order;

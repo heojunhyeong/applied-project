@@ -15,5 +15,5 @@ public interface OrderService {
 
     public OrderDetailResponse getOrderDetail(String orderId);
 
-
+    public void confirmPurchase(Long userId, String orderId, Long orderDetailId);
 }

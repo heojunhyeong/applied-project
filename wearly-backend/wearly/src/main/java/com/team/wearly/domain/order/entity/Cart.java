@@ -24,6 +24,7 @@ public class Cart {
     private Long quantity;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Size size;
 
     @ManyToOne(fetch = FetchType.LAZY)

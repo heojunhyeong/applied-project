@@ -37,6 +37,9 @@ public record SellerProductUpsertRequest(
         @NotNull(message = "카테고리는 필수입니다.")
         ProductCategory productCategory,
 
+        @NotNull(message = "사이즈는 최소 1개 이상 선택해야 합니다.")
+        List<Size> sizes,
+
         @NotNull(message = "상태 선택은 필수입니다.")
         ProductStatus status
 ) {}

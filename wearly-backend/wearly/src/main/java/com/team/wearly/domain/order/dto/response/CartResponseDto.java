@@ -28,6 +28,7 @@ public class CartResponseDto {
                 .productName(cart.getProduct().getProductName())
                 .price(cart.getProduct().getPrice())
                 .quantity(cart.getQuantity())
+                .size(cart.getSize())
                 .imageUrl(cart.getProduct().getImageUrl())
                 .build();
     }

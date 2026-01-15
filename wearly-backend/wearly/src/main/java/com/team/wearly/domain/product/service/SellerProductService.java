@@ -10,6 +10,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -36,6 +37,7 @@ public class SellerProductService {
                 .brand(request.brand())
                 .productCategory(request.productCategory())
                 .status(ProductStatus.ON_SALE) // 등록 기본값
+                .availableSizes(new HashSet<>(request.sizes())) // [수정] 리스트를 Set으로 변환 저장
                 .build();
 
         Product saved = sellerProductRepository.save(product);
@@ -72,7 +74,8 @@ public class SellerProductService {
                 request.imageUrl().trim(),
                 request.brand(),
                 request.productCategory(),
-                request.status()
+                request.status(),
+                new HashSet<>(request.sizes()) //사이즈 목록 업데이트
         );
 
         return SellerProductResponse.from(product);

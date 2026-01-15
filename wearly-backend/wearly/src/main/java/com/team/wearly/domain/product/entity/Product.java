@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.time.LocalDateTime;
 
@@ -54,8 +56,13 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductCategory productCategory;
 
+    //가능한 사이즈 목록 저장 (별도 테이블 자동 생성됨)
+    @ElementCollection(targetClass = Size.class)
+    @CollectionTable(name = "product_available_sizes", joinColumns = @JoinColumn(name = "product_id"))
     @Enumerated(EnumType.STRING)
-    private Size size;
+    @Column(name = "size")
+    @Builder.Default
+    private Set<Size> availableSizes = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -78,7 +85,8 @@ public class Product {
             String imageUrl,
             Brand brand,
             ProductCategory productCategory,
-            ProductStatus status
+            ProductStatus status,
+            Set<Size> availableSizes
     ) {
         this.productName = productName;
         this.price = price;
@@ -88,6 +96,7 @@ public class Product {
         this.brand = brand;
         this.productCategory = productCategory;
         this.status = status;
+        this.availableSizes = availableSizes;
     }
 
     public void softDelete() {

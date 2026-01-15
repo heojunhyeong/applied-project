@@ -4,10 +4,12 @@ import com.team.wearly.domain.product.entity.Product;
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
 import com.team.wearly.domain.product.entity.enums.ProductStatus;
+import com.team.wearly.domain.product.entity.enums.Size;
 import com.team.wearly.domain.review.dto.response.ReviewResponse; // [중요] 리뷰 DTO import
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public record SellerProductResponse(
         Long id,
@@ -19,6 +21,7 @@ public record SellerProductResponse(
         String imageUrl,
         Brand brand,
         ProductCategory productCategory,
+        Set<Size> availableSizes,
         ProductStatus status,
         LocalDateTime createdDate,
         LocalDateTime updatedDate,
@@ -67,6 +70,7 @@ public record SellerProductResponse(
                 p.getImageUrl(),
                 p.getBrand(),
                 p.getProductCategory(),
+                p.getAvailableSizes(),
                 p.getStatus(),
                 p.getCreatedDate(),
                 p.getUpdatedDate(),

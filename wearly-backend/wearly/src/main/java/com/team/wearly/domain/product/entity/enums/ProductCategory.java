@@ -13,8 +13,7 @@ public enum ProductCategory {
     SWEATSHIRT("맨투맨"),
     JEANS("청바지"),
     SHORTS("반바지"),
-    MUFFLER("머플러"),
-    SHOES("신발");
+    MUFFLER("머플러");
 
     private final String title;
 }

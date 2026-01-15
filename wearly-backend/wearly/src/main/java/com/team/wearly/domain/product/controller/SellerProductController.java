@@ -4,6 +4,8 @@ import com.team.wearly.domain.product.dto.request.SellerProductUpsertRequest;
 import com.team.wearly.domain.product.dto.response.SellerProductResponse;
 import com.team.wearly.domain.product.service.SellerProductService;
 import com.team.wearly.domain.user.entity.Seller;
+import com.team.wearly.global.service.S3Service;
+import com.team.wearly.global.util.PresignedUrlVo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class SellerProductController {
 
     private final SellerProductService sellerProductService;
+    private final S3Service s3Service;
 
     private Seller getSeller(Authentication authentication) {
         Object principal = authentication.getPrincipal();
@@ -82,5 +85,28 @@ public class SellerProductController {
         Seller seller = getSeller(authentication);
         sellerProductService.deleteMyProduct(seller.getId(), productId);
         return ResponseEntity.noContent().build();
+    }
+
+    //Presigned URL 발급 API 메서드 추가
+    @PostMapping("/presigned-url")
+    public ResponseEntity<PresignedUrlVo> getPresignedUrl(
+            @RequestParam String extension,
+            @RequestParam String type
+    ) {
+        String folderPath;
+
+        if ("THUMBNAIL".equalsIgnoreCase(type)) {
+            folderPath = "products/thumbnail";
+        } else if ("DESCRIPTION".equalsIgnoreCase(type)) {
+            folderPath = "products/description";
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 이미지 타입입니다: " + type);
+        }
+
+        // [수정됨] 서비스가 String[]을 반환하므로 배열로 받음
+        String[] result = s3Service.createProductPresignedUrl(folderPath, extension);
+
+        // 결과의 0번째는 URL, 1번째는 Key
+        return ResponseEntity.ok(new PresignedUrlVo(result[0], result[1]));
     }
 }

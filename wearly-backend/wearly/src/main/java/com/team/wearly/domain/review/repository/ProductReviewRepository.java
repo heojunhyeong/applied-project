@@ -14,6 +14,9 @@ import java.util.Optional;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
 
+    // 특정 상품의 리뷰를 페이징 처리해서 조회
+    Page<ProductReview> findByProductId(Long productId, Pageable pageable);
+
     // 1) 리뷰 목록: seller 기준 + (옵션) productId + (옵션) status
     @Query("""
         select r

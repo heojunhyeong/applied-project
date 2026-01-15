@@ -14,7 +14,6 @@ import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import com.team.wearly.domain.payment.infrastructure.toss.TossConfirmResponse;
 import com.team.wearly.domain.payment.infrastructure.toss.TossPaymentClient;
 import com.team.wearly.domain.payment.repository.PaymentRepository;
-import com.team.wearly.domain.payment.repository.SettlementRepository;
 import com.team.wearly.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,7 @@
 package com.team.wearly.domain.order.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team.wearly.domain.order.entity.enums.OrderStatus;
 import com.team.wearly.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,5 +37,12 @@ public class OrderDetail {
     // Order 엔티티에서 호출할 내부용 메서드
     protected void assignOrder(Order order) {
         this.order = order;
+    }
+
+    private OrderStatus detailStatus;
+
+    // 디테일 상태 변경 메서드
+    public void updateDetailStatus(OrderStatus nextStatus) {
+        this.detailStatus = nextStatus;
     }
 }

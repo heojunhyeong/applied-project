@@ -70,7 +70,7 @@ public class AdminOrderService {
                 .collect(Collectors.toList());
 
         // 배송 정보
-        AdminOrderResponse.DeliveryInfo deliveryInfo = buildDeliveryInfo(order.getOrderDelivery());
+        //AdminOrderResponse.DeliveryInfo deliveryInfo = buildDeliveryInfo(order.getOrderDelivery());
 
         return AdminOrderResponse.builder()
                 .orderId(order.getId())
@@ -87,7 +87,7 @@ public class AdminOrderService {
                 .isPaid(paymentInfo.getExists() && paymentInfo.getStatus() == PaymentStatus.DONE)
                 .paymentInfo(paymentInfo)
                 .orderItems(orderItems)
-                .deliveryInfo(deliveryInfo)
+                //.deliveryInfo(deliveryInfo)
                 .build();
     }
 
@@ -145,26 +145,26 @@ public class AdminOrderService {
                 .build();
     }
 
-    /**
-     * 배송 정보 구성
-     */
-    private AdminOrderResponse.DeliveryInfo buildDeliveryInfo(OrderDelivery delivery) {
-        if (delivery == null) {
-            return AdminOrderResponse.DeliveryInfo.builder()
-                    .address(null)
-                    .detailAddress(null)
-                    .zipCode(null)
-                    .carrier(null)
-                    .invoiceNumber(null)
-                    .build();
-        }
-
-        return AdminOrderResponse.DeliveryInfo.builder()
-                .address(delivery.getAddress())
-                .detailAddress(delivery.getDetail_address())
-                .zipCode(delivery.getZipCode())
-                .carrier(delivery.getCarrier() != null ? delivery.getCarrier().name() : null)
-                .invoiceNumber(delivery.getInvoiceNumber())
-                .build();
-    }
+//    /**
+//     * 배송 정보 구성
+//     */
+//    private AdminOrderResponse.DeliveryInfo buildDeliveryInfo(OrderDelivery delivery) {
+//        if (delivery == null) {
+//            return AdminOrderResponse.DeliveryInfo.builder()
+//                    .address(null)
+//                    .detailAddress(null)
+//                    .zipCode(null)
+//                    .carrier(null)
+//                    .invoiceNumber(null)
+//                    .build();
+//        }
+//
+//        return AdminOrderResponse.DeliveryInfo.builder()
+//                .address(delivery.getAddress())
+//                .detailAddress(delivery.getDetail_address())
+//                .zipCode(delivery.getZipCode())
+//                .carrier(delivery.getCarrier() != null ? delivery.getCarrier().name() : null)
+//                .invoiceNumber(delivery.getInvoiceNumber())
+//                .build();
+//    }
 }

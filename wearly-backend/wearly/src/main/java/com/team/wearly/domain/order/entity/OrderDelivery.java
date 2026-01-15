@@ -22,11 +22,6 @@ public class OrderDelivery {
     private String detail_address;
     private Long zipCode;
 
-    @Enumerated(EnumType.STRING)
-    private Carrier carrier;
-    //0으로 시작하는 송장번호 고려해 String으로 변경
-    private String invoiceNumber;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     @JsonIgnore
@@ -37,9 +32,4 @@ public class OrderDelivery {
         this.order = order;
     }
 
-    // 판매자용 : 택배사/송장번호만 ****
-    public void updateInvoice(Carrier carrier, String invoiceNumber) {
-        this.carrier = carrier;
-        this.invoiceNumber = invoiceNumber;
-    }
 }

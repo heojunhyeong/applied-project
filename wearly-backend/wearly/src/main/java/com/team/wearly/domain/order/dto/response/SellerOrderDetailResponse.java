@@ -8,14 +8,11 @@ import java.util.List;
 
 public record SellerOrderDetailResponse(
         String orderId,
-        OrderStatus orderStatus,
-
-        String userId,          // 구매자 로그인 아이디 (User.userName)
-        String userName,        // 구매자 닉네임 (User.userNickname)
-
-        Long totalPrice,
+        OrderStatus orderStatus,     // 셀러 기준 상태 (detailStatus)
+        String buyerLoginId,         // User.userName
+        String buyerNickname,        // User.userNickname
+        Long totalPrice,             // 셀러 기준 합계로 넣는 걸 추천
         LocalDateTime createdDate,
-
         Delivery delivery,
         List<Item> items
 ) {
@@ -28,10 +25,12 @@ public record SellerOrderDetailResponse(
     ) {}
 
     public record Item(
+            Long orderDetailId,
             Long productId,
             String productName,
             String imageUrl,
             Long quantity,
-            Long price
+            Long price,
+            OrderStatus detailStatus
     ) {}
 }

@@ -1,6 +1,7 @@
 package com.team.wearly.domain.order.entity;
 
 import com.team.wearly.domain.product.entity.Product;
+import com.team.wearly.domain.product.entity.enums.Size;
 import com.team.wearly.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,8 @@ public class Cart {
     @Column(nullable = true)
     private Long quantity;
 
+    @Enumerated(EnumType.STRING)
+    private Size size;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

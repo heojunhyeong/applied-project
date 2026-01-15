@@ -1,106 +1,105 @@
 .main-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  gap: 3rem;
-  padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px); /* 헤더 높이를 고려 */
+    gap: 3rem;
+    padding: 2rem;
+    margin-top: 60px; /* 40px -> 60px로 변경 (헤더 높이와 일치) */
 }
 
 .welcome-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .welcome-box {
-  background-color: #f0f0f0;
-  border-radius: 20px;
-  padding: 3rem 4rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    padding: 3rem 4rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
 }
 
 .welcome-text {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
 }
 
 .brands-container {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  justify-content: center;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .brand-button {
-  padding: 1.5rem 3rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border-radius: 15px;
-  border: 2px solid #333;
-  background-color: #fff;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 150px;
+    padding: 1.5rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 15px;
+    border: 2px solid #333;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
 }
 
 .brand-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  background-color: #333;
-  color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background-color: #333;
+    color: #fff;
 }
 
 .brand-button:active {
-  transform: translateY(-1px);
+    transform: translateY(-1px);
 }
 
-/* 다크 모드 대응 */
 @media (prefers-color-scheme: dark) {
-  .welcome-box {
-    background-color: #2a2a2a;
-  }
+    .welcome-box {
+        background-color: #2a2a2a;
+    }
 
-  .welcome-text {
-    color: rgba(255, 255, 255, 0.87);
-  }
+    .welcome-text {
+        color: rgba(255, 255, 255, 0.87);
+    }
 
-  .brand-button {
-    background-color: #1a1a1a;
-    color: rgba(255, 255, 255, 0.87);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
+    .brand-button {
+        background-color: #1a1a1a;
+        color: rgba(255, 255, 255, 0.87);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
 
-  .brand-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
+    .brand-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
 }
 
-/* 반응형 디자인 */
 @media (max-width: 768px) {
-  .welcome-box {
-    padding: 2rem 2.5rem;
-  }
+    .welcome-box {
+        padding: 2rem 2.5rem;
+    }
 
-  .welcome-text {
-    font-size: 1.5rem;
-  }
+    .welcome-text {
+        font-size: 1.5rem;
+    }
 
-  .brands-container {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
-  }
+    .brands-container {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+    }
 
-  .brand-button {
-    width: 100%;
-  }
+    .brand-button {
+        width: 100%;
+    }
 }

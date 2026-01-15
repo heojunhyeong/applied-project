@@ -31,7 +31,7 @@ public class Order extends BaseTimeEntity {
     private String orderId;
 
     private Long userId;
-    private Long sellerId;   // 추가
+    //private Long sellerId;
 
     private Long totalPrice;
 
@@ -84,43 +84,16 @@ public class Order extends BaseTimeEntity {
             }
         }
 
-        // PAID -> WAIT_CHECK or CANCELLED(선택)
-        else if (this.orderStatus == OrderStatus.PAID) {
-            if (nextStatus != OrderStatus.WAIT_CHECK && nextStatus != OrderStatus.CANCELLED) {
-                throw new IllegalStateException("PAID 상태에서는 WAIT_CHECK(또는 CANCELLED)로만 변경할 수 있습니다.");
-            }
-        }
-
-        // WAIT_CHECK -> CHECK
-        else if (this.orderStatus == OrderStatus.WAIT_CHECK) {
-            if (nextStatus != OrderStatus.CHECK) {
-                throw new IllegalStateException("WAIT_CHECK 상태에서는 CHECK로만 변경할 수 있습니다.");
-            }
-        }
-
-        // CHECK -> IN_DELIVERY
-        else if (this.orderStatus == OrderStatus.CHECK) {
-            if (nextStatus != OrderStatus.IN_DELIVERY) {
-                throw new IllegalStateException("CHECK 상태에서는 IN_DELIVERY로만 변경할 수 있습니다.");
-            }
-        }
-
-        // IN_DELIVERY -> DELIVERY_COMPLETED
-        else if (this.orderStatus == OrderStatus.IN_DELIVERY) {
-            if (nextStatus != OrderStatus.DELIVERY_COMPLETED) {
-                throw new IllegalStateException("IN_DELIVERY 상태에서는 DELIVERY_COMPLETED로만 변경할 수 있습니다.");
-            }
-        }
-
-        // DELIVERY_COMPLETED / CANCELLED -> 변경 불가
-        else if (this.orderStatus == OrderStatus.DELIVERY_COMPLETED || this.orderStatus == OrderStatus.CANCELLED) {
-            throw new IllegalStateException("최종 상태에서는 변경할 수 없습니다.");
-        }
-
-        else {
-            throw new IllegalArgumentException("허용되지 않은 주문 상태 변경입니다.");
-        }
-
         this.orderStatus = nextStatus;
+
+        // 결제까지는 OrderDetail 상태도 같이 동기화
+        syncAllDetailStatus(nextStatus);
+    }
+
+    private void syncAllDetailStatus(OrderStatus status) {
+        if (this.orderDetails == null) return;
+        for (OrderDetail detail : this.orderDetails) {
+            detail.updateDetailStatus(status);
+        }
     }
 }

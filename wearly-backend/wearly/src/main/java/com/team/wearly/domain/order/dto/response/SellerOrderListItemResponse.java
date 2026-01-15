@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record SellerOrderListItemResponse(
         String orderId,
-        String userName,        // 구매자 닉네임 (User.userNickname)
+        String buyerNickname,        // User.userNickname
         OrderStatus orderStatus,
         Long totalPrice,
         Long itemCount,

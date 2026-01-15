@@ -1,0 +1,66 @@
+.header {
+    width: 100%;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    height: 60px; /* 명확한 높이 지정 */
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem; /* 상하 패딩 제거 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.logo {
+    font-size: 1.5rem; /* 1rem -> 1.5rem으로 증가 */
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    line-height: 1;
+}
+
+.logo:hover {
+    color: #007bff;
+}
+
+.header-nav {
+    display: flex;
+    gap: 0.75rem; /* 0.5rem -> 0.75rem으로 증가 */
+    align-items: center;
+    height: 100%;
+}
+
+.header-button {
+    padding: 0.5rem 1rem; /* 0.25rem 0.6rem -> 0.5rem 1rem으로 증가 */
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem; /* 0.8rem -> 0.95rem으로 증가 */
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    height: fit-content;
+    line-height: 1.2;
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+.header-button:hover {
+    background-color: #f5f5f5;
+    border-color: #007bff;
+    color: #007bff;
+}

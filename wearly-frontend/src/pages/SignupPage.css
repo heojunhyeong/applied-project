@@ -1,0 +1,125 @@
+.signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 60px); /* 헤더 높이를 고려 */
+    padding: 20px;
+    margin-top: 60px; /* 40px -> 60px로 변경 (헤더 높이와 일치) */
+}
+
+.signup-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.signup-box h2 {
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.error-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #dc3545;
+}
+
+.error-message {
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    color: #721c24;
+    font-size: 14px;
+    text-align: center;
+}
+
+.signup-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.signup-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.signup-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.signup-link {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.signup-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+.required {
+    color: #dc3545;
+}
+
+.char-count {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+}
+
+.form-group input:focus + .error-text + .char-count,
+.form-group input:focus ~ .char-count {
+    color: #007bff;
+}

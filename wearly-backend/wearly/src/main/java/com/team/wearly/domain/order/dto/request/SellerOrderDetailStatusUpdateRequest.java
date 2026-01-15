@@ -3,6 +3,6 @@ package com.team.wearly.domain.order.dto.request;
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
 import jakarta.validation.constraints.NotNull;
 
-public record SellerOrderStatusUpdateRequest(
+public record SellerOrderDetailStatusUpdateRequest(
         @NotNull OrderStatus nextStatus
 ) {}

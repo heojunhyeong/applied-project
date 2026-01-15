@@ -11,19 +11,16 @@ import java.util.Optional;
 
 public interface SellerOrderRepository extends JpaRepository<Order, Long> {
 
-    /** 판매자 주문 목록 (최신순은 pageable sort로) */
+    // 판매자 주문 목록 (최신순)
     Page<Order> findBySellerId(Long sellerId, Pageable pageable);
 
-    /** 판매자 주문 목록 + 상태 필터 */
+    // 판매자 주문 목록 + 상태 필터
     Page<Order> findBySellerIdAndOrderStatus(Long sellerId, OrderStatus orderStatus, Pageable pageable);
 
-    /** 판매자 주문 상세 (외부노출용 orderId 기준) */
+    // 판매자 주문 상세
     Optional<Order> findByOrderIdAndSellerId(String orderId, Long sellerId);
 
-    /**
-     * (선택) 주문 상세 한 방에 fetch join (N+1 보이면 이걸로 교체)
-     * - orderDetails, product, delivery 같이 가져옴
-     */
+    // orderDetails, product, delivery 같이 가져옴
     @Query("""
         select distinct o
         from Order o

@@ -36,4 +36,10 @@ public class OrderDelivery {
     protected void assignOrder(Order order) {
         this.order = order;
     }
+
+    // 판매자용 : 택배사/송장번호만 ****
+    public void updateInvoice(Carrier carrier, String invoiceNumber) {
+        this.carrier = carrier;
+        this.invoiceNumber = invoiceNumber;
+    }
 }

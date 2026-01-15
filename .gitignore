@@ -11,3 +11,9 @@ target/
 build/
 node_modules/.env
 .env
+
+#라이브러리 제외
+node_modules/
+**/node_modules/
+dist/
+.DS_Store

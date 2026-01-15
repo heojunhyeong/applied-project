@@ -1,5 +1,6 @@
 package com.team.wearly.domain.order.entity.dto.request;
 
+import com.team.wearly.domain.product.entity.enums.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class OrderCreateRequest {
     private String address;
     private String detailAddress;
     private Long zipCode;
+    private Size size;
 
     private Long userCouponId;
 }

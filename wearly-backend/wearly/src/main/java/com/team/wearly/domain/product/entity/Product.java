@@ -3,6 +3,7 @@ package com.team.wearly.domain.product.entity;
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
 import com.team.wearly.domain.product.entity.enums.ProductStatus;
+import com.team.wearly.domain.product.entity.enums.Size;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,6 +53,9 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     private ProductCategory productCategory;
+
+    @Enumerated(EnumType.STRING)
+    private Size size;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

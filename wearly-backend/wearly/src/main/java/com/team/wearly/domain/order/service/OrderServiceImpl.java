@@ -110,6 +110,7 @@ public class OrderServiceImpl implements OrderService {
                     .quantity(request.getQuantity())
                     .price(product.getPrice())
                     .product(product)
+                    .size(product.getSize())
                     .sellerId(product.getSellerId())
                     .build();
             order.addOrderDetail(detail);
@@ -127,6 +128,7 @@ public class OrderServiceImpl implements OrderService {
                         .price(cart.getProduct().getPrice())
                         .product(cart.getProduct())
                         .sellerId(cart.getProduct().getSellerId())
+                        .size(cart.getSize())
                         .detailStatus(OrderStatus.BEFORE_PAID) // 초기 상태 명시
                         .build();
 

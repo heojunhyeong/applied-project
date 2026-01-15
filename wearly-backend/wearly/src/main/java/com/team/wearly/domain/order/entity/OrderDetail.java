@@ -3,6 +3,7 @@ package com.team.wearly.domain.order.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
 import com.team.wearly.domain.product.entity.Product;
+import com.team.wearly.domain.product.entity.enums.Size;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +37,9 @@ public class OrderDetail {
 
     @OneToOne(mappedBy = "orderDetail", cascade = CascadeType.ALL)
     private OrderDeliveryDetail deliveryDetail;
+
+    @Enumerated(EnumType.STRING)
+    private Size size;
 
     public void setDeliveryDetail(OrderDeliveryDetail deliveryDetail) {
         this.deliveryDetail = deliveryDetail;

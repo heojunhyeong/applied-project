@@ -1,6 +1,7 @@
 package com.team.wearly.domain.order.dto.response;
 
 import com.team.wearly.domain.order.entity.Cart;
+import com.team.wearly.domain.product.entity.enums.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class CartResponseDto {
     private String productName;
     private Long price;
     private Long quantity;
+    private Size size;
     private String imageUrl;
 
     public static CartResponseDto from(Cart cart) {

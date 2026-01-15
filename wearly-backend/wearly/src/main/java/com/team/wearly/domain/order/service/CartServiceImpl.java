@@ -46,8 +46,17 @@ public class CartServiceImpl implements CartService{
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다."));
 
-        // 이미 장바구니에 있는 상품인지 확인
-        Optional<Cart> existingCart = cartRepository.findByUserIdAndProductId(userId, requestDto.getProductId());
+        // 사이즈 유효성 검증
+        if (!product.getAvailableSizes().contains(requestDto.getSize())) {
+            throw new IllegalArgumentException("해당 상품에 존재하지 않는 사이즈입니다: " + requestDto.getSize());
+        }
+
+        // 이미 장바구니에 있는 상품인지 확인 (상품 ID + 사이즈까지 체크해야 함!)
+        Optional<Cart> existingCart = cartRepository.findByUserIdAndProductIdAndSize(
+                userId,
+                requestDto.getProductId(),
+                requestDto.getSize()
+        );
 
         Cart cart;
         if (existingCart.isPresent()) {
@@ -61,6 +70,7 @@ public class CartServiceImpl implements CartService{
                     .quantity(requestDto.getQuantity())
                     .user(user)
                     .product(product)
+                    .size(requestDto.getSize())
                     .build();
         }
 

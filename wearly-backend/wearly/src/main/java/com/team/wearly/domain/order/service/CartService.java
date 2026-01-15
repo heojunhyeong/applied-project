@@ -13,7 +13,7 @@ public interface CartService {
     CartResponseDto addCart(Long userId, CartRequestDto requestDto);
 
     // 장바구니 상품 삭제
-    void deleteCartItem(Long userId, Long productId);
+    void deleteCartItem(Long userId, Long cartId);
 
     // 장바구니 전체 비우기
     void clearCart(Long userId);

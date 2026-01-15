@@ -102,6 +102,11 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(request.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. ID: " + request.getProductId()));
 
+            // 사용자가 요청한 사이즈가 해당 상품의 판매 가능 목록에 없으면 예외 발생 추가
+            if (!product.getAvailableSizes().contains(request.getSize())) {
+                throw new IllegalArgumentException("해당 상품에서 선택할 수 없는 사이즈입니다: " + request.getSize());
+            }
+
             if (product.getStockQuantity() < request.getQuantity()) {
                 throw new IllegalStateException("상품 재고가 부족합니다.");
             }
@@ -110,7 +115,7 @@ public class OrderServiceImpl implements OrderService {
                     .quantity(request.getQuantity())
                     .price(product.getPrice())
                     .product(product)
-                    .size(product.getSize())
+                    .size(request.getSize())
                     .sellerId(product.getSellerId())
                     .build();
             order.addOrderDetail(detail);
@@ -210,6 +215,7 @@ public class OrderServiceImpl implements OrderService {
                             .quantity(item.getQuantity())
                             .price(item.getPrice())
                             .imageUrl(item.getProduct().getImageUrl())
+                            .size(item.getSize())
                             .reviewId(review.map(ProductReview::getId).orElse(null))
                             .build();
                 }).collect(Collectors.toList()))

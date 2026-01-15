@@ -2,7 +2,9 @@ package com.team.wearly.domain.user.controller;
 
 import com.team.wearly.domain.user.dto.request.UpdateSellerRequest;
 import com.team.wearly.domain.user.dto.request.UpdateUserRequest;
+import com.team.wearly.domain.user.dto.response.AdminSellerResponse;
 import com.team.wearly.domain.user.dto.response.UserAdminResponse;
+import com.team.wearly.domain.user.entity.enums.UserRole;
 import com.team.wearly.domain.user.service.AdminUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +22,47 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
 
     /**
-     * 관리자용 회원 목록 조회 API
-     * * [사용 예시]
-     * 1. 전체 조회: GET /api/admin/users
-     * 2. 검색 조회: GET /api/admin/users?keyword=~~~
+     * 관리자용 회원 목록 조회 API (User/Seller 필터링 지원)
+     * [사용 예시]
+     * 1. 전체 User 조회: GET /api/admin/users
+     * 2. User만 조회: GET /api/admin/users?userType=USER
+     * 3. Seller만 조회: GET /api/admin/users?userType=SELLER
+     * 4. 검색 조회: GET /api/admin/users?keyword=홍길동
+     * 5. User 검색: GET /api/admin/users?userType=USER&keyword=홍길동
+     * 6. Seller 검색: GET /api/admin/users?userType=SELLER&keyword=홍길동
      */
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<UserAdminResponse>> getUsers(
-            @RequestParam(required = false) String keyword) {
+    public ResponseEntity<?> getUsers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UserRole userType) {
 
-        List<UserAdminResponse> response = adminUserService.getUsers(keyword);
+        // userType이 없으면 기존처럼 User만 반환 (하위 호환성)
+        if (userType == null || userType == UserRole.USER) {
+            List<UserAdminResponse> response = adminUserService.getUsers(keyword);
+            return ResponseEntity.ok(response);
+        } else if (userType == UserRole.SELLER) {
+            List<AdminSellerResponse> response = adminUserService.getSellers(keyword);
+            return ResponseEntity.ok(response);
+        } else {
+            // ADMIN은 조회하지 않음
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * 관리자용 특정 회원 상세 조회 API
+     * [사용 예시]
+     * 1. User 상세 조회: GET /api/admin/users/{userId}?userType=USER
+     * 2. Seller 상세 조회: GET /api/admin/users/{userId}?userType=SELLER
+     */
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> getUser(
+            @PathVariable Long userId,
+            @RequestParam UserRole userType) {
+
+        Object response = adminUserService.getUser(userId, userType);
         return ResponseEntity.ok(response);
     }
 

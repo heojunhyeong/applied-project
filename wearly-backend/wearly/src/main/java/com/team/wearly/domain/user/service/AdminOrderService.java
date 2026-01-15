@@ -8,6 +8,7 @@ import com.team.wearly.domain.order.repository.OrderRepository;
 import com.team.wearly.domain.payment.entity.Payment;
 import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import com.team.wearly.domain.payment.repository.PaymentRepository;
+import com.team.wearly.domain.user.dto.response.AdminOrderListResponse;
 import com.team.wearly.domain.user.dto.response.AdminOrderResponse;
 import com.team.wearly.domain.user.entity.User;
 import com.team.wearly.domain.user.repository.UserRepository;
@@ -29,11 +30,11 @@ public class AdminOrderService {
     private final UserRepository userRepository;
 
     /**
-     * 관리자용 주문 내역 조회 (검색 기능 포함)
+     * 관리자용 주문 내역 조회 (검색 기능 포함) - 간단한 정보만 반환
      * @param nickname User 닉네임 (검색어, null이면 전체 조회)
-     * @return 주문 내역 리스트
+     * @return 주문 내역 리스트 (주문id, 주문번호, 회원id, 결제내역 O/X)
      */
-    public List<AdminOrderResponse> getOrders(String nickname) {
+    public List<AdminOrderListResponse> getOrders(String nickname) {
         List<Order> orders;
 
         if (nickname != null && !nickname.isBlank()) {
@@ -45,8 +46,37 @@ public class AdminOrderService {
         }
 
         return orders.stream()
-                .map(this::convertToAdminOrderResponse)
+                .map(this::convertToAdminOrderListResponse)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 관리자용 주문 상세 조회
+     * @param orderId 주문 ID
+     * @return 주문 상세 정보
+     */
+    public AdminOrderResponse getOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
+        
+        return convertToAdminOrderResponse(order);
+    }
+
+    /**
+     * Order 엔티티를 AdminOrderListResponse로 변환 (간단한 정보만)
+     */
+    private AdminOrderListResponse convertToAdminOrderListResponse(Order order) {
+        // 결제 정보 조회
+        Optional<Payment> paymentOpt = paymentRepository.findByOrderId(order.getOrderId());
+        boolean isPaid = paymentOpt.isPresent() && paymentOpt.get().getStatus() == PaymentStatus.DONE;
+        String paymentStatus = isPaid ? "O" : "X";
+
+        return AdminOrderListResponse.builder()
+                .orderId(order.getId())
+                .orderNumber(order.getOrderId())
+                .userId(order.getUserId())
+                .paymentStatus(paymentStatus)
+                .build();
     }
 
     /**
@@ -70,7 +100,7 @@ public class AdminOrderService {
                 .collect(Collectors.toList());
 
         // 배송 정보
-        //AdminOrderResponse.DeliveryInfo deliveryInfo = buildDeliveryInfo(order.getOrderDelivery());
+        //AdminOrderResponse.DeliveryInfo deliveryInfo = buildDeliveryInfo(order.getOrderDelivery(), order.getOrderDetails());
 
         return AdminOrderResponse.builder()
                 .orderId(order.getId())
@@ -148,7 +178,7 @@ public class AdminOrderService {
 //    /**
 //     * 배송 정보 구성
 //     */
-//    private AdminOrderResponse.DeliveryInfo buildDeliveryInfo(OrderDelivery delivery) {
+//    private AdminOrderResponse.DeliveryInfo buildDeliveryInfo(OrderDelivery delivery, List<OrderDetail> orderDetails) {
 //        if (delivery == null) {
 //            return AdminOrderResponse.DeliveryInfo.builder()
 //                    .address(null)
@@ -159,12 +189,25 @@ public class AdminOrderService {
 //                    .build();
 //        }
 //
+//        // 첫 번째 OrderDetail의 OrderDeliveryDetail에서 carrier와 invoiceNumber 가져오기
+//        String carrier = null;
+//        String invoiceNumber = null;
+//        
+//        if (orderDetails != null && !orderDetails.isEmpty()) {
+//            OrderDetail firstDetail = orderDetails.get(0);
+//            if (firstDetail.getDeliveryDetail() != null) {
+//                OrderDeliveryDetail deliveryDetail = firstDetail.getDeliveryDetail();
+//                carrier = deliveryDetail.getCarrier() != null ? deliveryDetail.getCarrier().name() : null;
+//                invoiceNumber = deliveryDetail.getInvoiceNumber();
+//            }
+//        }
+//
 //        return AdminOrderResponse.DeliveryInfo.builder()
 //                .address(delivery.getAddress())
 //                .detailAddress(delivery.getDetail_address())
 //                .zipCode(delivery.getZipCode())
-//                .carrier(delivery.getCarrier() != null ? delivery.getCarrier().name() : null)
-//                .invoiceNumber(delivery.getInvoiceNumber())
+//                .carrier(carrier)
+//                .invoiceNumber(invoiceNumber)
 //                .build();
 //    }
 }

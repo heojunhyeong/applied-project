@@ -8,6 +8,7 @@ import com.team.wearly.domain.payment.repository.SettlementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -63,5 +64,15 @@ public class SettlementService {
     public void cancelSettlement(String orderId) {
         List<Settlement> settlements = settlementRepository.findAllByOrderId(orderId);
         settlements.forEach(s -> s.updateStatus(SettlementStatus.CANCELLED));
+    }
+
+
+    @Transactional
+    public void markItemAsSettlementTarget(String orderId, Long sellerId, Long productId) {
+        Settlement settlement = settlementRepository.findByOrderIdAndSellerIdAndProductId(orderId, sellerId, productId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 상품에 대한 정산 데이터를 찾을 수 없습니다."));
+
+        settlement.updateStatus(SettlementStatus.CONFIRMED);
+
     }
 }

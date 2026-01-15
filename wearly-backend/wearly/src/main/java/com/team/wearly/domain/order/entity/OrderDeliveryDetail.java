@@ -27,7 +27,7 @@ public class OrderDeliveryDetail {
     @JsonIgnore
     private OrderDetail orderDetail;
 
-    protected void assignOrderDetail(OrderDetail orderDetail) {
+    public void assignOrderDetail(OrderDetail orderDetail) {
         this.orderDetail = orderDetail;
     }
 

@@ -1,28 +1,39 @@
 package com.team.wearly.domain.order.service;
 
 import com.team.wearly.domain.order.dto.request.SellerOrderDeliveryUpdateRequest;
-import com.team.wearly.domain.order.dto.request.SellerOrderStatusUpdateRequest;
+import com.team.wearly.domain.order.dto.request.SellerOrderDetailStatusUpdateRequest;
+import com.team.wearly.domain.order.dto.response.SellerOrderDetailListResponse;
 import com.team.wearly.domain.order.dto.response.SellerOrderDetailResponse;
-import com.team.wearly.domain.order.dto.response.SellerOrderListItemResponse;
-import com.team.wearly.domain.order.entity.Order;
-import com.team.wearly.domain.order.entity.OrderDelivery;
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
-import com.team.wearly.domain.order.repository.SellerOrderDeliveryRepository;
-import com.team.wearly.domain.order.repository.SellerOrderRepository;
-import com.team.wearly.domain.user.entity.User;
-import com.team.wearly.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+public interface SellerOrderService {
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class SellerOrderService {
+    // 판매자 주문 목록 (OrderDetail 기준)
+    Page<SellerOrderDetailListResponse> getSellerOrderDetails(
+            Long sellerId,
+            OrderStatus status,
+            Pageable pageable
+    );
 
+    // 판매자 주문 단건 상세
+    SellerOrderDetailResponse getSellerOrderDetail(
+            Long sellerId,
+            Long orderDetailId
+    );
+
+    // 송장 / 택배사 입력
+    void updateDelivery(
+            Long sellerId,
+            Long orderDetailId,
+            SellerOrderDeliveryUpdateRequest request
+    );
+
+    // 주문 상태 변경 (WAIT_CHECK 이후부터 판매자 권한)
+    void updateStatus(
+            Long sellerId,
+            Long orderDetailId,
+            SellerOrderDetailStatusUpdateRequest request
+    );
 }

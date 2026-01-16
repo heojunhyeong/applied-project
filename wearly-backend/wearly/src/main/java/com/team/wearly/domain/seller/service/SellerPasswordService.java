@@ -16,6 +16,17 @@ public class SellerPasswordService {
     private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+    /**
+     * 기존 비밀번호 일치 여부를 확인하고, 신규 비밀번호와 확인용 비밀번호가 일치할 경우 암호화하여 변경함
+     *
+     * @param sellerId 비밀번호를 변경할 판매자 식별자
+     * @param request 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인 값이 포함된 DTO
+     * @throws IllegalArgumentException 판매자가 존재하지 않거나, 현재 비밀번호 불일치, 또는 새 비밀번호 확인이 불일치할 경우 발생
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
+     */
     public void changePassword(Long sellerId, SellerPasswordChangeRequest request) {
         Seller seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다."));

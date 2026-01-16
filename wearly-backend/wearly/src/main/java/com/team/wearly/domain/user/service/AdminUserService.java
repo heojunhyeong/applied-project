@@ -24,8 +24,13 @@ public class AdminUserService {
     private final SellerRepository sellerRepository;
 
     /**
-     * 회원 목록 조회 (검색 기능 포함)
-     * keyword가 있으면 검색, 없으면 전체 조회
+     * 전체 일반 사용자 목록을 조회하거나 키워드를 통해 특정 사용자를 검색함
+     *
+     * @param keyword 검색어 (닉네임, 이메일 등)
+     * @return 관리자용 사용자 정보 응답 DTO 리스트
+     * @author 김지번
+     * @DateOfCreated 2026-01-11
+     * @DateOfEdit 2026-01-11
      */
     public List<UserAdminResponse> getUsers(String keyword) {
         List<User> users;
@@ -43,9 +48,15 @@ public class AdminUserService {
                 .toList();
     }
 
+
     /**
-     * 판매자 목록 조회 (검색 기능 포함)
-     * keyword가 있으면 검색, 없으면 전체 조회
+     * 전체 판매자 목록을 조회하거나 키워드를 통해 특정 판매자를 검색함
+     *
+     * @param keyword 검색어 (브랜드명, 닉네임 등)
+     * @return 관리자용 판매자 정보 응답 DTO 리스트
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     public List<AdminSellerResponse> getSellers(String keyword) {
         List<Seller> sellers;
@@ -63,11 +74,17 @@ public class AdminUserService {
                 .toList();
     }
 
+
     /**
-     * 특정 회원 조회 (User 또는 Seller)
-     * @param userId 회원 ID
-     * @param userType 회원 타입 (USER 또는 SELLER)
-     * @return UserAdminResponse 또는 AdminSellerResponse
+     * 특정 식별자와 타입을 가진 회원(User 또는 Seller)의 상세 정보를 조회함
+     *
+     * @param userId   회원 식별자
+     * @param userType 회원 역할 구분 (USER/SELLER)
+     * @return 회원 타입에 따른 DTO 객체 (UserAdminResponse 또는 AdminSellerResponse)
+     * @throws IllegalArgumentException 지원하지 않는 타입이거나 회원을 찾을 수 없을 때 발생
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     public Object getUser(Long userId, UserRole userType) {
         if (userType == UserRole.USER) {
@@ -83,8 +100,14 @@ public class AdminUserService {
         }
     }
 
+
     /**
-     * User 소프트 삭제
+     * 일반 사용자 계정을 비활성화(소프트 삭제) 처리함
+     *
+     * @param userId 삭제할 사용자의 식별자
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @Transactional
     public void deleteUser(Long userId) {
@@ -94,8 +117,16 @@ public class AdminUserService {
         user.softDelete();
     }
 
+
     /**
-     * User 정보 수정
+     * 일반 사용자의 핵심 정보(이메일, 닉네임)를 관리자 권한으로 수정하며, 중복 검증을 수행함
+     *
+     * @param userId  수정할 사용자의 식별자
+     * @param request 변경할 정보가 담긴 DTO
+     * @throws IllegalArgumentException 중복된 이메일이나 닉네임이 존재할 경우 발생
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @Transactional
     public void updateUser(Long userId, UpdateUserRequest request) {
@@ -117,8 +148,14 @@ public class AdminUserService {
         user.updateInfo(request.getUserEmail(), request.getUserNickname());
     }
 
+
     /**
-     * Seller 소프트 삭제
+     * 판매자 계정을 비활성화(소프트 삭제) 처리함
+     *
+     * @param sellerId 삭제할 판매자의 식별자
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @Transactional
     public void deleteSeller(Long sellerId) {
@@ -128,8 +165,15 @@ public class AdminUserService {
         seller.softDelete();
     }
 
+
     /**
-     * Seller 정보 수정
+     * 판매자의 프로필 및 계정 정보를 관리자 권한으로 수정함
+     *
+     * @param sellerId 수정할 판매자의 식별자
+     * @param request  변경할 판매자 상세 정보 DTO
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @Transactional
     public void updateSeller(Long sellerId, UpdateSellerRequest request) {

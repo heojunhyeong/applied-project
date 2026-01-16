@@ -8,6 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 멤버십 가입, 상태 변경 및 해지 예약 등 멤버십 생명주기를 관리하는 서비스
+ *
+ * @author 허준형
+ * @DateOfCreated 2026-01-15
+ * @DateOfEdit 2026-01-15
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -15,6 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class MembershipService {
     private final MembershipRepository membershipRepository;
 
+    /**
+     * 사용자의 요청에 따라 멤버십을 즉시 종료하지 않고 해지 예약 상태로 전환하는 로직
+     *
+     * @param userId 해지를 예약하려는 사용자의 식별자
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     public void reserveTermination(Long userId) {
         Membership membership = membershipRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("활성화된 멤버십이 없습니다."));

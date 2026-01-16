@@ -30,9 +30,13 @@ public class AdminOrderService {
     private final UserRepository userRepository;
 
     /**
-     * 관리자용 주문 내역 조회 (검색 기능 포함) - 간단한 정보만 반환
-     * @param nickname User 닉네임 (검색어, null이면 전체 조회)
-     * @return 주문 내역 리스트 (주문id, 주문번호, 회원id, 결제내역 O/X)
+     * 관리자용 주문 목록을 조회함 (회원 닉네임 검색 지원)
+     *
+     * @param nickname 검색할 사용자의 닉네임 (null일 경우 전체 조회)
+     * @return 요약된 주문 정보 리스트 (주문ID, 주문번호, 회원ID, 결제 상태 포함)
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     public List<AdminOrderListResponse> getOrders(String nickname) {
         List<Order> orders;
@@ -51,9 +55,13 @@ public class AdminOrderService {
     }
 
     /**
-     * 관리자용 주문 상세 조회
-     * @param orderId 주문 ID
-     * @return 주문 상세 정보
+     * 특정 주문의 상세 정보(구매자 정보, 결제 상세, 주문 상품 목록 등)를 종합하여 조회함
+     *
+     * @param orderId 주문 식별자 (PK)
+     * @return 관리자용 주문 상세 응답 DTO
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     public AdminOrderResponse getOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -63,7 +71,13 @@ public class AdminOrderService {
     }
 
     /**
-     * Order 엔티티를 AdminOrderListResponse로 변환 (간단한 정보만)
+     * Order 엔티티를 관리자 목록용 응답 DTO로 변환하며 실제 결제 완료 여부를 판단함
+     *
+     * @param order 주문 엔티티
+     * @return 목록용 응답 DTO
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     private AdminOrderListResponse convertToAdminOrderListResponse(Order order) {
         // 결제 정보 조회
@@ -80,7 +94,12 @@ public class AdminOrderService {
     }
 
     /**
-     * Order 엔티티를 AdminOrderResponse로 변환
+     * 여러 도메인(회원, 결제, 주문 상세)의 데이터를 결합하여 상세 응답 DTO를 구성함
+     *
+     * @param order 주문 엔티티
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     private AdminOrderResponse convertToAdminOrderResponse(Order order) {
         // User 정보 조회
@@ -122,7 +141,11 @@ public class AdminOrderService {
     }
 
     /**
-     * 결제 정보 구성
+     * 결제 내역 존재 여부에 따라 관리자용 결제 정보 컴포넌트를 생성함
+     *
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
      */
     private AdminOrderResponse.PaymentInfo buildPaymentInfo(Optional<Payment> paymentOpt) {
         if (paymentOpt.isEmpty()) {
@@ -146,7 +169,11 @@ public class AdminOrderService {
     }
 
     /**
-     * 배송 상태 결정 (검수 부분 제거)
+     * 내부 도메인 상태(OrderStatus)를 관리자 웹 화면에 표시할 명칭으로 매핑함
+     *
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
      */
     private String determineDeliveryStatus(OrderStatus orderStatus) {
         return switch (orderStatus) {
@@ -162,7 +189,11 @@ public class AdminOrderService {
     }
 
     /**
-     * OrderDetail을 OrderItemInfo로 변환
+     * 주문 상세 엔티티를 상품 정보가 포함된 DTO로 변환함
+     *
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
      */
     private AdminOrderResponse.OrderItemInfo convertToOrderItemInfo(OrderDetail detail) {
         return AdminOrderResponse.OrderItemInfo.builder()

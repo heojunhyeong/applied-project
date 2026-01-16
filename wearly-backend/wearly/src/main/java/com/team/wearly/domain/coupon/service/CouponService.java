@@ -1,4 +1,4 @@
-package com.team.wearly.domain.coupon.entity.service;
+package com.team.wearly.domain.coupon.service;
 
 import com.team.wearly.domain.coupon.entity.UserCoupon;
 import com.team.wearly.domain.coupon.entity.enums.CouponStatus;
@@ -23,6 +23,15 @@ public class CouponService {
     private final MembershipRepository membershipRepository;
     private final UserRepository userRepository; // User 엔티티를 찾기 위해 필요
 
+    /**
+     * 멤버십 활성 사용자인지 확인 후 전용 혜택 쿠폰을 생성하고 저장하는 서비스 로직
+     *
+     * @param userId 쿠폰을 발급받을 사용자의 식별자
+     * @param benefitId 발급할 쿠폰의 종류를 결정하는 혜택 ID
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Transactional
     public void downloadMembershipCoupon(Long userId, Long benefitId) {
 

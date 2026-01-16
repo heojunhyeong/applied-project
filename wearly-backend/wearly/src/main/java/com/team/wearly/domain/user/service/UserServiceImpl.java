@@ -1,6 +1,9 @@
 package com.team.wearly.domain.user.service;
 
+import com.team.wearly.domain.membership.entity.Membership;
+import com.team.wearly.domain.membership.entity.enums.MembershipStatus;
 import com.team.wearly.domain.user.dto.request.SignupRequest;
+import com.team.wearly.domain.user.dto.response.MyPageResponse;
 import com.team.wearly.domain.user.dto.response.SignupResponse;
 import com.team.wearly.domain.user.entity.PasswordResetToken;
 import com.team.wearly.domain.user.entity.Seller;
@@ -36,11 +39,15 @@ public class UserServiceImpl implements UserService {
     @Value("${app.frontend-url:http://localhost:8080}")
     private String frontendUrl;
 
+
     /**
-     * 회원가입 메인 로직
-     * - USER: user 테이블에 저장
-     * - SELLER: seller 테이블에 저장
-     * - ADMIN 단어 차단: 이메일, 닉네임, 비밀번호 등 모든 필드에서 검증
+     * 신규 회원가입을 처리함. 역할(Role)에 따라 적절한 테이블에 저장하며, 엄격한 중복 및 보안 검증을 수행함
+     *
+     * @param request 가입 정보(아이디, 이메일, 닉네임, 비밀번호, 역할 등)
+     * @return 가입 완료된 회원의 정보 응답 DTO
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @Override
     @Transactional
@@ -205,8 +212,15 @@ public class UserServiceImpl implements UserService {
 
 
 
-    // 재설정 링크 발송
-    // TODO: 주석 추가 필요
+
+    /**
+     * 비밀번호 재설정을 위한 이메일 발송 요청을 처리함. 고유 토큰을 생성하여 30분간 유효한 링크를 전송함
+     *
+     * @param email 비밀번호를 재설정할 사용자의 이메일
+     * @author 허준형
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
+     */
     @Transactional
     @Override
     public void requestPasswordReset(String email) {
@@ -231,8 +245,15 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    // 비밀번호 변경 메서드
-    // TODO: 주석 추가 필요
+    /**
+     * 제공된 토큰의 유효성을 검증한 후 사용자의 비밀번호를 새롭게 변경함
+     *
+     * @param token       메일로 발송된 비밀번호 재설정 토큰
+     * @param newPassword 새롭게 설정할 비밀번호
+     * @author 허준형
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
+     */
     @Transactional
     @Override
     public void resetPassword(String token, String newPassword) {
@@ -252,5 +273,23 @@ public class UserServiceImpl implements UserService {
         user.changePassword(passwordEncoder.encode(newPassword));
 
         resetToken.use();
+    }
+
+    @Transactional(readOnly = true)
+    public MyPageResponse getMyPageData(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 멤버십 존재 여부 및 상태 확인
+        Membership membership = user.getMembership();
+        boolean isActive = (membership != null && membership.getStatus() == MembershipStatus.ACTIVE);
+
+        return MyPageResponse.builder()
+                .userName(user.getUserName())
+                .email(user.getUserEmail())
+                .isMembershipUser(isActive)
+                .membershipStatus(membership != null ? membership.getStatus().name() : "NONE")
+                .nextBillingDate(membership != null ? membership.getNextPaymentDate() : null)
+                .build();
     }
 }

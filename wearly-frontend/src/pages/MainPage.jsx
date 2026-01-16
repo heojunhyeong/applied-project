@@ -1,43 +1,51 @@
-import {useNavigate} from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./MainPage.css";
 
 function MainPage() {
     const navigate = useNavigate();
+    const [selectedCategory, setSelectedCategory] = useState("all");
 
-    const handleBrandClick = (brand) => {
-        navigate(`/${brand}`);
+    const handleCategoryClick = (category) => {
+        setSelectedCategory(category);
     };
 
-    return (<div className="main-page">
-        {/* 환영 문구 영역 */}
-        <div className="welcome-container">
-            <div className="welcome-box">
-                <h1 className="welcome-text">Wearly에 오신걸 환영합니다</h1>
+
+    return (
+        <div className="main-page">
+            {/* 메인 배너 */}
+            <div className="banner-container">
+                <div className="banner"></div>
+            </div>
+
+            {/* 카테고리 필터 */}
+            <div className="category-filters">
+                <button
+                    className={`category-filter ${selectedCategory === "all" ? "active" : ""}`}
+                    onClick={() => handleCategoryClick("all")}
+                >
+                    전체
+                </button>
+                <button
+                    className={`category-filter ${selectedCategory === "shoes" ? "active" : ""}`}
+                    onClick={() => handleCategoryClick("shoes")}
+                >
+                    신발
+                </button>
+                <button
+                    className={`category-filter ${selectedCategory === "apparel" ? "active" : ""}`}
+                    onClick={() => handleCategoryClick("apparel")}
+                >
+                    의류
+                </button>
+            </div>
+
+            {/* 제품 표시 영역 */}
+            <div className="products-area">
+                <p className="no-products-message">등록된 제품이 없습니다.</p>
             </div>
         </div>
-
-        {/* 브랜드 선택 영역 */}
-        <div className="brands-container">
-            <button
-                className="brand-button nike"
-                onClick={() => handleBrandClick("nike")}
-            >
-                나이키
-            </button>
-            <button
-                className="brand-button adidas"
-                onClick={() => handleBrandClick("adidas")}
-            >
-                아디다스
-            </button>
-            <button
-                className="brand-button newbalance"
-                onClick={() => handleBrandClick("newbalance")}
-            >
-                뉴발란스
-            </button>
-        </div>
-    </div>);
+    );
 }
 
 export default MainPage;

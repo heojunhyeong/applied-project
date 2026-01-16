@@ -28,6 +28,16 @@ public class AdminProductService {
     }
 
     /**
+     * 관리자용 상품 상세 조회
+     */
+    public ProductAdminResponse getProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + productId));
+        
+        return ProductAdminResponse.from(product);
+    }
+
+    /**
      * 관리자용 상품 판매 상태 수정
      */
     @Transactional

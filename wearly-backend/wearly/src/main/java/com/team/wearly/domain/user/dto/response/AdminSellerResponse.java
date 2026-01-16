@@ -1,6 +1,6 @@
 package com.team.wearly.domain.user.dto.response;
 
-import com.team.wearly.domain.user.entity.User;
+import com.team.wearly.domain.user.entity.Seller;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserAdminResponse {
-
-    private Long id;            // 회원 고유 번호 (삭제/수정 시 필요하므로 포함)
+public class AdminSellerResponse {
+    private Long id;            // 판매자 고유 번호
     private String userName;    // 아이디
     private String userEmail;   // 이메일
     private String userNickname;// 닉네임
@@ -25,17 +24,17 @@ public class UserAdminResponse {
     private LocalDateTime updatedDate; // 수정일
 
     // 엔티티 -> DTO 변환 편의 메서드
-    public static UserAdminResponse from(User user) {
-        return UserAdminResponse.builder()
-                .id(user.getId())
-                .userName(user.getUserName())
-                .userEmail(user.getUserEmail())
-                .userNickname(user.getUserNickname())
-                .introduction(user.getIntroduction())
-                .phoneNumber(user.getPhoneNumber())
-                .imageUrl(user.getImageUrl())
-                .createdDate(user.getCreatedDate())
-                .updatedDate(user.getUpdatedDate())
+    public static AdminSellerResponse from(Seller seller) {
+        return AdminSellerResponse.builder()
+                .id(seller.getId())
+                .userName(seller.getUserName())
+                .userEmail(seller.getUserEmail())
+                .userNickname(seller.getUserNickname())
+                .introduction(seller.getIntroduction())
+                .phoneNumber(seller.getPhoneNumber())
+                .imageUrl(seller.getImageUrl())
+                .createdDate(seller.getCreatedDate())
+                .updatedDate(seller.getUpdatedDate())
                 .build();
     }
 }

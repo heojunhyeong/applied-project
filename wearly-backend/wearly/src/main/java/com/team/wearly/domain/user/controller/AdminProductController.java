@@ -30,6 +30,17 @@ public class AdminProductController {
     }
 
     /**
+     * 관리자용 상품 상세 조회 API
+     * GET /api/admin/products/{productId}
+     */
+    @GetMapping("/{productId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ProductAdminResponse> getProduct(@PathVariable Long productId) {
+        ProductAdminResponse response = adminProductService.getProduct(productId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * 관리자용 상품 판매 상태 수정 API
      * PUT /api/admin/products/{productId}/status
      */

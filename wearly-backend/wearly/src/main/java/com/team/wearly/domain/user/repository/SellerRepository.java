@@ -2,7 +2,10 @@ package com.team.wearly.domain.user.repository;
 
 import com.team.wearly.domain.user.entity.Seller;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SellerRepository extends JpaRepository<Seller, Long> {
@@ -15,4 +18,8 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     // 내 닉네임 제외 중복 체크(프로필 수정용)
     boolean existsByUserNicknameAndIdNot(String userNickname, Long id);
+
+    // 아이디(userName) 또는 닉네임(userNickname)에 키워드가 포함된 판매자 검색
+    @Query("SELECT s FROM Seller s WHERE s.userName LIKE %:keyword% OR s.userNickname LIKE %:keyword%")
+    List<Seller> searchByKeyword(@Param("keyword") String keyword);
 }

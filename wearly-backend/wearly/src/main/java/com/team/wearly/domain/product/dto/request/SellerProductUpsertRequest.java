@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 public record SellerProductUpsertRequest(
         @NotBlank(message = "상품명은 필수입니다.")
         @Size(max = 100, message = "상품명은 100자 이내여야 합니다.")
@@ -38,7 +40,7 @@ public record SellerProductUpsertRequest(
         ProductCategory productCategory,
 
         @NotNull(message = "사이즈는 최소 1개 이상 선택해야 합니다.")
-        List<Size> sizes,
+        List<com.team.wearly.domain.product.entity.enums.Size> sizes,
 
         @NotNull(message = "상태 선택은 필수입니다.")
         ProductStatus status

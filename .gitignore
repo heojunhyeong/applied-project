@@ -1,19 +1,21 @@
-# JetBrains IDE 관련 (이미지에 보이는 .idea 폴더)
+# JetBrains
 .idea/
 *.iml
 
-# OS 관련
+# OS
 .DS_Store
 Thumbs.db
 
-# 언어/프레임워크별 빌드 결과물 (예시)
+# Backend build
 target/
 build/
-node_modules/.env
-.env
 
-#라이브러리 제외
-node_modules/
+# Frontend build & deps
 **/node_modules/
-dist/
-.DS_Store
+**/dist/
+
+# Env
+.env
+.env.*
+**/.env
+**/.env.*

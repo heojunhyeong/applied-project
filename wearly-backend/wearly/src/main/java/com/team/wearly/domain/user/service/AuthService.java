@@ -52,7 +52,7 @@ public class AuthService {
 
         // 1) user 테이블에서 조회
         User user = userRepository.findByUserName(userId).orElse(null);
-        if (user != null && passwordEncoder.matches(userPassword, user.getUserPassword())) {
+       if (user != null && user.getDeletedAt() == null && passwordEncoder.matches(userPassword, user.getUserPassword())) {
             String token = jwtTokenProvider.generateToken(user.getUserName(), UserRole.USER.name());
             return new LoginResponse(
                     token,
@@ -67,7 +67,7 @@ public class AuthService {
 
         // 2) seller 테이블에서 조회
         Seller seller = sellerRepository.findByUserName(userId).orElse(null);
-        if (seller != null && passwordEncoder.matches(userPassword, seller.getUserPassword())) {
+        if (seller != null && seller.getDeletedAt() == null && passwordEncoder.matches(userPassword, seller.getUserPassword())) {
             String token = jwtTokenProvider.generateToken(seller.getUserName(), UserRole.SELLER.name());
             return new LoginResponse(
                     token,

@@ -8,6 +8,7 @@ import SignupPage from './pages/SignupPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import Profile from './pages/Profile.jsx';
 import SuccessPage from './pages/payment/SuccessPage';
+import CartPage from './pages/CartPage.jsx';
 import './App.css'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/payment/success" element={<SuccessPage />} />
                 <Route path="/profile/upload" element={<Profile />} />
+                <Route path="/cart" element={<CartPage />} />
             </Routes>
         </BrowserRouter>
     );

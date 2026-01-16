@@ -16,4 +16,11 @@ public interface OrderService {
     public OrderDetailResponse getOrderDetail(String orderId);
 
     public void confirmPurchase(Long userId, String orderId, Long orderDetailId);
+
+    /**
+     * 상품명 키워드로 주문 상세 검색 (같은 날 주문된 상품 포함)
+     * @return 키워드가 포함된 상품과 같은 날 주문된 모든 상품의 주문 상세 목록
+     */
+    public List<OrderDetailResponse.OrderItemDto> searchOrderDetailsByKeyword(Long userId, String keyword);
+
 }

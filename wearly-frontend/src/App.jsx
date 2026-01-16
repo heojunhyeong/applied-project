@@ -8,7 +8,6 @@ import SignupPage from './pages/SignupPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import Profile from './pages/Profile.jsx';
 import SuccessPage from './pages/payment/SuccessPage';
-import CartPage from './pages/CartPage.jsx';
 import './App.css'
 
 function App() {

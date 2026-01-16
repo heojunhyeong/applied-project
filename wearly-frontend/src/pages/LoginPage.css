@@ -2,9 +2,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 60px); /* 헤더 높이를 고려 */
+    min-height: calc(100vh - 70px); /* 헤더 높이를 고려 */
     padding: 20px;
-    margin-top: 60px; /* 40px -> 60px로 변경 (헤더 높이와 일치) */
+    margin-top: 70px; /* 헤더 높이와 일치 */
 }
 
 .login-box {
@@ -12,7 +12,7 @@
     max-width: 400px;
     padding: 30px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 20px;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -39,7 +39,7 @@
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 12px;
     font-size: 14px;
     box-sizing: border-box;
 }
@@ -61,7 +61,7 @@
     padding: 12px;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
-    border-radius: 4px;
+    border-radius: 12px;
     color: #721c24;
     font-size: 14px;
     text-align: center;
@@ -73,7 +73,7 @@
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 12px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;

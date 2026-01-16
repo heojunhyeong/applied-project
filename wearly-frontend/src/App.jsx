@@ -22,6 +22,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/payment/success" element={<SuccessPage />} />
                 <Route path="/profile/upload" element={<Profile />} />
+                <Route path="/cart" element={<CartPage />} />
             </Routes>
         </BrowserRouter>
     );

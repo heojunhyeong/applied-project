@@ -286,4 +286,33 @@ public class OrderServiceImpl implements OrderService {
             order.updateStatus(OrderStatus.PURCHASE_CONFIRMED);
         }
     }
+
+    /**
+     * 상품명 키워드로 주문 상세 검색 (같은 날 주문된 상품 포함)
+     * @param userId 사용자 ID (본인의 주문만 검색)
+     * @param keyword 상품명 검색 키워드
+     * @return 키워드가 포함된 상품과 같은 날 주문된 모든 상품의 주문 상세 목록
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDetailResponse.OrderItemDto> searchOrderDetailsByKeyword(Long userId, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+
+        List<OrderDetail> orderDetails = orderRepository.findOrderDetailsByKeywordWithSameDateOrders(keyword, userId);
+
+        return orderDetails.stream()    // 리스트를 자바 스트림으로 변환
+                .map(detail -> OrderDetailResponse.OrderItemDto.builder()
+                        .productId(detail.getProduct().getId())
+                        .productName(detail.getProduct().getProductName())
+                        .quantity(detail.getQuantity())
+                        .price(detail.getPrice())
+                        .imageUrl(detail.getProduct().getImageUrl())
+                        .size(detail.getSize())
+                        .reviewId(null) // 검색 결과에는 리뷰 ID는 필요 없을 수도 있음
+                        .build())
+                .distinct() // 중복 제거
+                .collect(Collectors.toList());
+    }
 }

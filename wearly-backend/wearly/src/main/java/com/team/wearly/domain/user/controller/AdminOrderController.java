@@ -18,16 +18,14 @@ public class AdminOrderController {
     private final AdminOrderService adminOrderService;
 
     /**
-     * 관리자용 주문 내역 조회 API (간단한 정보만)
-     * [사용 예시]
-     * 1. 전체 조회: GET /api/admin/orders
-     * 2. 닉네임 검색: GET /api/admin/orders?nickname=검색어
-     * 
-     * 반환 정보:
-     * - orderId: 주문 ID
-     * - orderNumber: 주문 번호
-     * - userId: 회원 ID
-     * - paymentStatus: 결제 내역 (O 또는 X)
+     * 전체 주문 목록을 조회하거나 특정 닉네임을 가진 사용자의 주문을 검색함
+     * [보안] ROLE_ADMIN 권한을 가진 사용자만 접근 가능
+     *
+     * @param nickname 검색 조건으로 사용할 사용자의 닉네임 (Optional)
+     * @return 주문 요약 정보(ID, 주문번호, 회원ID, 결제여부) 리스트
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
      */
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -39,16 +37,14 @@ public class AdminOrderController {
     }
 
     /**
-     * 관리자용 주문 상세 조회 API
-     * GET /api/admin/orders/{orderId}
-     * 
-     * 반환 정보:
-     * - orderId, orderNumber, userId, userNickname, userEmail
-     * - orderDate, totalPrice, couponDiscountPrice, finalPrice
-     * - orderStatus, deliveryStatus, isPaid
-     * - paymentInfo (exists, status, amount, paymentMethod, paymentDate)
-     * - orderItems (productId, productName, imageUrl, quantity, price, totalItemPrice)
-     * - deliveryInfo (주석 처리됨)
+     * 특정 주문의 상세 정보(구매자 인적사항, 결제 정보, 주문 상품 목록 등)를 조회함
+     * [보안] ROLE_ADMIN 권한을 가진 사용자만 접근 가능
+     *
+     * @param orderId 상세 조회할 주문의 시스템 식별자
+     * @return 주문 상세 내역 및 결제/배송 상태 정보 DTO
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
      */
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

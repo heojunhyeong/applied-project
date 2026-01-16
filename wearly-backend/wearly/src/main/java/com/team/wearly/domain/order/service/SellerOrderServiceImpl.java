@@ -28,9 +28,15 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     private final UserRepository userRepository;
 
     /**
-     * 판매자 주문 목록 (OrderDetail 기준)
-     * - status=null 이면 전체
-     * - status!=null 이면 detailStatus 필터
+     * 특정 판매자에게 들어온 주문 상세 목록을 페이징하여 조회함 (상태별 필터링 지원)
+     *
+     * @param sellerId 판매자 식별자
+     * @param status   필터링할 주문 상태 (null일 경우 전체 조회)
+     * @param pageable 페이징 정보
+     * @return 주문 정보 및 배송 현황을 포함한 DTO 페이지
+     * @author 허보미
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     @Override
     public Page<SellerOrderDetailListResponse> getSellerOrderDetails(Long sellerId, OrderStatus status, Pageable pageable) {
@@ -70,7 +76,14 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     }
 
     /**
-     * 판매자 주문 상세 (OrderDetail 단건)
+     * 판매자가 특정 주문 상세 내역을 확인하며, 구매자 정보 및 배송지 주소를 함께 조회함
+     *
+     * @param sellerId      판매자 식별자
+     * @param orderDetailId 개별 주문 상세 식별자
+     * @return 배송지와 상품 정보를 포함한 상세 응답 DTO
+     * @author 허보미
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     @Override
     public SellerOrderDetailResponse getSellerOrderDetail(Long sellerId, Long orderDetailId) {
@@ -126,8 +139,14 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     }
 
     /**
-     * 송장/택배사 입력(수정) - OrderDetail 단위
-     * - 상태 제한은 최소로만: 보통 CHECK에서만 입력 허용(원하면 완화 가능)
+     * 판매자가 상품 발송을 위해 택배사 정보와 송장 번호를 입력하거나 수정함
+     *
+     * @param sellerId      판매자 식별자
+     * @param orderDetailId 주문 상세 식별자
+     * @param request       택배사 및 송장 번호 정보
+     * @author 허보미
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     @Override
     @Transactional
@@ -154,9 +173,14 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     }
 
     /**
-     * 주문 상태 변경 (WAIT_CHECK 이후부터 판매자 권한)
-     * - 허용 전이: WAIT_CHECK -> CHECK -> IN_DELIVERY -> DELIVERY_COMPLETED
-     * - CHECK -> IN_DELIVERY 는 송장/택배사 필수
+     * 판매자가 주문의 진행 상태를 변경함 (상품 확인 -> 배송 중 -> 배송 완료 순차 변경)
+     *
+     * @param sellerId      판매자 식별자
+     * @param orderDetailId 주문 상세 식별자
+     * @param request       변경하고자 하는 목표 상태 정보
+     * @author 허보미
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     @Override
     @Transactional

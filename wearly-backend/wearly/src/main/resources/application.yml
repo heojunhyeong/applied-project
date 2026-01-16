@@ -14,8 +14,9 @@ spring:
     hibernate:
       ddl-auto: update  # 테이블 자동 생성/수정 (회원가입 데이터 영구 저장)
     show-sql: true
-#    properties:
-#      hibernate:
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100 # [필수] 컬렉션 조회 시 IN 쿼리로 한방에 가져옵니다.
 #        format_sql: true
 #        dialect: org.hibernate.dialect.MySQLDialect
 

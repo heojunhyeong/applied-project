@@ -18,7 +18,12 @@ public class AdminProductService {
     private final ProductRepository productRepository;
 
     /**
-     * 관리자용 상품 목록 조회
+     * 시스템에 등록된 모든 상품의 목록을 조회함
+     *
+     * @return 관리자용 상품 정보 응답 DTO 리스트
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     public List<ProductAdminResponse> getProducts() {
         List<Product> products = productRepository.findAll();
@@ -28,7 +33,14 @@ public class AdminProductService {
     }
 
     /**
-     * 관리자용 상품 상세 조회
+     * 특정 상품의 상세 규격 및 현재 상태 정보를 조회함
+     *
+     * @param productId 조회할 상품의 식별자
+     * @return 상품 상세 정보 응답 DTO
+     * @throws IllegalArgumentException 상품 식별자가 유효하지 않을 경우 발생
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     public ProductAdminResponse getProduct(Long productId) {
         Product product = productRepository.findById(productId)
@@ -38,7 +50,13 @@ public class AdminProductService {
     }
 
     /**
-     * 관리자용 상품 판매 상태 수정
+     * 운영 정책(금칙어 사용, 품절 처리 누락 등)에 따라 관리자 권한으로 상품의 판매 상태를 강제 수정함
+     *
+     * @param productId 상태를 변경할 상품의 식별자
+     * @param request 새롭게 적용할 상품 상태 정보
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @Transactional
     public void updateProductStatus(Long productId, UpdateProductStatusRequest request) {
@@ -49,7 +67,12 @@ public class AdminProductService {
     }
 
     /**
-     * 관리자용 상품 삭제
+     * 플랫폼 운영상 부적절한 상품을 시스템에서 영구적으로 삭제함
+     *
+     * @param productId 삭제할 상품의 식별자
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @Transactional
     public void deleteProduct(Long productId) {

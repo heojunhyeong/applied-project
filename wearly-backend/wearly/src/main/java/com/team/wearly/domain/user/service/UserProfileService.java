@@ -15,14 +15,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserProfileService {
     private final UserRepository userRepository;
 
-    /** 유저 프로필 조회 */
+    /**
+     * 특정 사용자의 식별자를 통해 현재 프로필 정보를 조회함
+     *
+     * @param userId 조회할 사용자의 PK
+     * @return 닉네임, 이미지 URL 등을 포함한 프로필 응답 DTO
+     * @throws IllegalArgumentException 사용자를 찾을 수 없을 경우 발생
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
+     */
     public UserProfileResponse getProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
         return UserProfileResponse.from(user);
     }
 
-    /** 유저 프로필 수정 (닉네임/소개/연락처) */
+    /**
+     * 사용자의 닉네임, 소개글, 연락처 정보를 수정함
+     * 닉네임의 경우 필수값이며, 본인을 제외한 타 사용자와 중복되지 않아야 함
+     *
+     * @param userId  수정할 사용자의 PK
+     * @param request 수정하고자 하는 프로필 데이터 세트
+     * @return 수정이 완료된 프로필 응답 DTO
+     * @throws IllegalArgumentException 닉네임이 누락되었거나 이미 존재하는 닉네임일 경우 발생
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
+     */
     @Transactional
     public UserProfileResponse updateProfile(Long userId, UserProfileUpdateRequest request) {
         User user = userRepository.findById(userId)
@@ -46,7 +66,16 @@ public class UserProfileService {
         return UserProfileResponse.from(user);
     }
 
-    // S3업로드 후 url을 DB에 저장
+    /**
+     * S3 등 외부 저장소에 업로드된 프로필 이미지의 URL을 사용자의 계정 정보에 반영함
+     *
+     * @param userId   이미지를 업데이트할 사용자의 PK
+     * @param imageUrl 업로드 완료된 이미지의 전체 URL 경로
+     * @return 업데이트된 프로필 정보
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
+     */
     @Transactional
     public UserProfileResponse updateProfileImage(Long userId, String imageUrl) {
         User user = userRepository.findById(userId)

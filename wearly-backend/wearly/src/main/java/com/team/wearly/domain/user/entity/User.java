@@ -1,5 +1,6 @@
 package com.team.wearly.domain.user.entity;
 
+import com.team.wearly.domain.membership.entity.Membership;
 import com.team.wearly.domain.user.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -57,6 +58,9 @@ public class User {
         this.introduction = introduction;
         this.phoneNumber = phoneNumber;
     }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Membership membership;
 
     // 소프트 삭제를 위한 필드
     @Column(nullable = true)

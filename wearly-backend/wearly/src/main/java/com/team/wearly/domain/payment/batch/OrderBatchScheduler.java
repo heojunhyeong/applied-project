@@ -15,6 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 결제 대기 상태인 주문과 실제 결제 대행사(Toss)의 상태를 동기화하는 스케줄러 컴포넌트
+ *
+ * @author 허준형
+ * @DateOfCreated 2026-01-15
+ * @DateOfEdit 2026-01-15
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -24,6 +31,14 @@ public class OrderBatchScheduler {
     private final TossPaymentClient tossPaymentClient; // 토스에 물어보기 위해 주입
     private final PaymentService paymentService;
 
+
+    /**
+     * 일정 시간(30분) 동안 결제가 완료되지 않은 주문들을 대상으로 토스 API를 조회하여 결제 완료 처리하거나 자동 취소함
+     *
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Scheduled(fixedDelay = 1800000) // 30분마다 실행
     @Transactional
     public void syncOrderAndPayment() {

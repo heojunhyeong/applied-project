@@ -24,7 +24,17 @@ public class SellerProductService {
     private static final List<ProductStatus> VISIBLE_STATUSES =
             List.of(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT);
 
-    /** 1) 상품 등록 */
+
+    /**
+     * 새로운 상품을 등록하며 초기 상태를 '판매중(ON_SALE)'으로 설정함
+     *
+     * @param sellerId 판매자 식별자
+     * @param request 상품명, 가격, 재고, 이미지 등 등록 정보
+     * @return 등록된 상품 상세 응답 DTO
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
+     */
     @Transactional
     public SellerProductResponse create(Long sellerId, SellerProductUpsertRequest request) {
         Product product = Product.builder()
@@ -44,14 +54,32 @@ public class SellerProductService {
         return SellerProductResponse.from(saved);
     }
 
-    /** 2) 내 상품 목록 조회 (DELETED 제외) */
+    /**
+     * 판매자 본인이 등록한 상품 중 삭제되지 않은 상품 목록을 페이징하여 조회함
+     *
+     * @param sellerId 판매자 식별자
+     * @param pageable 페이징 정보
+     * @return 판매자의 상품 응답 DTO 페이지
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
+     */
     public Page<SellerProductResponse> getMyProducts(Long sellerId, Pageable pageable) {
         return sellerProductRepository
                 .findBySellerIdAndStatusIn(sellerId, VISIBLE_STATUSES, pageable)
                 .map(SellerProductResponse::from);
     }
 
-    /** 3) 내 상품 상세 (DELETED 제외) */
+    /**
+     * 특정 상품의 상세 정보를 조회하며, 판매자 본인의 상품이거나 삭제된 상태가 아님을 검증함
+     *
+     * @param sellerId 판매자 식별자
+     * @param productId 상품 식별자
+     * @return 상품 상세 정보 DTO
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
+     */
     public SellerProductResponse getMyProduct(Long sellerId, Long productId) {
         Product product = sellerProductRepository
                 .findByIdAndSellerIdAndStatusIn(productId, sellerId, VISIBLE_STATUSES)
@@ -59,7 +87,17 @@ public class SellerProductService {
         return SellerProductResponse.from(product);
     }
 
-    /** 4) 내 상품 수정 (전체 수정 / PUT) */
+    /**
+     * 기존 상품 정보를 전달받은 요청 데이터로 전체 업데이트함 (재고, 상태, 사이즈 포함)
+     *
+     * @param sellerId 판매자 식별자
+     * @param productId 수정할 상품 식별자
+     * @param request 수정할 상품 정보 객체
+     * @return 수정 완료된 상품 응답 DTO
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
+     */
     @Transactional
     public SellerProductResponse updateMyProduct(Long sellerId, Long productId, SellerProductUpsertRequest request) {
         Product product = sellerProductRepository
@@ -81,9 +119,16 @@ public class SellerProductService {
         return SellerProductResponse.from(product);
     }
 
-    /** 5) 내 상품 삭제 (결제/배송 상태 상관없이 소프트 삭제) */
-    /** 삭제 시 목록/상세/수정 에서 조회 자체가 안됨*/
-    /** 추후 환불/취소 정책은 주문 도메인에서 처리*/
+
+    /**
+     * 상품을 실제로 DB에서 삭제하지 않고 상태를 'DELETED'로 변경하여 목록 및 상세 노출을 차단함
+     *
+     * @param sellerId 판매자 식별자
+     * @param productId 삭제할 상품 식별자
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
+     */
     @Transactional
     public void deleteMyProduct(Long sellerId, Long productId) {
         Product product = sellerProductRepository

@@ -8,6 +8,7 @@ import com.team.wearly.domain.product.entity.Product;
 import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.ProductCategory;
 import com.team.wearly.domain.product.entity.enums.ProductStatus;
+import com.team.wearly.domain.product.entity.enums.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                         brandEq(condition.brand()),
                         categoryEq(condition.category()),
                         keywordLike(condition.keyword()),
-                        product.status.in(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT)
+                        isDisplayable()
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -47,7 +48,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                         brandEq(condition.brand()),
                         categoryEq(condition.category()),
                         keywordLike(condition.keyword()),
-                        product.status.in(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT)
+                        isDisplayable()
                 );
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
@@ -61,10 +62,14 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 .from(product)
                 .where(
                         brandEq(brand),
-                        product.status.in(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT)
+                        isDisplayable()
                 )
                 .orderBy(product.productCategory.asc())
                 .fetch();
+    }
+
+    private BooleanExpression isDisplayable() {
+        return product.status.in(ProductStatus.ON_SALE, ProductStatus.SOLD_OUT);
     }
 
     private BooleanExpression brandEq(Brand brand) {
@@ -90,4 +95,5 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             case PRICE_HIGH -> product.price.desc(); // 높은 가격순
             case LATEST -> product.createdDate.desc(); // 최신순
         };
-    }}
+    }
+}

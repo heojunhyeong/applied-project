@@ -22,14 +22,14 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
 
     /**
-     * 관리자용 회원 목록 조회 API (User/Seller 필터링 지원)
-     * [사용 예시]
-     * 1. 전체 User 조회: GET /api/admin/users
-     * 2. User만 조회: GET /api/admin/users?userType=USER
-     * 3. Seller만 조회: GET /api/admin/users?userType=SELLER
-     * 4. 검색 조회: GET /api/admin/users?keyword=홍길동
-     * 5. User 검색: GET /api/admin/users?userType=USER&keyword=홍길동
-     * 6. Seller 검색: GET /api/admin/users?userType=SELLER&keyword=홍길동
+     * 관리자 권한으로 회원(User/Seller) 목록을 조회함. 역할(Role) 필터링 및 키워드 검색을 지원함
+     *
+     * @param keyword 검색어 (닉네임, 이름 등)
+     * @param userType 회원 구분 (USER, SELLER 등)
+     * @return 각 타입에 맞는 회원 정보 리스트 (UserAdminResponse 또는 AdminSellerResponse)
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-15
      */
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -51,10 +51,14 @@ public class AdminUserController {
     }
 
     /**
-     * 관리자용 특정 회원 상세 조회 API
-     * [사용 예시]
-     * 1. User 상세 조회: GET /api/admin/users/{userId}?userType=USER
-     * 2. Seller 상세 조회: GET /api/admin/users/{userId}?userType=SELLER
+     * 특정 회원(일반 사용자 또는 판매자)의 상세 가입 정보와 계정 상태를 조회함
+     *
+     * @param userId 회원 식별자
+     * @param userType 회원 구분 필드 (USER/SELLER)
+     * @return 회원 상세 정보 객체
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
      */
     @GetMapping("/{userId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -66,9 +70,15 @@ public class AdminUserController {
         return ResponseEntity.ok(response);
     }
 
+
     /**
-     * 관리자용 User 소프트 삭제 API
-     * DELETE /api/admin/users/{userId}
+     * 일반 사용자 계정을 소프트 삭제 처리하여 플랫폼 이용을 중단시킴
+     *
+     * @param userId 삭제할 사용자의 식별자
+     * @return 성공 시 204 No Content
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -78,8 +88,14 @@ public class AdminUserController {
     }
 
     /**
-     * 관리자용 User 정보 수정 API
-     * PUT /api/admin/users/{userId}
+     * 관리자가 일반 사용자의 프로필 정보나 계정 설정을 강제로 수정함
+     *
+     * @param userId 수정할 사용자의 식별자
+     * @param request 변경할 사용자 정보 DTO
+     * @return 성공 시 200 OK
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @PutMapping("/{userId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -91,8 +107,13 @@ public class AdminUserController {
     }
 
     /**
-     * 관리자용 Seller 소프트 삭제 API
-     * DELETE /api/admin/users/sellers/{sellerId}
+     * 판매자 계정을 소프트 삭제 처리함
+     *
+     * @param sellerId 삭제할 판매자의 식별자
+     * @return 성공 시 204 No Content
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @DeleteMapping("/sellers/{sellerId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -102,8 +123,14 @@ public class AdminUserController {
     }
 
     /**
-     * 관리자용 Seller 정보 수정 API
-     * PUT /api/admin/users/sellers/{sellerId}
+     * 관리자가 판매자의 브랜드 정보나 연락처 등 사업자 정보를 강제로 수정함
+     *
+     * @param sellerId 수정할 판매자의 식별자
+     * @param request 변경할 판매자 정보 DTO
+     * @return 성공 시 200 OK
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-13
+     * @DateOfEdit 2026-01-13
      */
     @PutMapping("/sellers/{sellerId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

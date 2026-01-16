@@ -12,26 +12,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 서버가 토스 페이먼츠 서버에 승인 요청을 하는 클래스
- * RestTemplate을 사용하여 HTTP 요청을 보냄
- * 외부 API(토스)와 직접 통신하므로 infrastructure 패키지에 만들었음
- *
+ * 토스 페이먼츠 외부 API와 통신하여 결제 승인, 빌링키 발급, 취소 및 조회를 처리하는 클라이언트 클래스
  *
  * @author 허준형
  * @DateOfCreated 2026-01-10
- * @DateOfEdit 2025-01-10
+ * @DateOfEdit 2026-01-15
  */
-
-
 @Component
 public class TossPaymentClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-
     @Value("${payment.toss.secret-key:}")
     private String secretKey;
 
+
+    /**
+     * 프론트엔드에서 전달받은 결제 정보를 토스 서버에 보내 최종 결제 승인을 요청함
+     *
+     * @param paymentKey 토스에서 발행한 결제 고유 키
+     * @param orderId 우리 시스템의 주문 번호
+     * @param amount 결제 금액
+     * @return 토스에서 응답한 결제 승인 상세 정보
+     * @author 허준형
+     * @DateOfCreated 2026-01-10
+     * @DateOfEdit 2026-01-15
+     */
     public TossConfirmResponse confirmPayment(String paymentKey, String orderId, Long amount) {
 
         // 토스 API URL
@@ -67,6 +73,19 @@ public class TossPaymentClient {
 
     }
 
+    /**
+     * 발급된 빌링키를 사용하여 사용자의 개입 없이 정기 결제를 실행함
+     *
+     * @param billingKey 자동 결제용 빌링키
+     * @param customerKey 고객 식별 키
+     * @param orderId 주문 번호
+     * @param amount 결제 금액
+     * @param orderName 주문 상품명
+     * @return 결제 승인 응답 정보
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     public TossConfirmResponse executeBillingPayment(String billingKey, String customerKey, String orderId, Long amount, String orderName) {
         // 빌링키 결제 API URL
         String url = "https://api.tosspayments.com/v1/billing/" + billingKey;
@@ -99,8 +118,15 @@ public class TossPaymentClient {
         }
     }
 
-    // 결제 취소 메서드
-    // TODO: 주석 추가 예정
+    /**
+     * 이미 완료된 결제 건에 대해 부분 혹은 전체 취소를 요청함
+     *
+     * @param paymentKey 취소할 결제의 고유 키
+     * @param cancelReason 결제 취소 사유
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     public void cancelPayment(String paymentKey, String cancelReason) {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
 
@@ -123,6 +149,17 @@ public class TossPaymentClient {
         }
     }
 
+
+    /**
+     * 카드 인증 후 전달받은 authKey를 통해 정기 결제를 위한 빌링키를 최종 발급받음
+     *
+     * @param authKey 토스 창에서 인증 후 받은 인증 키
+     * @param customerKey 고객 식별 키
+     * @return 발급된 빌링키 정보를 포함한 응답 객체
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     public TossBillingConfirmResponse issueBillingKey(String authKey, String customerKey) {
         String url = "https://api.tosspayments.com/v1/billing/authorizations/confirm";
 
@@ -151,8 +188,15 @@ public class TossPaymentClient {
         }
     }
 
-    // 결제 승인 전 최종 확인을 위한 메서드
-    // TODO: 주석 추가 예정
+    /**
+     * 주문 번호를 기준으로 토스 서버에 현재 결제 상태 및 상세 내역을 조회함
+     *
+     * @param orderId 조회를 원하는 주문 번호
+     * @return 결제 상세 정보 (내역이 없을 경우 null)
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     public TossConfirmResponse getPaymentByOrderId(String orderId) {
         String url = "https://api.tosspayments.com/v1/payments/orders/" + orderId;
 

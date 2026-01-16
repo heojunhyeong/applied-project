@@ -23,6 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
+
+/**
+ * 일반 주문 결제 및 멤버십 정기 결제의 승인, 취소, 내역 저장을 담당하는 서비스
+ *
+ * @author 허준형
+ * @DateOfCreated 2026-01-11
+ * @DateOfEdit 2026-01-15
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +42,17 @@ public class PaymentService {
     private final MembershipRepository membershipRepository;
     private final SettlementService settlementService;
 
+
+    /**
+     * 일반 주문에 대한 결제 승인을 처리하며, 성공 시 재고 차감 및 결제 완료 처리를 수행함
+     *
+     * @param paymentKey 토스 결제 고유 키
+     * @param orderId 주문 번호
+     * @param amount 결제 요청 금액
+     * @author 허준형
+     * @DateOfCreated 2026-01-11
+     * @DateOfEdit 2026-01-15
+     */
     @Transactional
     public void confirmPayment(String paymentKey, String orderId, Long amount) {
 
@@ -68,6 +87,17 @@ public class PaymentService {
         }
     }
 
+
+    /**
+     * 멤버십 가입을 위한 빌링키를 발급받고, 첫 달 요금에 대한 즉시 결제를 실행함
+     *
+     * @param userId 멤버십 가입 사용자 식별자
+     * @param authKey 토스 인증 키
+     * @param customerKey 고객 식별 키
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Transactional
     public void confirmBilling(Long userId, String authKey, String customerKey) {
 
@@ -136,6 +166,14 @@ public class PaymentService {
 //        System.out.println("테스트: 멤버십 활성화 성공! 유저 ID: " + userId);
 //    }
 
+    /**
+     * 스케줄러에 의해 호출되며, 멤버십 회원의 정기 결제를 실행하고 결제일을 갱신함
+     *
+     * @param membership 정기 결제 대상 멤버십 엔티티
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Transactional
     public void executeScheduledPayment(Membership membership) {
         String orderId = "MEM-AUTO-" + LocalDate.now().toString().replace("-", "")
@@ -182,7 +220,15 @@ public class PaymentService {
 
     }
 
-
+    /**
+     * 완료된 주문 결제에 대해 외부 API 취소 요청을 보내고 시스템 내 주문/결제 상태를 취소로 변경함
+     *
+     * @param orderId 취소할 주문 번호
+     * @param cancelReason 취소 사유
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Transactional
     public void cancelPayment(String orderId, String cancelReason) {
 
@@ -211,6 +257,14 @@ public class PaymentService {
         };
     }
 
+    /**
+     * 결제 승인 결과를 데이터베이스에 저장하고, 주문 번호 형식에 따라 주문 혹은 멤버십 완료 처리를 수행함
+     *
+     * @param response 토스 페이먼츠 승인 응답 데이터
+     * @author 허준형
+     * @DateOfCreated 2026-01-11
+     * @DateOfEdit 2026-01-15
+     */
     public void savePaymentAndCompleteOrder(TossConfirmResponse response) {
         Payment payment = Payment.builder()
                 .paymentKey(response.getPaymentKey())

@@ -23,10 +23,19 @@ public class SellerReviewController {
 
     private final SellerReviewService sellerReviewService;
 
+
+
     /**
+     * SecurityContext의 Authentication 객체에서 현재 로그인한 판매자 정보를 추출함
      * Authentication principal = Seller 엔티티 (JwtAuthenticationFilter에서 넣어줌)
      * - /api/seller/** 는 SecurityConfig에서 ROLE_SELLER만 접근 가능하게 막혀있음
      * - 그래서 여기서는 "Seller로 캐스팅"만 하면 sellerId를 바로 얻을 수 있음
+     * @param authentication 인증 정보 객체
+     * @return 캐스팅된 Seller 엔티티
+     * @throws IllegalStateException 판매자 권한이 아닌 경우 발생
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     private Seller getSeller(Authentication authentication) {
         Object principal = authentication.getPrincipal();
@@ -38,7 +47,17 @@ public class SellerReviewController {
     }
 
     /**
-     * 1) 내 상품 리뷰 목록 조회
+     * 판매자가 보유한 전체 상품 또는 특정 상품의 리뷰 목록을 최신순으로 페이징 조회함
+     *
+     * @param authentication 인증 정보
+     * @param productId 특정 상품 필터링용 식별자 (Optional)
+     * @param status 리뷰 상태 필터 (Optional)
+     * @param page 페이지 번호
+     * @param size 페이지당 항목 수
+     * @return 리뷰 목록 응답 DTO 페이지
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @GetMapping("/reviews")
     public ResponseEntity<Page<SellerReviewResponse.SellerReviewItemResponse>> getMyProductReviews(
@@ -63,7 +82,14 @@ public class SellerReviewController {
     }
 
     /**
-     * 2) 내 상품 리뷰 요약 (평점 평균/리뷰 개수)
+     * 판매자의 전체 상품 또는 특정 상품에 대한 평균 평점과 리뷰 총 개수 요약을 조회함
+     *
+     * @param authentication 인증 정보
+     * @param productId 특정 상품 식별자 (Optional)
+     * @return 평점 및 개수 요약 응답 DTO
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @GetMapping("/reviews/summary")
     public ResponseEntity<SellerReviewResponse.SellerReviewSummaryResponse> getMyReviewSummary(
@@ -77,8 +103,15 @@ public class SellerReviewController {
         );
     }
 
+
     /**
-     * 3) 상품별 리뷰 요약 리스트 (상품 목록에 별점/리뷰수 붙일 때 사용)
+     * 판매자가 등록한 모든 상품별 리뷰 통계(별점, 리뷰수) 리스트를 조회함
+     *
+     * @param authentication 인증 정보
+     * @return 상품별 리뷰 요약 정보 리스트
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @GetMapping("/reviews/summary/products")
     public ResponseEntity<List<ProductReviewSummaryResponse>> getProductReviewSummaries(
@@ -92,7 +125,15 @@ public class SellerReviewController {
     }
 
     /**
-     * 4) 리뷰 신고 접수 (판매자)
+     * 부적절한 리뷰에 대해 사유를 기재하여 관리자에게 신고를 접수함
+     *
+     * @param authentication 인증 정보
+     * @param reviewId 신고 대상 리뷰 식별자
+     * @param request 신고 사유가 포함된 요청 DTO
+     * @return 성공 시 204 No Content
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @PostMapping("/reviews/{reviewId}/reports")
     public ResponseEntity<Void> reportReview(
@@ -109,7 +150,16 @@ public class SellerReviewController {
     }
 
     /**
-     * 5) 내가 접수한 신고 목록 조회 (판매자)
+     * 판매자 본인이 접수한 리뷰 신고 내역과 처리 상태를 페이징 조회함
+     *
+     * @param authentication 인증 정보
+     * @param status 처리 상태 필터 (Optional)
+     * @param page 페이지 번호
+     * @param size 페이지당 항목 수
+     * @return 신고 내역 응답 DTO 페이지
+     * @author 허보미
+     * @DateOfCreated 2026-01-12
+     * @DateOfEdit 2026-01-12
      */
     @GetMapping("/review-reports")
     public ResponseEntity<Page<SellerReviewReportItemResponse>> getMyReviewReports(

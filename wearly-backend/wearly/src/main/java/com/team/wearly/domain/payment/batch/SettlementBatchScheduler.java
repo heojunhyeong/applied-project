@@ -11,6 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
+/**
+ * 확정된 정산 데이터를 기반으로 판매자에게 실제 대금을 지급하는 배치 스케줄러
+ *
+ * @author 허준형
+ * @DateOfCreated 2026-01-15
+ * @DateOfEdit 2026-01-15
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -18,6 +26,13 @@ public class SettlementBatchScheduler {
 
     private final SettlementRepository settlementRepository;
 
+    /**
+     * 매달 10일 정산 확정 상태의 내역을 조회하여 판매자 계좌로 입금 처리를 수행함
+     *
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     // 매달 10일 새벽 1시에 실행 (cron: 초 분 시 일 월 요일)
     @Scheduled(cron = "0 0 1 10 * *")
     @Transactional

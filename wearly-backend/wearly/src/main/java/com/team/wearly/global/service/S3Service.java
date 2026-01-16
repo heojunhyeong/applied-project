@@ -13,6 +13,14 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
+
+/**
+ * AWS S3 버킷에 파일을 직접 업로드할 수 있도록 임시 권한이 부여된 Presigned URL 발급을 담당하는 서비스
+ *
+ * @author 정찬혁
+ * @DateOfCreated 2026-01-14
+ * @DateOfEdit 2026-01-14
+ */
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -25,11 +33,19 @@ public class S3Service {
     @Value("${spring.cloud.aws.region.static}")
     private String region;
 
+
+
     /**
-     * 프로필 이미지 업로드를 위한 Presigned URL 생성
+     * 사용자(User/Seller) 프로필 이미지 업로드를 위한 Presigned URL을 생성함
+     * 파일 경로는 'profiles/{userType}/{userId}/{UUID}.{extension}' 구조로 관리됨
      *
-     * @param userId      사용자 ID
-     * @param contentType 이미지 Content-Type (예: image/jpeg, image/png)
+     * @param userId      사용자 식별자
+     * @param contentType 이미지의 MIME 타입 (e.g., image/jpeg)
+     * @param userType    사용자 구분 (USER 또는 SELLER)
+     * @return [0]: 업로드용 Presigned URL, [1]: S3에 저장될 객체 키(Key)
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
      */
     public String[] createPresignedUrl(Long userId, String contentType, String userType) {
         String extension = contentType.split("/")[1];  // image/png -> ["image","png"] 배열로 변경
@@ -50,7 +66,17 @@ public class S3Service {
         return new String[]{presignedUrl, key};  //key -> 업로드될 이미지의 경로
     }
 
-    // 상품 전용 업로드 URL 발급 (폴더명 자유 설정 가능)
+
+    /**
+     * 상품 관련 이미지 업로드를 위해 지정된 폴더 경로로 Presigned URL을 발급함
+     *
+     * @param folderName S3 내 저장될 폴더 경로 (e.g., products, reviews)
+     * @param extension  파일 확장자 (png, jpg 등)
+     * @return [0]: 업로드용 URL, [1]: 저장된 파일의 키(Key)
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-14
+     * @DateOfEdit 2026-01-14
+     */
     public String[] createProductPresignedUrl(String folderName, String extension) {
         // 1. 키 생성
         String fileName = UUID.randomUUID().toString() + "." + extension;

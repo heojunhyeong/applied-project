@@ -20,7 +20,13 @@ public class MembershipScheduler {
     private final MembershipRepository membershipRepository;
     private final PaymentService paymentService;
 
-    // 매일 새벽 0시 0분 0초에 실행
+    /**
+     * 매일 자정 활성 멤버십 회원을 대상으로 정기 결제를 수행하는 배치 작업
+     *
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Scheduled(cron = "0 0 0 * * *")
     public void runMonthlyPayment() {
         log.info("정기 결제 배치 작업 시작: {}", LocalDateTime.now());
@@ -42,8 +48,13 @@ public class MembershipScheduler {
         log.info("정기 결제 배치 작업 종료");
     }
 
-    // 해지 예약자 중 기간이 끝난 사람을 찾아 완전 종료 처리
-    // 매일 새벽 12시 30분에 실행
+    /**
+     * 해지 예약 상태인 회원의 이용 기간 만료 여부를 확인하여 최종 종료 처리하는 배치 작업
+     *
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Scheduled(cron = "0 30 0 * * *")
     public void processTerminations() {
         // [수정] CANCEL_RESERVED -> CANCELLATION_RESERVED

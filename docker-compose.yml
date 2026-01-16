@@ -38,9 +38,9 @@ services:
       - backend-net
       - db-net
 
-  wearly-frontend:
-    build: ./wearly-frontend
-    image: wearly-frontend-server:v1
+  wearly-frontend-v1:
+    build: ./wearly-frontend-v1
+    image: wearly-frontend-v1-server:v1
     depends_on:
       - wearly-backend
     networks:
@@ -53,7 +53,7 @@ services:
       - 70:80
     depends_on:
       - wearly-backend
-      - wearly-frontend
+      - wearly-frontend-v1
     networks:
       - backend-net
       - frontend-net

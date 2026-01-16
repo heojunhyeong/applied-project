@@ -5,6 +5,7 @@ import com.team.wearly.domain.user.dto.response.UserProfileResponse;
 import com.team.wearly.domain.user.entity.User;
 import com.team.wearly.domain.user.repository.UserRepository;
 
+import com.team.wearly.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserProfileService {
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
     /**
      * 특정 사용자의 식별자를 통해 현재 프로필 정보를 조회함
@@ -68,18 +70,33 @@ public class UserProfileService {
 
     /**
      * S3 등 외부 저장소에 업로드된 프로필 이미지의 URL을 사용자의 계정 정보에 반영함
+     * 기존 프로필 이미지가 있는 경우 S3에서 삭제함
      *
      * @param userId   이미지를 업데이트할 사용자의 PK
      * @param imageUrl 업로드 완료된 이미지의 전체 URL 경로
      * @return 업데이트된 프로필 정보
      * @author 정찬혁
      * @DateOfCreated 2026-01-13
-     * @DateOfEdit 2026-01-13
+     * @DateOfEdit 2026-01-14
      */
     @Transactional
     public UserProfileResponse updateProfileImage(Long userId, String imageUrl) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        // 기존 이미지가 있는 경우 S3에서 삭제
+        String oldImageUrl = user.getImageUrl();    //기존 이미지
+        if (oldImageUrl != null && !oldImageUrl.isBlank() && !oldImageUrl.equals(imageUrl)) {
+            try {
+                String oldKey = s3Service.extractKeyFromUrl(oldImageUrl);
+                if (oldKey != null) {
+                    s3Service.deleteObject(oldKey);
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
         user.updateImageUrl(imageUrl);
         return UserProfileResponse.from(user);
     }

@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Users, Package, CreditCard } from 'lucide-react';
 
 interface AdminLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

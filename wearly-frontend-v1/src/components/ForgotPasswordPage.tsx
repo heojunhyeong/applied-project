@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
   };
 
   // Handle send reset link
-  const handleSendResetLink = (e: React.FormEvent) => {
+  const handleSendResetLink = (e: FormEvent) => {
     e.preventDefault();
     const error = validateEmail(email);
     if (error) {

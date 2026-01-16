@@ -35,7 +35,7 @@ public class CouponService {
     @Transactional
     public void downloadMembershipCoupon(Long userId, Long benefitId) {
 
-        Membership membership = membershipRepository.findByUserId(userId)
+        Membership membership = membershipRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버십 회원이 아닙니다."));
 
         if (membership.getStatus() != MembershipStatus.ACTIVE) {

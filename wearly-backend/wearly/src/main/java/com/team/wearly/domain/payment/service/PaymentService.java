@@ -104,13 +104,26 @@ public class PaymentService {
         // 빌링키 발급
         TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
         String billingKey = billingResponse.getBillingKey();
+//        String billingKey = "test_billing_key_12345678"; // 가짜 빌링키
 
         // 멤버십 신청 정보 확인
-        Membership membership = membershipRepository.findByUserId(userId)
+        Membership membership = membershipRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
 
         // 빌링키 저장
         membership.registerBillingInfo(billingKey);
+
+//        try {
+//            log.info("테스트 모드: 실제 결제 API 호출을 생략하고 성공 처리합니다.");
+//
+//            // 결제 성공 시 수행되어야 할 로직 직접 호출 (가짜 응답 데이터 생성 필요시)
+//            // savePaymentAndCompleteOrder(fakeResponse);
+//
+//            log.info("테스트: 멤버십 활성화 성공! 유저 ID: {}", userId);
+//        } catch (Exception e) {
+//            membership.updateStatus(MembershipStatus.EXPIRED);
+//            throw new RuntimeException("멤버십 최초 결제에 실패하여 구독이 활성화되지 않았습니다.");
+//        }
 
         // 첫 달 요금 즉시 결제 실행
         // 멤버십용 주문번호 생성 (예: MEM-20260113-UUID)
@@ -136,35 +149,6 @@ public class PaymentService {
             throw new RuntimeException("멤버십 최초 결제에 실패하여 구독이 활성화되지 않았습니다.");
         }
     }
-
-//    @Transactional
-//    public void confirmBilling(Long userId, String authKey, String customerKey) {
-//
-//        // 1. 빌링키 발급 (가짜 키로 대체)
-//        // TossBillingConfirmResponse billingResponse = tossPaymentClient.issueBillingKey(authKey, customerKey);
-//        // String billingKey = billingResponse.getBillingKey();
-//        String billingKey = "test_billing_key_12345";
-//
-//        // 2. 멤버십 신청 정보 확인 (위 SQL로 넣은 데이터가 조회됨)
-//        Membership membership = membershipRepository.findByUserId(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("멤버십 가입 신청 내역이 없습니다."));
-//
-//        // 3. 빌링키 저장 및 상태 변경 (ACTIVE로 변하고 결제일 세팅됨)
-//        membership.registerBillingInfo(billingKey);
-//
-//        // 4. 첫 달 요금 즉시 결제 실행 (테스트를 위해 주석 처리)
-//    /*
-//    try {
-//        // 실제 결제 API 호출 생략
-//        // savePaymentAndCompleteOrder(paymentResponse);
-//    } catch (Exception e) {
-//        membership.updateStatus(MembershipStatus.EXPIRED);
-//        throw new RuntimeException("멤버십 최초 결제에 실패...");
-//    }
-//    */
-//
-//        System.out.println("테스트: 멤버십 활성화 성공! 유저 ID: " + userId);
-//    }
 
     /**
      * 스케줄러에 의해 호출되며, 멤버십 회원의 정기 결제를 실행하고 결제일을 갱신함

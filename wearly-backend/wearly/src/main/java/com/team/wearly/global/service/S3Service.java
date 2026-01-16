@@ -8,8 +8,9 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import com.team.wearly.global.util.PresignedUrlVo;
 
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
-import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -26,6 +27,8 @@ import java.util.UUID;
 public class S3Service {
 
     private final S3Presigner s3Presigner;
+
+    private final S3Client s3Client;
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
@@ -103,5 +106,79 @@ public class S3Service {
 
         // 6. 결과 반환 (팀원 코드와 동일하게 String 배열 사용)
         return new String[]{url, key};
+    }
+
+    /**
+     * S3 URL에서 객체 키(Key)를 추출함
+     *
+     * @param url 기존 프로필 이미지 Url
+     * @return S3 객체 키(Key), URL 형식이 올바르지 않으면 null
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-14
+     */
+    public String extractKeyFromUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return null;
+        }
+
+        try {
+            // S3 URL 형식: https://{bucket}.s3.{region}.amazonaws.com/{key}
+            // 또는: https://s3.{region}.amazonaws.com/{bucket}/{key}
+            String bucketPrefix = bucket + ".s3.";
+            String s3Prefix = "s3.";
+
+            int keyStartIndex = -1;
+
+            // 첫 번째 형식: https://{bucket}.s3.{region}.amazonaws.com/{key}
+            if (url.contains(bucketPrefix)) {
+                int prefixIndex = url.indexOf(bucketPrefix);
+                int slashIndex = url.indexOf("/", prefixIndex + bucketPrefix.length());
+                if (slashIndex != -1) {
+                    keyStartIndex = slashIndex + 1;
+                }
+            }
+
+            // 두 번째 형식: https://s3.{region}.amazonaws.com/{bucket}/{key}
+            else if (url.contains(s3Prefix)) {
+                int bucketIndex = url.indexOf("/" + bucket + "/");
+                if (bucketIndex != -1) {
+                    keyStartIndex = bucketIndex + bucket.length() + 2; // "/{bucket}/" 길이
+                }
+            }
+
+            if (keyStartIndex > 0 && keyStartIndex < url.length()) {
+                String key = url.substring(keyStartIndex);
+                // 쿼리 파라미터 제거 (presigned URL의 경우)
+                int queryIndex = key.indexOf("?");
+                if (queryIndex != -1) {
+                    key = key.substring(0, queryIndex);
+                }
+                return key;
+            }
+        } catch (Exception e) {
+            // URL 파싱 실패 시 null 반환
+        }
+
+        return null;
+    }
+
+    /**
+     * S3 버킷에서 객체를 삭제함
+     *
+     * @param key 삭제할 객체의 키(Key)
+     * @author 정찬혁
+     * @DateOfCreated 2026-01-14
+     */
+    public void deleteObject(String key) {
+        if (key == null || key.isBlank()) {
+            return;
+        }
+
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        s3Client.deleteObject(deleteRequest);
     }
 }

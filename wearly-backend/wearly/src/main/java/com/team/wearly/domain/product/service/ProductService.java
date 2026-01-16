@@ -46,6 +46,11 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
 
+        // 삭제된 상품이면 접근 막기
+        if (product.getStatus() == com.team.wearly.domain.product.entity.enums.ProductStatus.DELETED) {
+            throw new IllegalArgumentException("판매가 중단된 상품입니다.");
+        }
+
         // PageRequest를 사용하여 "첫 페이지의 5개"만 가져옵니다.
         Pageable limitFive = PageRequest.of(0, 5);
         Page<ProductReview> reviewPage = reviewRepository.findByProductId(productId, limitFive);

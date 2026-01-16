@@ -12,6 +12,7 @@ import com.team.wearly.domain.order.repository.CartRepository;
 import com.team.wearly.domain.order.repository.OrderRepository;
 import com.team.wearly.domain.payment.service.SettlementService;
 import com.team.wearly.domain.product.entity.Product;
+import com.team.wearly.domain.product.entity.enums.ProductStatus;
 import com.team.wearly.domain.product.repository.ProductRepository;
 import com.team.wearly.domain.review.entity.ProductReview;
 import com.team.wearly.domain.review.repository.ProductReviewRepository;
@@ -102,6 +103,11 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(request.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. ID: " + request.getProductId()));
 
+            // 삭제된 상품 주문 방지
+            if (product.getStatus() == ProductStatus.DELETED) {
+                throw new IllegalArgumentException("판매가 중단된 상품입니다.");
+            }
+
             // 사용자가 요청한 사이즈가 해당 상품의 판매 가능 목록에 없으면 예외 발생 추가
             if (!product.getAvailableSizes().contains(request.getSize())) {
                 throw new IllegalArgumentException("해당 상품에서 선택할 수 없는 사이즈입니다: " + request.getSize());
@@ -128,6 +134,12 @@ public class OrderServiceImpl implements OrderService {
             }
 
             for (Cart cart : selectedCarts) {
+
+                // 장바구니 상품 중 삭제된 게 있는지 확인
+                if (cart.getProduct().getStatus() == ProductStatus.DELETED) {
+                    throw new IllegalArgumentException("장바구니에 판매 중단된 상품이 포함되어 있습니다: " + cart.getProduct().getProductName());
+                }
+
                 OrderDetail detail = OrderDetail.builder()
                         .quantity(cart.getQuantity())
                         .price(cart.getProduct().getPrice())

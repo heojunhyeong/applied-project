@@ -5,6 +5,9 @@ import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
 import com.team.wearly.domain.order.entity.Order;
 import com.team.wearly.domain.order.entity.dto.request.OrderCreateRequest;
 import com.team.wearly.domain.order.service.OrderService;
+import com.team.wearly.domain.user.entity.Admin;
+import com.team.wearly.domain.user.entity.Seller;
+import com.team.wearly.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +22,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+
+    private Long getUserIdFromAuthentication(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new IllegalStateException("인증 정보가 없습니다.");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof User) {
+            return ((User) principal).getId();
+        } else if (principal instanceof Seller) {
+            return ((Seller) principal).getId();
+        } else {
+            throw new IllegalStateException("지원하지 않는 사용자 타입입니다.");
+        }
+    }
 
     /**
      * 프론트엔드에서 주문 번호를 알려주는 API
@@ -61,6 +80,26 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.getOrderDetail(orderId));
+    }
+
+    /**
+     * 주문 상세 검색 API (상품명 키워드 검색)
+     * GET /api/users/orders/search?keyword=감자
+     * 키워드가 포함된 상품과 같은 날짜에 주문된 모든 상품을 반환합니다.
+     * 예: "감자"로 검색 시, 감자가 포함된 상품과 같은 날 주문된 고구마 등도 함께 반환됩니다.
+     *
+     * @param authentication 인증 정보 (사용자 ID 추출용)
+     * @param keyword 상품명 검색 키워드
+     * @return 주문 상세 상품 목록
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<OrderDetailResponse.OrderItemDto>> searchOrderDetails(
+            Authentication authentication,
+            @RequestParam(required = false) String keyword) {
+
+        Long userId = getUserIdFromAuthentication(authentication);
+        List<OrderDetailResponse.OrderItemDto> response = orderService.searchOrderDetailsByKeyword(userId, keyword);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{orderId}/details/{orderDetailId}/confirm")

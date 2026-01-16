@@ -35,7 +35,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://localhost:70"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         
@@ -52,10 +52,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/users/signup").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()  // 로그인 API 허용
-                            .requestMatchers("/api/users/profile/presigned-url").permitAll()    // user profile 이미지 업로드 테스트용
-                            .requestMatchers("/api/seller/profile/presigned-url").permitAll()    // seller profile 이미지 업로드 테스트용
-                            .requestMatchers("/api/users/profile").permitAll()  // user profile 이미지 업로드 테스트용
-                            .requestMatchers("/api/seller/profile").permitAll()  // eller profile 이미지 업로드 테스트용
                             .requestMatchers("/api/payment/**", "/api/orders/**", "/api/users/orders/**").permitAll()
                 .requestMatchers("/api/users/reviews").permitAll()
                 .requestMatchers("/api/password/**").permitAll()

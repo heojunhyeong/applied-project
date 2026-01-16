@@ -10,7 +10,8 @@ import java.util.Optional;
 
 public interface MembershipRepository extends JpaRepository<Membership,Long> {
     Optional<Membership> findByOrderId(String orderId);
-    Optional<Membership> findByUserId(Long userId);
+    Optional<Membership> findByUser_Id(Long userId);
     // 상태가 ACTIVE이고, 다음 결제일이 오늘인 목록 조회
     List<Membership> findAllByStatusAndNextPaymentDateBefore(MembershipStatus status, LocalDateTime dateTime);
+
 }

@@ -22,6 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o JOIN User u ON o.userId = u.id WHERE u.userNickname LIKE %:nickname% ORDER BY o.createdDate DESC")
     List<Order> findByUserNickname(@Param("nickname") String nickname);
 
+
+
     /**
      * 특정 키워드가 포홤된 상품명이 주문된 날짜를 찾고, 그 날짜에 주문된 모든 주문 상세를 반환
      * @return 키워드가 포함된 상품과 같은 날 주문된 모든 OrderDetail 목록

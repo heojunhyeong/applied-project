@@ -31,7 +31,7 @@ public class MembershipService {
      * @DateOfEdit 2026-01-15
      */
     public void reserveTermination(Long userId) {
-        Membership membership = membershipRepository.findByUserId(userId)
+        Membership membership = membershipRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalArgumentException("활성화된 멤버십이 없습니다."));
 
         if (membership.getStatus() != MembershipStatus.ACTIVE) {

@@ -3,8 +3,10 @@ package com.team.wearly.domain.order.service;
 
 import com.team.wearly.domain.order.dto.response.OrderDetailResponse;
 import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
+import com.team.wearly.domain.order.dto.response.OrderSheetResponse;
 import com.team.wearly.domain.order.entity.Order;
 import com.team.wearly.domain.order.entity.dto.request.OrderCreateRequest;
+import com.team.wearly.domain.product.entity.enums.Size;
 
 import java.util.List;
 
@@ -23,4 +25,4 @@ public interface OrderService {
      */
     public List<OrderDetailResponse.OrderItemDto> searchOrderDetailsByKeyword(Long userId, String keyword);
 
-}
+    OrderSheetResponse getOrderSheet(Long userId, List<Long> cartItemIds, Long productId, Long quantity, Size size);}

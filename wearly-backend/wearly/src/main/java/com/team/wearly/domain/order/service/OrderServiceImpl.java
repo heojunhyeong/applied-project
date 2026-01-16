@@ -5,6 +5,7 @@ import com.team.wearly.domain.coupon.entity.enums.CouponType;
 import com.team.wearly.domain.coupon.repository.UserCouponRepository;
 import com.team.wearly.domain.order.dto.response.OrderDetailResponse;
 import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
+import com.team.wearly.domain.order.dto.response.OrderSheetResponse;
 import com.team.wearly.domain.order.entity.*;
 import com.team.wearly.domain.order.entity.dto.request.OrderCreateRequest;
 import com.team.wearly.domain.order.entity.enums.OrderStatus;
@@ -13,6 +14,7 @@ import com.team.wearly.domain.order.repository.OrderRepository;
 import com.team.wearly.domain.payment.service.SettlementService;
 import com.team.wearly.domain.product.entity.Product;
 import com.team.wearly.domain.product.entity.enums.ProductStatus;
+import com.team.wearly.domain.product.entity.enums.Size;
 import com.team.wearly.domain.product.repository.ProductRepository;
 import com.team.wearly.domain.review.entity.ProductReview;
 import com.team.wearly.domain.review.repository.ProductReviewRepository;
@@ -39,6 +41,10 @@ public class OrderServiceImpl implements OrderService {
     private final UserCouponRepository userCouponRepository;
     private final SettlementService settlementService;
 
+
+
+
+
     /**
      * 새로운 주문을 생성하며, 단일 상품 바로 구매와 장바구니 상품 묶음 구매를 구분하여 처리함
      * 쿠폰 적용 여부에 따라 할인 금액을 계산하고 주문 정보를 저장함
@@ -60,102 +66,74 @@ public class OrderServiceImpl implements OrderService {
         String orderId = "ORD-" + LocalDate.now().toString().replace("-", "")
                 + "-" + UUID.randomUUID().toString().substring(0, 8);
 
-        Long discountPrice = 0L;
-        UserCoupon targetCoupon = null;
+        long serverCalculatedProductPrice = 0L;
+        long discountPrice = 0L;
+        long deliveryFee = 3000L;
+
+        if (request.getProductId() != null) {
+
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+            validateProductAvailability(product, request.getSize(), request.getQuantity());
+
+            serverCalculatedProductPrice = product.getPrice() * request.getQuantity();
+
+        } else if (request.getCartItemIds() != null && !request.getCartItemIds().isEmpty()) {
+
+            List<Cart> selectedCarts = cartRepository.findAllById(request.getCartItemIds());
+            if (selectedCarts.isEmpty()) throw new IllegalArgumentException("장바구니 항목이 존재하지 않습니다.");
+
+            for (Cart cart : selectedCarts) {
+                validateProductAvailability(cart.getProduct(), cart.getSize(), cart.getQuantity());
+                serverCalculatedProductPrice += cart.getProduct().getPrice() * cart.getQuantity();
+            }
+        } else {
+            throw new IllegalArgumentException("주문할 상품 정보가 부족합니다.");
+        }
 
         if (request.getUserCouponId() != null) {
-            // 유저가 보유한 쿠폰 조회
-            targetCoupon = userCouponRepository.findByIdAndUserId(request.getUserCouponId(), userId)
+
+            UserCoupon targetCoupon = userCouponRepository.findByIdAndUser_Id(request.getUserCouponId(), userId)
                     .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다."));
 
-            // 유효성 체크 (상태, 만료일, 최소주문금액)
-            if (!targetCoupon.isAvailable(request.getTotalPrice())) {
-                throw new IllegalArgumentException("사용 조건이 맞지 않거나 유효하지 않은 쿠폰입니다.");
+            if (!targetCoupon.isAvailable(serverCalculatedProductPrice)) {
+                throw new IllegalArgumentException("쿠폰 사용 조건이 맞지 않습니다.");
             }
 
-            // 쿠폰 타입별 할인 계산
             if (targetCoupon.getCouponType() == CouponType.DISCOUNT_AMOUNT) {
                 discountPrice = targetCoupon.getDiscountValue();
             } else if (targetCoupon.getCouponType() == CouponType.DISCOUNT_RATE) {
-                discountPrice = request.getTotalPrice() * targetCoupon.getDiscountValue() / 100;
+                discountPrice = (serverCalculatedProductPrice * targetCoupon.getDiscountValue()) / 100;
             }
 
-            // 쿠폰 사용 처리 및 주문번호 기록
             targetCoupon.applyToOrder(orderId);
+        }
+
+        long finalValidationPrice = serverCalculatedProductPrice - discountPrice + deliveryFee;
+        if (finalValidationPrice != request.getTotalPrice()) {
+            throw new IllegalArgumentException("결제 요청 금액이 일치하지 않습니다. (요청: " + request.getTotalPrice() + ", 계산: " + finalValidationPrice + ")");
         }
 
         Order order = Order.builder()
                 .orderId(orderId)
                 .userId(userId)
-                .totalPrice(request.getTotalPrice())
-                // 쿠폰 할인 반영
+                .totalPrice(finalValidationPrice)
                 .couponDiscountPrice(discountPrice)
                 .orderStatus(OrderStatus.BEFORE_PAID)
                 .build();
 
-        // 주문 상세 설정 로직
         if (request.getProductId() != null) {
-            Product product = productRepository.findById(request.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. ID: " + request.getProductId()));
-
-            // 삭제된 상품 주문 방지
-            if (product.getStatus() == ProductStatus.DELETED) {
-                throw new IllegalArgumentException("판매가 중단된 상품입니다.");
-            }
-
-            // 사용자가 요청한 사이즈가 해당 상품의 판매 가능 목록에 없으면 예외 발생 추가
-            if (!product.getAvailableSizes().contains(request.getSize())) {
-                throw new IllegalArgumentException("해당 상품에서 선택할 수 없는 사이즈입니다: " + request.getSize());
-            }
-
-            if (product.getStockQuantity() < request.getQuantity()) {
-                throw new IllegalStateException("상품 재고가 부족합니다.");
-            }
-
-            OrderDetail detail = OrderDetail.builder()
-                    .quantity(request.getQuantity())
-                    .price(product.getPrice())
-                    .product(product)
-                    .size(request.getSize())
-                    .sellerId(product.getSellerId())
-                    .build();
-            order.addOrderDetail(detail);
-
-        } else if (request.getCartItemIds() != null && !request.getCartItemIds().isEmpty()) {
+            Product product = productRepository.findById(request.getProductId()).orElseThrow();
+            order.addOrderDetail(createOrderDetail(product, request.getQuantity(), request.getSize()));
+        } else {
             List<Cart> selectedCarts = cartRepository.findAllById(request.getCartItemIds());
-
-            if (selectedCarts.isEmpty()) {
-                throw new IllegalArgumentException("장바구니 항목이 존재하지 않습니다.");
-            }
-
             for (Cart cart : selectedCarts) {
-
-                // 장바구니 상품 중 삭제된 게 있는지 확인
-                if (cart.getProduct().getStatus() == ProductStatus.DELETED) {
-                    throw new IllegalArgumentException("장바구니에 판매 중단된 상품이 포함되어 있습니다: " + cart.getProduct().getProductName());
-                }
-
-                OrderDetail detail = OrderDetail.builder()
-                        .quantity(cart.getQuantity())
-                        .price(cart.getProduct().getPrice())
-                        .product(cart.getProduct())
-                        .sellerId(cart.getProduct().getSellerId())
-                        .size(cart.getSize())
-                        .detailStatus(OrderStatus.BEFORE_PAID) // 초기 상태 명시
-                        .build();
-
-                OrderDeliveryDetail deliveryDetail = OrderDeliveryDetail.builder()
-                        .orderDetail(detail)
-                        .build();
-                order.addOrderDetail(detail);
+                order.addOrderDetail(createOrderDetail(cart.getProduct(), cart.getQuantity(), cart.getSize()));
             }
             cartRepository.deleteAllInBatch(selectedCarts);
-
-        } else {
-            throw new IllegalArgumentException("주문할 상품 정보가 부족합니다.");
         }
 
-        // 배송 정보 설정
         OrderDelivery delivery = OrderDelivery.builder()
                 .address(request.getAddress())
                 .detail_address(request.getDetailAddress())
@@ -166,6 +144,61 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public OrderSheetResponse getOrderSheet(Long userId, List<Long> cartItemIds, Long productId, Long quantity, Size size) {
+        List<OrderSheetResponse.OrderItemDto> items;
+        long totalProductPrice;
+
+        // 1. 단품 구매(바로 구매)인 경우
+        if (productId != null) {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+            totalProductPrice = product.getPrice() * quantity;
+            items = List.of(OrderSheetResponse.OrderItemDto.builder()
+                    .productId(product.getId())
+                    .productName(product.getProductName())
+                    .quantity(quantity)
+                    .price(product.getPrice())
+                    .size(size.name())
+                    .imageUrl(product.getImageUrl())
+                    .build());
+        }
+        // 2. 장바구니 구매인 경우
+        else if (cartItemIds != null && !cartItemIds.isEmpty()) {
+            List<Cart> selectedCarts = cartRepository.findAllById(cartItemIds);
+            if (selectedCarts.isEmpty()) throw new IllegalArgumentException("상품을 선택해주세요.");
+
+            totalProductPrice = selectedCarts.stream()
+                    .mapToLong(cart -> cart.getProduct().getPrice() * cart.getQuantity())
+                    .sum();
+
+            items = selectedCarts.stream()
+                    .map(OrderSheetResponse.OrderItemDto::from)
+                    .toList();
+        } else {
+            throw new IllegalArgumentException("주문 정보가 부족합니다.");
+        }
+
+        // 3. 공통: 사용 가능한 쿠폰 조회
+        List<OrderSheetResponse.AvailableCouponDto> coupons = userCouponRepository.findByUser_Id(userId).stream()
+                .filter(uc -> uc.isAvailable(totalProductPrice))
+                .map(uc -> OrderSheetResponse.AvailableCouponDto.builder()
+                        .userCouponId(uc.getId())
+                        .couponName(uc.getCouponCode())
+                        .discountValue(uc.getDiscountValue())
+                        .couponType(uc.getCouponType().name())
+                        .build())
+                .toList();
+
+        return OrderSheetResponse.builder()
+                .items(items)
+                .totalProductPrice(totalProductPrice)
+                .availableCoupons(coupons)
+                .deliveryFee(3000L)
+                .build();
+    }
     /**
      * 사용자의 주문 이력을 최신순으로 조회하며, 여러 상품 주문 시 대표 상품명(외 n건)을 구성함
      *
@@ -314,5 +347,36 @@ public class OrderServiceImpl implements OrderService {
                         .build())
                 .distinct() // 중복 제거
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 상품 상태 및 재고 검증 (Size Enum & Long Quantity 적용)
+     */
+    private void validateProductAvailability(Product product, Size size, Long quantity) {
+        if (product.getStatus() == ProductStatus.DELETED) {
+            throw new IllegalArgumentException("판매 중단된 상품: " + product.getProductName());
+        }
+        // Product 엔티티의 availableSizes가 List<Size> 형태여야 함
+        if (!product.getAvailableSizes().contains(size)) {
+            throw new IllegalArgumentException("선택 불가능한 사이즈: " + size);
+        }
+        if (product.getStockQuantity() < quantity) {
+            throw new IllegalStateException("재고 부족: " + product.getProductName());
+        }
+    }
+
+
+    /**
+     * OrderDetail 생성 (Long Quantity & Size Enum 적용)
+     */
+    private OrderDetail createOrderDetail(Product product, Long quantity, Size size) {
+        return OrderDetail.builder()
+                .quantity(quantity)
+                .price(product.getPrice())
+                .product(product)
+                .size(size)
+                .sellerId(product.getSellerId())
+                .detailStatus(OrderStatus.BEFORE_PAID)
+                .build();
     }
 }

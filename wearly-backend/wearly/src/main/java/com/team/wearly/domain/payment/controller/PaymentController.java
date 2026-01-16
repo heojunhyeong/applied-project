@@ -45,29 +45,29 @@ public class PaymentController {
             Authentication authentication, // 인증 정보 추가
             @RequestBody TossPaymentConfirmRequest request) {
 
-//        Long userId = Long.parseLong(authentication.getName());
-//
-//        paymentService.confirmPayment(
-//                request.getPaymentKey(),
-//                request.getOrderId(),
-//                request.getAmount()
-//        );
-//        return ResponseEntity.ok().build();
-
-        // 테스트용, 위 주석으로 교체 필요
-        Long userId;
-        if (authentication == null) {
-            userId = 2L;
-        } else {
-            userId = Long.parseLong(authentication.getName());
-        }
+        Long userId = Long.parseLong(authentication.getName());
 
         paymentService.confirmPayment(
                 request.getPaymentKey(),
                 request.getOrderId(),
                 request.getAmount()
         );
-        return ResponseEntity.ok("결제 승인 성공!");
+        return ResponseEntity.ok().build();
+
+        // 테스트용, 위 주석으로 교체 필요
+//        Long userId;
+//        if (authentication == null) {
+//            userId = 2L;
+//        } else {
+//            userId = Long.parseLong(authentication.getName());
+//        }
+//
+//        paymentService.confirmPayment(
+//                request.getPaymentKey(),
+//                request.getOrderId(),
+//                request.getAmount()
+//        );
+//        return ResponseEntity.ok("결제 승인 성공!");
     }
 
     /**
@@ -104,25 +104,25 @@ public class PaymentController {
             Authentication authentication,
             @RequestBody BillingConfirmRequest request) {
 
-//        Long userId = Long.parseLong(authentication.getName());
-//
-//        // 빌링키 발급 및 멤버십 활성화 로직 실행
-//        paymentService.confirmBilling(userId, request.getAuthKey(), request.getCustomerKey());
-//
-//        return ResponseEntity.ok("멤버십 정기 결제가 성공적으로 등록되었습니다.");
-
-        // 테스트용, 위 주석으로 교체 필요
-        Long userId;
-        if (authentication == null) {
-            userId = 2L;
-        } else {
-            userId = Long.parseLong(authentication.getName());
-        }
+        Long userId = Long.parseLong(authentication.getName());
 
         // 빌링키 발급 및 멤버십 활성화 로직 실행
         paymentService.confirmBilling(userId, request.getAuthKey(), request.getCustomerKey());
 
         return ResponseEntity.ok("멤버십 정기 결제가 성공적으로 등록되었습니다.");
+
+        // 테스트용, 위 주석으로 교체 필요
+//        Long userId;
+//        if (authentication == null) {
+//            userId = 2L;
+//        } else {
+//            userId = Long.parseLong(authentication.getName());
+//        }
+//
+//        // 빌링키 발급 및 멤버십 활성화 로직 실행
+//        paymentService.confirmBilling(userId, request.getAuthKey(), request.getCustomerKey());
+//
+//        return ResponseEntity.ok("멤버십 정기 결제가 성공적으로 등록되었습니다.");
     }
 
 
@@ -169,7 +169,7 @@ public class PaymentController {
         Long userId = Long.parseLong(authentication.getName());
 
         // 멤버십 정보를 조회 (없으면 null 혹은 404 처리)
-        Membership membership = membershipRepository.findByUserId(userId)
+        Membership membership = membershipRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalArgumentException("가입된 멤버십 정보가 없습니다."));
 
         return ResponseEntity.ok(MembershipResponse.from(membership));

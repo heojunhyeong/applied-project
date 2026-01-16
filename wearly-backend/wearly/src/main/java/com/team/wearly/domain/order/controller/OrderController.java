@@ -2,9 +2,11 @@ package com.team.wearly.domain.order.controller;
 
 import com.team.wearly.domain.order.dto.response.OrderDetailResponse;
 import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
+import com.team.wearly.domain.order.dto.response.OrderSheetResponse;
 import com.team.wearly.domain.order.entity.Order;
 import com.team.wearly.domain.order.entity.dto.request.OrderCreateRequest;
 import com.team.wearly.domain.order.service.OrderService;
+import com.team.wearly.domain.product.entity.enums.Size;
 import com.team.wearly.domain.user.entity.Admin;
 import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.user.entity.User;
@@ -141,5 +143,17 @@ public class OrderController {
 
         orderService.confirmPurchase(userId, orderId, orderDetailId);
         return ResponseEntity.ok("구매 확정이 완료되었습니다. 정산 프로세스가 시작됩니다.");
+    }
+
+    @GetMapping("/sheet")
+    public ResponseEntity<OrderSheetResponse> getOrderSheet(
+            @RequestParam(required = false) List<Long> cartItemIds,
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) Long quantity,
+            @RequestParam(required = false) Size size,
+            @AuthenticationPrincipal Long userId) { // 인증 방식에 따라 수정 필요
+
+        OrderSheetResponse response = orderService.getOrderSheet(userId, cartItemIds, productId, quantity, size);
+        return ResponseEntity.ok(response);
     }
 }

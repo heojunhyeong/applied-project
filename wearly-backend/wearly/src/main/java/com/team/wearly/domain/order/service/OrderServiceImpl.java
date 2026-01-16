@@ -40,20 +40,15 @@ public class OrderServiceImpl implements OrderService {
     private final SettlementService settlementService;
 
     /**
-     * 주문 로직
-     * 주문번호는 현재 날짜와 UUID를 조합하며 생성되며
-     * 최초 주문 상태는 {@link OrderStatus#BEFORE_PAID} 로 설정된다
-     * 단일 주문 상품 정보(사이트에서 주문하기 클릭)시 바로 구매로 우선 처리하고
-     * 단일 주문 상품 정보가 없을 시 장바구니 구매로 처리한다
-     * <p>
-     * TODO: 주석 보완 필요
+     * 새로운 주문을 생성하며, 단일 상품 바로 구매와 장바구니 상품 묶음 구매를 구분하여 처리함
+     * 쿠폰 적용 여부에 따라 할인 금액을 계산하고 주문 정보를 저장함
      *
-     * @param request 주문 생성을 위한 요청 객체
-     *                - userId: 주문을 생성하는 사용자 ID
-     * @return 생성되어 저장된 Order 엔티티
+     * @param userId 주문을 수행하는 사용자의 식별자
+     * @param request 주문 상품 정보, 배송지 정보, 적용 쿠폰 ID 등을 담은 객체
+     * @return 생성된 주문(Order) 엔티티
      * @author 허준형
      * @DateOfCreated 2026-01-11
-     * @DateOfEdit 2025-01-11
+     * @DateOfEdit 2026-01-15
      */
     @Override
     @Transactional
@@ -171,8 +166,15 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
-    // 주문 내역 목록
-    // TODO: 주석 보완 필요
+    /**
+     * 사용자의 주문 이력을 최신순으로 조회하며, 여러 상품 주문 시 대표 상품명(외 n건)을 구성함
+     *
+     * @param userId 주문 내역을 조회할 사용자의 식별자
+     * @return 요약된 주문 내역 응답 DTO 리스트
+     * @author 허준형
+     * @DateOfCreated 2026-01-11
+     * @DateOfEdit 2026-01-15
+     */
     @Override
     @Transactional(readOnly = true)
     public List<OrderHistoryResponse> getOrderHistory(Long userId) {
@@ -197,8 +199,15 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
     }
 
-    // 주문 상세 조회
-    // TODO: 주석 보완 필요
+    /**
+     * 특정 주문의 상세 정보를 조회하며, 각 주문 상품별 리뷰 작성 여부를 포함하여 반환함
+     *
+     * @param orderId 상세 정보를 조회할 주문 번호
+     * @return 주문 상세 정보, 배송지 및 개별 상품 목록을 담은 DTO
+     * @author 허준형
+     * @DateOfCreated 2026-01-11
+     * @DateOfEdit 2026-01-15
+     */
     @Override
     @Transactional(readOnly = true)
     public OrderDetailResponse getOrderDetail(String orderId) {
@@ -234,6 +243,16 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    /**
+     * 사용자가 배송 완료된 상품의 구매를 확정하고, 해당 품목에 대한 판매자 정산 프로세스를 시작함
+     *
+     * @param userId 구매 확정을 요청한 사용자의 식별자
+     * @param orderId 대상 주문 번호
+     * @param orderDetailId 주문 내 개별 상품 상세 번호
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @Override
     @Transactional
     public void confirmPurchase(Long userId, String orderId, Long orderDetailId) {

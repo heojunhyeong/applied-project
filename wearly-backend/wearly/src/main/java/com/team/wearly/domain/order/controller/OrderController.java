@@ -52,17 +52,48 @@ public class OrderController {
     }
 
 
+    /**
+     * 현재 로그인한 사용자의 전체 주문 내역을 조회하는 API
+     *
+     * @param authentication 인증된 사용자의 정보 (userId 추출용)
+     * @return 사용자의 주문 이력 리스트
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @GetMapping
     public ResponseEntity<List<OrderHistoryResponse>> getMyOrders(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(orderService.getOrderHistory(userId));
     }
 
+
+    /**
+     * 특정 주문 번호에 대한 상세 정보를 조회하는 API
+     *
+     * @param orderId 조회를 원하는 주문 번호
+     * @return 주문 상세 정보 데이터
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.getOrderDetail(orderId));
     }
 
+
+    /**
+     * 사용자가 상품 수령 후 구매를 최종 확정하는 API
+     *
+     * @param userId 인증된 사용자의 식별자
+     * @param orderId 해당 상품이 포함된 주문 번호
+     * @param orderDetailId 확정할 개별 상품의 상세 번호
+     * @return 구매 확정 성공 메시지
+     * @author 허준형
+     * @DateOfCreated 2026-01-15
+     * @DateOfEdit 2026-01-15
+     */
     @PostMapping("/{orderId}/details/{orderDetailId}/confirm")
     public ResponseEntity<String> confirmPurchase(
             @AuthenticationPrincipal Long userId,

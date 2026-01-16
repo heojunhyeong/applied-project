@@ -1,6 +1,7 @@
 package com.team.wearly.domain.user.service;
 
 import com.team.wearly.domain.user.dto.request.SignupRequest;
+import com.team.wearly.domain.user.dto.response.MyPageResponse;
 import com.team.wearly.domain.user.dto.response.SignupResponse;
 
 public interface UserService {
@@ -16,5 +17,7 @@ public interface UserService {
     public void requestPasswordReset(String email);
 
     public void resetPassword(String token, String newPassword);
+
+    MyPageResponse getMyPageData(Long userId);
 
 }

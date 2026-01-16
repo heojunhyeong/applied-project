@@ -27,8 +27,15 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
-     * 로그인 처리
-     * user, seller, admin 테이블에서 모두 조회 가능
+     * 입력된 아이디와 비밀번호를 바탕으로 User, Seller, Admin 테이블을 순차적으로 확인하여 인증을 수행함
+     * 인증 성공 시 해당 역할에 맞는 권한 정보를 포함한 JWT 토큰을 생성하여 반환함
+     *
+     * @param request 로그인 아이디(userId)와 비밀번호(userPassword)를 포함한 요청 DTO
+     * @return 토큰 정보, 회원 식별자, 역할 등이 포함된 로그인 응답 DTO
+     * @throws IllegalArgumentException 요청 값이 비어있거나 인증 정보가 일치하지 않을 경우 발생
+     * @author 허준형
+     * @DateOfCreated 2026-01-16
+     * @DateOfEdit 2026-01-16
      */
     @Transactional
     public LoginResponse login(LoginRequest request) {

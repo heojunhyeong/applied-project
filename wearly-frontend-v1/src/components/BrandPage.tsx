@@ -6,7 +6,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { useState } from "react";
+import { useState, type FormEvent, type KeyboardEvent } from "react";
 
 const brandData: Record<
   string,
@@ -396,7 +396,7 @@ export default function BrandPage() {
   );
 
   // Handle search
-  const handleSearch = (e?: React.FormEvent) => {
+  const handleSearch = (e?: FormEvent) => {
     if (e) e.preventDefault();
     setSearchQuery(searchInput);
     setIsSearchActive(true);
@@ -410,7 +410,7 @@ export default function BrandPage() {
   };
 
   // Handle Enter key
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch();
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Package, ShoppingBag, Truck, X, Plus } from "lucide-react";
 
@@ -204,7 +204,7 @@ export default function SellerPage() {
   ];
 
   const handleInputChange = (
-    e: React.ChangeEvent<
+    e: ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {

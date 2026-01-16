@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
   const isTokenValid = token && token.startsWith('valid');
 
   // Handle reset password
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = (e: FormEvent) => {
     e.preventDefault();
     
     // Validate password

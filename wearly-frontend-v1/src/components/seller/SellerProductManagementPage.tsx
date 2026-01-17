@@ -202,7 +202,10 @@ export default function SellerProductManagementPage() {
         `/api/seller/products/${productId}`,
         { method: "GET" }
       );
-      setDraftProduct(mapProductFromResponse(response));
+      const mapped = mapProductFromResponse(response);
+      setDraftProduct(mapped);
+      setPriceInput(String(mapped.price));
+      setStockInput(String(mapped.stockQuantity));
     } catch (error: any) {
       setErrorMessage(error.message ?? "상품 상세 조회에 실패했습니다.");
     }
@@ -223,13 +226,21 @@ export default function SellerProductManagementPage() {
   };
 
   // 상품 수정 모달 열기
-  const handleOpenEdit = (product: Product) => {
-    setEditingProductId(product.id);
-    setDraftProduct(product);
-    setPriceInput(String(product.price));
-    setStockInput(String(product.stockQuantity));
-    setIsEditModalOpen(true);
-  };
+ // 상품 수정 모달 열기 (상세 재조회 포함)
+const handleOpenEdit = async (product: Product) => {
+  setErrorMessage(null);
+  setEditingProductId(product.id);
+  setIsEditModalOpen(true);
+
+  // 일단 리스트 데이터로 바로 보여주고
+  setDraftProduct(product);
+  setPriceInput(String(product.price));
+  setStockInput(String(product.stockQuantity));
+
+  // 그 다음 상세 조회로 availableSizes까지 정확히 덮어쓰기
+  await fetchProductDetail(product.id);
+};
+
 
   // 상품 수정 모달 닫기
   const handleCloseEdit = () => {
@@ -310,39 +321,75 @@ export default function SellerProductManagementPage() {
   };
 
   // 상품 수정 API 연결용 핸들러
-  const updateMyProduct = (productId: string, payload: Product) => {
-    return { productId, payload };
+  const updateMyProduct = async (productId: number, payload: Product) => {
+    // 백엔드 SellerProductUpsertRequest에 맞춰서 보낼 바디만 추림
+    const body = {
+      productName: payload.productName,
+      price: payload.price,
+      stockQuantity: payload.stockQuantity,
+      description: payload.description,
+      imageUrl: payload.imageUrl,
+      brand: payload.brand,
+      productCategory: payload.productCategory,
+      status: payload.status,
+      availableSizes: payload.availableSizes,
+    };
+  
+    const updated = await apiFetch<SellerProductResponse>(
+      `/api/seller/products/${productId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(body),
+      }
+    );
+  
+    return mapProductFromResponse(updated);
   };
 
   // 상품 수정 저장
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingProductId || !draftProduct) return;
+  
     if (!priceInput || !stockInput) {
       alert("가격과 재고는 1 이상으로 입력해야 합니다.");
       return;
     }
-
+  
     const priceValue = Number(priceInput);
     const stockValue = Number(stockInput);
-    if (Number.isNaN(priceValue) || Number.isNaN(stockValue) || priceValue < 1 || stockValue < 1) {
+  
+    if (
+      Number.isNaN(priceValue) ||
+      Number.isNaN(stockValue) ||
+      priceValue < 1 ||
+      stockValue < 1
+    ) {
       alert("가격과 재고는 1 이상이어야 합니다.");
       return;
     }
-
-    const payload = {
+  
+    const payload: Product = {
       ...draftProduct,
       price: priceValue,
       stockQuantity: stockValue,
+      availableSizes: draftProduct.availableSizes ?? [],
     };
-
-    updateMyProduct(editingProductId, payload);
-
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === editingProductId ? { ...payload } : product
-      )
-    );
-    handleCloseEdit();
+  
+    try {
+      const updated = await updateMyProduct(editingProductId, payload);
+  
+      // 리스트 state 갱신
+      setProducts((prev) =>
+        prev.map((p) => (p.id === editingProductId ? { ...p, ...updated } : p))
+      );
+  
+      // 확실하게 DB 기준으로 다시 땡기고 싶으면 이거 켜
+      await fetchProducts(page);
+  
+      handleCloseEdit();
+    } catch (error: any) {
+      alert(error?.message ?? "상품 수정에 실패했습니다.");
+    }
   };
 
   return (

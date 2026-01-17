@@ -142,14 +142,16 @@ export default function PurchasePage() {
 
             // 2. 토스 페이먼츠 결제창 호출
             // @ts-ignore: index.html에 로드된 TossPayments SDK를 사용합니다.
-            const tossPayments = window.TossPayments("test_ck_D5VqZkd6bROq049NEgvE8jYpQPa2");
+            const tossPayments = window.TossPayments("test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml");
 
-            await tossPayments.requestPayment('카드', {
+            await tossPayments.requestPayment('CARD', { // 대문자 'CARD'로 보내거나, 혹은 상점 설정에 따라 다름
                 amount: finalAmount,
                 orderId: orderId,
                 orderName: orderSheet.items[0].productName + (orderSheet.items.length > 1 ? ` 외 ${orderSheet.items.length - 1}건` : ''),
-                successUrl: `${window.location.origin}/payment/success`,
-                failUrl: `${window.location.origin}/payment/fail`,
+                successUrl: `http://localhost:70/payment/success`,
+                failUrl: `http://localhost:70/payment/fail`,
+                // 아래 옵션을 추가하면 QR결제/간편결제가 포함된 선택창이 뜰 확률이 높습니다.
+                method: 'CARD',
             });
 
         } catch (err: any) {

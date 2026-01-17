@@ -1,6 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import SellerLayout from "./SellerLayout";
 import { apiFetch } from "../../api/http";
 
 type ProductStatus = "ON_SALE" | "SOLD_OUT" | "DELETED";
@@ -195,6 +194,17 @@ export default function SellerProductManagementPage() {
     }
   };
 
+  // 페이지 이동 처리
+  const handlePrevPage = () => {
+    if (page <= 0) return;
+    setPage((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleNextPage = () => {
+    if (totalPages <= 0 || page >= totalPages - 1) return;
+    setPage((prev) => Math.min(prev + 1, totalPages - 1));
+  };
+
   // 상품 상세 조회
   const fetchProductDetail = async (productId: number) => {
     try {
@@ -226,20 +236,20 @@ export default function SellerProductManagementPage() {
   };
 
   // 상품 수정 모달 열기
- // 상품 수정 모달 열기 (상세 재조회 포함)
-const handleOpenEdit = async (product: Product) => {
-  setErrorMessage(null);
-  setEditingProductId(product.id);
-  setIsEditModalOpen(true);
+  // 상품 수정 모달 열기 (상세 재조회 포함)
+  const handleOpenEdit = async (product: Product) => {
+    setErrorMessage(null);
+    setEditingProductId(product.id);
+    setIsEditModalOpen(true);
 
-  // 일단 리스트 데이터로 바로 보여주고
-  setDraftProduct(product);
-  setPriceInput(String(product.price));
-  setStockInput(String(product.stockQuantity));
+    // 일단 리스트 데이터로 바로 보여주고
+    setDraftProduct(product);
+    setPriceInput(String(product.price));
+    setStockInput(String(product.stockQuantity));
 
-  // 그 다음 상세 조회로 availableSizes까지 정확히 덮어쓰기
-  await fetchProductDetail(product.id);
-};
+    // 그 다음 상세 조회로 availableSizes까지 정확히 덮어쓰기
+    await fetchProductDetail(product.id);
+  };
 
 
   // 상품 수정 모달 닫기
@@ -321,171 +331,180 @@ const handleOpenEdit = async (product: Product) => {
   };
 
   // 상품 수정 API 연결용 핸들러
-  const updateMyProduct = async (productId: number, payload: Product) => {
-    // 백엔드 SellerProductUpsertRequest에 맞춰서 보낼 바디만 추림
-    const body = {
-      productName: payload.productName,
-      price: payload.price,
-      stockQuantity: payload.stockQuantity,
-      description: payload.description,
-      imageUrl: payload.imageUrl,
-      brand: payload.brand,
-      productCategory: payload.productCategory,
-      status: payload.status,
-      availableSizes: payload.availableSizes,
-    };
-  
-    const updated = await apiFetch<SellerProductResponse>(
-      `/api/seller/products/${productId}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(body),
-      }
-    );
-  
-    return mapProductFromResponse(updated);
+  const updateMyProduct = (productId: number, payload: Product) => {
+    return { productId, payload };
   };
 
   // 상품 수정 저장
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = () => {
     if (!editingProductId || !draftProduct) return;
-  
     if (!priceInput || !stockInput) {
       alert("가격과 재고는 1 이상으로 입력해야 합니다.");
       return;
     }
-  
+
     const priceValue = Number(priceInput);
     const stockValue = Number(stockInput);
-  
-    if (
-      Number.isNaN(priceValue) ||
-      Number.isNaN(stockValue) ||
-      priceValue < 1 ||
-      stockValue < 1
-    ) {
+    if (Number.isNaN(priceValue) || Number.isNaN(stockValue) || priceValue < 1 || stockValue < 1) {
       alert("가격과 재고는 1 이상이어야 합니다.");
       return;
     }
-  
-    const payload: Product = {
+
+    const payload = {
       ...draftProduct,
       price: priceValue,
       stockQuantity: stockValue,
-      availableSizes: draftProduct.availableSizes ?? [],
     };
-  
-    try {
-      const updated = await updateMyProduct(editingProductId, payload);
-  
-      // 리스트 state 갱신
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editingProductId ? { ...p, ...updated } : p))
-      );
-  
-      // 확실하게 DB 기준으로 다시 땡기고 싶으면 이거 켜
-      await fetchProducts(page);
-  
-      handleCloseEdit();
-    } catch (error: any) {
-      alert(error?.message ?? "상품 수정에 실패했습니다.");
-    }
+
+    updateMyProduct(editingProductId, payload);
+
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === editingProductId ? { ...payload } : product
+      )
+    );
+    handleCloseEdit();
   };
 
   return (
-    <SellerLayout>
-      <div className="p-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Product Management
-          </h1>
-          <p className="text-sm text-gray-600 mt-2">
-            Manage your product listings and stock status
-          </p>
-        </div>
+    <div className="p-8">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Product Management
+            </h1>
+            <p className="text-sm text-gray-600 mt-2">
+              Manage your product listings and stock status
+            </p>
+            {errorMessage && (
+              <p className="text-sm text-red-600 mt-3">{errorMessage}</p>
+            )}
+          </div>
 
-        {/* Product Table */}
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product ID
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product Image
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product Name
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Brand
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-gray-900">{product.id}</td>
-                  <td className="px-6 py-4">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.productName}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {product.productName}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {getBrandLabel(product.brand)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {getCategoryLabel(product.productCategory)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {product.price.toLocaleString()}원
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {product.stockQuantity}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                        product.status
-                      )}`}
-                    >
-                      {getStatusLabel(product.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <button
-                      onClick={() => handleOpenEdit(product)}
-                      className="px-4 py-2 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                    >
-                      Edit
-                    </button>
-                  </td>
+          {/* Product Table */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Product ID
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Product Image
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Product Name
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Action
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {isLoading ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
+                      Loading products...
+                    </td>
+                  </tr>
+                ) : products.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-12 text-center text-sm text-gray-500"
+                    >
+                      No products found
+                    </td>
+                  </tr>
+                ) : (
+                  products.map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {product.id}
+                      </td>
+                      <td className="px-6 py-4">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.productName}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.productName}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {getBrandLabel(product.brand)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {product.price.toLocaleString()}원
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {product.stockQuantity}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                            product.status
+                          )}`}
+                        >
+                          {getStatusLabel(product.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <button
+                          onClick={() => handleOpenEdit(product)}
+                          className="px-4 py-2 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between mt-6">
+            <div className="text-sm text-gray-600">
+              {totalElements.toLocaleString()} products total
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={page <= 0}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Prev
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {page + 1} of {Math.max(totalPages, 1)}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={totalPages <= 0 || page >= totalPages - 1}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Product Edit Modal */}
@@ -745,7 +764,6 @@ const handleOpenEdit = async (product: Product) => {
             </div>,
             document.body
           )}
-      </div>
-    </SellerLayout>
+    </div>
   );
 }

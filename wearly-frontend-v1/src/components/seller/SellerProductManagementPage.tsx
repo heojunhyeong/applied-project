@@ -330,14 +330,34 @@ export default function SellerProductManagementPage() {
     }
   };
 
-  // 상품 수정 API 연결용 핸들러
-  const updateMyProduct = (productId: number, payload: Product) => {
-    return { productId, payload };
+  //상품 수정 API 호출 (PUT)
+  const updateMyProduct = async (productId: number, payload: Product) => {
+    // // 백엔드가 받는 DTO에 맞춰서 변환
+    // // description: 상세 이미지 URL로 쓰는 중이라 그대로 보냄
+    const body = {
+      productName: payload.productName,
+      price: payload.price,
+      stockQuantity: payload.stockQuantity,
+      description: payload.description,
+      imageUrl: payload.imageUrl,
+      brand: payload.brand,
+      productCategory: payload.productCategory,
+      sizes: payload.availableSizes, // // 백엔드 DTO가 sizes 필드면 이렇게
+      status: payload.status,
+    };
+
+    // // 판매자 상품 수정 요청
+    return apiFetch(`/api/seller/products/${productId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
   };
 
   // 상품 수정 저장
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingProductId || !draftProduct) return;
+
     if (!priceInput || !stockInput) {
       alert("가격과 재고는 1 이상으로 입력해야 합니다.");
       return;
@@ -345,26 +365,40 @@ export default function SellerProductManagementPage() {
 
     const priceValue = Number(priceInput);
     const stockValue = Number(stockInput);
-    if (Number.isNaN(priceValue) || Number.isNaN(stockValue) || priceValue < 1 || stockValue < 1) {
+
+    if (
+      Number.isNaN(priceValue) ||
+      Number.isNaN(stockValue) ||
+      priceValue < 1 ||
+      stockValue < 1
+    ) {
       alert("가격과 재고는 1 이상이어야 합니다.");
       return;
     }
 
-    const payload = {
+    const payload: Product = {
       ...draftProduct,
       price: priceValue,
       stockQuantity: stockValue,
     };
 
-    updateMyProduct(editingProductId, payload);
+    try {
+      // // 백엔드 수정 요청
+      await updateMyProduct(editingProductId, payload);
 
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === editingProductId ? { ...payload } : product
-      )
-    );
-    handleCloseEdit();
+      // // 성공했을 때만 프론트 목록 반영
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === editingProductId ? { ...payload } : product
+        )
+      );
+
+      handleCloseEdit();
+    } catch (e: any) {
+      alert(e?.message ?? "상품 수정에 실패했습니다.");
+    }
   };
+
 
   return (
     <div className="p-8">
@@ -388,25 +422,31 @@ export default function SellerProductManagementPage() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Product ID
+                    ID
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Product Image
+                    Image
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Product Name
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Brand
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Category
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Price
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Stock
+                    Quantity
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Action
+                    Edit
                   </th>
                 </tr>
               </thead>
@@ -414,7 +454,7 @@ export default function SellerProductManagementPage() {
                 {isLoading ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={9}
                       className="px-6 py-12 text-center text-sm text-gray-500"
                     >
                       Loading products...
@@ -423,7 +463,7 @@ export default function SellerProductManagementPage() {
                 ) : products.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={9}
                       className="px-6 py-12 text-center text-sm text-gray-500"
                     >
                       No products found
@@ -436,19 +476,31 @@ export default function SellerProductManagementPage() {
                         {product.id}
                       </td>
                       <td className="px-6 py-4">
-                        <img
-                          src={product.imageUrl}
-                          alt={product.productName}
-                          className="w-16 h-16 object-cover rounded-md"
-                        />
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.productName}
+                            className="w-16 h-16 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-md bg-gray-200" />
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">
                           {product.productName}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {getBrandLabel(product.brand)}
-                        </div>
+                        {product.description && (
+                          <div className="text-xs text-gray-500 mt-1 truncate max-w-[220px]">
+                            {product.description}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {product.brand}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {product.productCategory}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {product.price.toLocaleString()}원

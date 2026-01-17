@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Star, Minus, Plus, Heart, Share2 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const productImages = [
   "https://images.unsplash.com/photo-1761891873744-eb181eb1334a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZW5pbSUyMGplYW5zJTIwcHJvZHVjdHxlbnwxfHx8fDE3NjgzNjE3MzB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
@@ -97,6 +97,7 @@ const qnaList = [
 ];
 
 export default function ProductDetailPage() {
+  const { productId } = useParams<{ productId: string }>();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -261,7 +262,22 @@ export default function ProductDetailPage() {
             {/* Action Buttons */}
             <div className="flex gap-3 mb-4">
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={() => {
+                  if (!selectedSize) {
+                    alert('사이즈를 선택해주세요.');
+                    return;
+                  }
+                  if (!productId) {
+                    alert('상품 정보를 불러올 수 없습니다.');
+                    return;
+                  }
+                  const params = new URLSearchParams({
+                    productId: productId,
+                    quantity: quantity.toString(),
+                    size: selectedSize,
+                  });
+                  navigate(`/checkout?${params.toString()}`);
+                }}
                 className="flex-1 py-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
               >
                 구매하기

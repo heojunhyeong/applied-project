@@ -61,4 +61,5 @@ server:
 # JWT 설정
 jwt:
   secret: your-256-bit-secret-key-for-jwt-token-generation-at-least-32-characters-long
-  expiration: 86400000  # 24시간 (밀리초)
+  expiration: 86400000  # Access Token: 24시간 (밀리초)
+  refresh-expiration: 604800000  # Refresh Token: 7일 (밀리초)

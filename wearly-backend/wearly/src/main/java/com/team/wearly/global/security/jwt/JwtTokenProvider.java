@@ -19,8 +19,11 @@ public class JwtTokenProvider {
     @Value("${jwt.secret:your-256-bit-secret-key-for-jwt-token-generation-at-least-32-characters-long}")
     private String secretKey;
 
-    @Value("${jwt.expiration:86400000}") // 24시간 (밀리초)
+    @Value("${jwt.expiration:3600000}") // Access Token: 1시간 (밀리초)
     private long jwtExpiration;
+
+    @Value("${jwt.refresh-expiration:604800000}") // Refresh Token: 7일 (밀리초)
+    private long refreshExpiration;
 
     // SecretKey 생성
     private SecretKey getSigningKey() {
@@ -68,22 +71,45 @@ public class JwtTokenProvider {
         return extractExpiration(token).before(new Date());
     }
 
-    // 사용자 정보로부터 토큰 생성
-    public String generateToken(String username, String role) {
+    // 사용자 정보로부터 Access Token 생성
+    public String generateAccessToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
-        return createToken(claims, username);
+        return createToken(claims, username, jwtExpiration);
     }
 
-    // 토큰 생성
-    private String createToken(Map<String, Object> claims, String subject) {
+    // 사용자 정보로부터 Refresh Token 생성
+    public String generateRefreshToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        return createToken(claims, username, refreshExpiration);
+    }
+
+    // 토큰 생성 (만료 시간 지정 가능)
+    private String createToken(Map<String, Object> claims, String subject, long expiration) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    // 토큰에서 역할(Role) 추출
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    // 만료된 토큰에서도 사용자명 추출 (Refresh Token 검증용)
+    public String extractUsernameFromExpiredToken(String token) {
+        try {
+            return extractUsername(token);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims().getSubject();
+        } catch (Exception e) {
+            throw new RuntimeException("토큰에서 사용자명을 추출할 수 없습니다", e);
+        }
     }
 
     // 토큰 유효성 검증

@@ -238,8 +238,8 @@ public class UserServiceImpl implements UserService {
 
         tokenRepository.save(resetToken);
 
-        // 링크 생성 (Postman 테스트 시 이 링크가 메일로 감)
-        String resetLink = frontendUrl + "/api/password/reset?token=" + token;
+        // 링크 생성 (프론트엔드 페이지로 이동하도록 설정)
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
 
         mailService.sendPasswordResetMail(user.getUserEmail(), resetLink);
     }

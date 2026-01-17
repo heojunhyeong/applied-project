@@ -108,4 +108,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         logger.warn("토큰 추출 실패 - 헤더: {}", bearerToken != null ? bearerToken.substring(0, Math.min(20, bearerToken.length())) + "..." : "null");
         return null;
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        // 비밀번호 재설정 관련 경로는 필터링 로직을 실행하지 않음
+        return path.startsWith("/api/password/");
+    }
 }

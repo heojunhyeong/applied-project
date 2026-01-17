@@ -1,6 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import AdminLayout from './AdminLayout';
+import { apiFetch } from '../../api/http';
+
+interface OrderListResponse {
+  orderId: number;
+  orderNumber: string;
+  userId: number;
+  paymentStatus: string;
+}
+
+interface OrderDetailResponse {
+  orderId: number;
+  orderNumber: string;
+  userId: number;
+  userNickname: string;
+  userEmail: string;
+  orderDate: string;
+  totalPrice: number;
+  couponDiscountPrice: number;
+  finalPrice: number;
+  orderStatus: string;
+  deliveryStatus: string;
+  isPaid: boolean;
+  paymentInfo?: {
+    exists: boolean;
+    status: string;
+    amount: number;
+    paymentMethod: string;
+    paymentDate: string;
+  };
+  orderItems: Array<{
+    productId: number;
+    productName: string;
+    imageUrl: string;
+    quantity: number;
+    price: number;
+    totalItemPrice: number;
+  }>;
+  deliveryInfo?: {
+    address: string;
+    detailAddress: string;
+    zipCode: number;
+    carrier: string;
+    invoiceNumber: string;
+  };
+}
 
 interface OrderProduct {
   productName: string;
@@ -17,161 +62,95 @@ interface Order {
   totalAmount: number;
   orderStatus: 'Completed' | 'Pending' | 'Cancelled' | 'Refunded';
   products: OrderProduct[];
+  detail?: OrderDetailResponse;
 }
 
 export default function OrderManagementPage() {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [orders] = useState<Order[]>([
-    {
-      orderId: 'O001',
-      orderNumber: '2024011501234',
-      userId: 'U001',
-      totalAmount: 248000,
-      orderStatus: 'Completed',
-      products: [
-        {
-          productName: 'NIKE Air Max 270',
-          quantity: 1,
-          price: 159000,
-          sellerId: 'S001',
-          status: 'Completed',
-        },
-        {
-          productName: 'ADIDAS Originals Hoodie',
-          quantity: 1,
-          price: 89000,
-          sellerId: 'S002',
-          status: 'Completed',
-        },
-      ],
-    },
-    {
-      orderId: 'O002',
-      orderNumber: '2024011502345',
-      userId: 'U003',
-      totalAmount: 159000,
-      orderStatus: 'Completed',
-      products: [
-        {
-          productName: 'NIKE Air Force 1',
-          quantity: 1,
-          price: 159000,
-          sellerId: 'S001',
-          status: 'Completed',
-        },
-      ],
-    },
-    {
-      orderId: 'O003',
-      orderNumber: '2024011603456',
-      userId: 'U002',
-      totalAmount: 327000,
-      orderStatus: 'Pending',
-      products: [
-        {
-          productName: 'THE NORTH FACE Nuptse Jacket',
-          quantity: 1,
-          price: 298000,
-          sellerId: 'S003',
-          status: 'Pending',
-        },
-        {
-          productName: "LEVI'S 501 Original Jeans",
-          quantity: 1,
-          price: 129000,
-          sellerId: 'S004',
-          status: 'Pending',
-        },
-      ],
-    },
-    {
-      orderId: 'O004',
-      orderNumber: '2024011604567',
-      userId: 'U001',
-      totalAmount: 89000,
-      orderStatus: 'Cancelled',
-      products: [
-        {
-          productName: 'ADIDAS Originals Hoodie',
-          quantity: 1,
-          price: 89000,
-          sellerId: 'S002',
-          status: 'Cancelled',
-        },
-      ],
-    },
-    {
-      orderId: 'O005',
-      orderNumber: '2024011605678',
-      userId: 'U005',
-      totalAmount: 456000,
-      orderStatus: 'Completed',
-      products: [
-        {
-          productName: 'NEW BALANCE 990v5',
-          quantity: 2,
-          price: 228000,
-          sellerId: 'S005',
-          status: 'Completed',
-        },
-      ],
-    },
-    {
-      orderId: 'O006',
-      orderNumber: '2024011606789',
-      userId: 'U003',
-      totalAmount: 128000,
-      orderStatus: 'Refunded',
-      products: [
-        {
-          productName: "LEVI'S Trucker Jacket",
-          quantity: 1,
-          price: 128000,
-          sellerId: 'S004',
-          status: 'Cancelled',
-        },
-      ],
-    },
-    {
-      orderId: 'O007',
-      orderNumber: '2024011607890',
-      userId: 'U002',
-      totalAmount: 215000,
-      orderStatus: 'Pending',
-      products: [
-        {
-          productName: 'NIKE Sportswear Tech Fleece',
-          quantity: 1,
-          price: 215000,
-          sellerId: 'S001',
-          status: 'Pending',
-        },
-      ],
-    },
-    {
-      orderId: 'O008',
-      orderNumber: '2024011608901',
-      userId: 'U004',
-      totalAmount: 98000,
-      orderStatus: 'Completed',
-      products: [
-        {
-          productName: 'ADIDAS Superstar Shoes',
-          quantity: 1,
-          price: 98000,
-          sellerId: 'S002',
-          status: 'Completed',
-        },
-      ],
-    },
-  ]);
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const toggleOrderExpand = (orderId: string) => {
+        const response = await apiFetch<OrderListResponse[]>('/api/admin/orders');
+        const mappedOrders: Order[] = (response || []).map((o) => ({
+          orderId: o.orderId.toString(),
+          orderNumber: o.orderNumber,
+          userId: o.userId.toString(),
+          totalAmount: 0, // Will be filled from detail
+          orderStatus: o.paymentStatus === 'O' ? ('Completed' as const) : ('Pending' as const),
+          products: [],
+        }));
+
+        setOrders(mappedOrders);
+      } catch (err: any) {
+        setError(err.message || '주문 목록을 불러오는데 실패했습니다.');
+        console.error('Failed to fetch orders:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  // Fetch order detail when expanded
+  const fetchOrderDetail = async (orderId: string) => {
+    const order = orders.find((o) => o.orderId === orderId);
+    if (order?.detail) {
+      return; // Already loaded
+    }
+
+    try {
+      const detail = await apiFetch<OrderDetailResponse>(`/api/admin/orders/${orderId}`);
+      
+      const statusMap: Record<string, 'Completed' | 'Pending' | 'Cancelled' | 'Refunded'> = {
+        DELIVERY_COMPLETED: 'Completed',
+        PAID: 'Completed',
+        BEFORE_PAID: 'Pending',
+        CANCELLED: 'Cancelled',
+        REFUNDED: 'Refunded',
+      };
+
+      const mappedProducts: OrderProduct[] = detail.orderItems.map((item) => ({
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        sellerId: '', // TODO: Get from product detail
+        status: statusMap[detail.orderStatus] || 'Pending',
+      }));
+
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.orderId === orderId
+            ? {
+                ...o,
+                totalAmount: detail.finalPrice,
+                orderStatus: statusMap[detail.orderStatus] || 'Pending',
+                products: mappedProducts,
+                detail,
+              }
+            : o
+        )
+      );
+    } catch (err: any) {
+      console.error('Failed to fetch order detail:', err);
+      alert(`주문 상세 정보를 불러오는데 실패했습니다: ${err.message}`);
+    }
+  };
+
+  const toggleOrderExpand = async (orderId: string) => {
     if (expandedOrderId === orderId) {
       setExpandedOrderId(null);
     } else {
       setExpandedOrderId(orderId);
+      await fetchOrderDetail(orderId);
     }
   };
 
@@ -189,6 +168,30 @@ export default function OrderManagementPage() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-600">로딩 중...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">{error}</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

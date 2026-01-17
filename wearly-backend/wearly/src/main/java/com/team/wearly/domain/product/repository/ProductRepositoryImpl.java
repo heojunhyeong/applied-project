@@ -34,8 +34,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                         brandEq(condition.brand()),
                         categoryEq(condition.category()),
                         keywordLike(condition.keyword()),
-                        isDisplayable()
-                )
+                        isDisplayable())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(getOrderSpecifier(condition.sort()))
@@ -48,8 +47,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                         brandEq(condition.brand()),
                         categoryEq(condition.category()),
                         keywordLike(condition.keyword()),
-                        isDisplayable()
-                );
+                        isDisplayable());
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -62,8 +60,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 .from(product)
                 .where(
                         brandEq(brand),
-                        isDisplayable()
-                )
+                        isDisplayable())
                 .orderBy(product.productCategory.asc())
                 .fetch();
     }
@@ -82,7 +79,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     private BooleanExpression keywordLike(String keyword) {
         return (keyword != null && !keyword.isBlank())
-                ? product.productName.containsIgnoreCase(keyword) : null;
+                ? product.productName.containsIgnoreCase(keyword)
+                : null;
     }
 
     private OrderSpecifier<?> getOrderSpecifier(ProductSortType sortType) {
@@ -91,7 +89,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         }
 
         return switch (sortType) {
-            case PRICE_LOW -> product.price.asc();  // 낮은 가격순
+            case PRICE_LOW -> product.price.asc(); // 낮은 가격순
             case PRICE_HIGH -> product.price.desc(); // 높은 가격순
             case LATEST -> product.createdDate.desc(); // 최신순
         };

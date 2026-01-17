@@ -37,6 +37,13 @@ const SIZE_MAP: Record<ProductSize, string> = {
   EXTRA_LARGE: "XL"
 };
 
+const SIZE_REVERSE_MAP: Record<string, ProductSize> = {
+    "S": "SMALL",
+    "M": "MEDIUM",
+    "L": "LARGE",
+    "XL": "EXTRA_LARGE"
+};
+
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -126,10 +133,11 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                    ? "border-gray-900"
-                    : "border-transparent hover:border-gray-300"
-                    }`}
+                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedImage === index
+                      ? "border-gray-900"
+                      : "border-transparent hover:border-gray-300"
+                  }`}
                 >
                   <ImageWithFallback
                     src={img}
@@ -282,9 +290,47 @@ export default function ProductDetailPage() {
               >
                 구매하기
               </button>
-              <button className="flex-1 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                장바구니
-              </button>
+                <button
+                    onClick={async () => {
+                        if (!selectedSize) {
+                            alert('사이즈를 선택해주세요.');
+                            return;
+                        }
+                        if (!productId) {
+                            alert('상품 정보를 불러올 수 없습니다.');
+                            return;
+                        }
+
+                        try {
+                            // Convert display size (S, M, L, XL) to backend enum (SMALL, MEDIUM, LARGE, EXTRA_LARGE)
+                            const backendSize = SIZE_REVERSE_MAP[selectedSize];
+                            if (!backendSize) {
+                                alert('유효하지 않은 사이즈입니다.');
+                                return;
+                            }
+
+                            await apiFetch(`/api/users/cart/items`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    productId: Number(productId),
+                                    quantity: quantity,
+                                    size: backendSize,
+                                }),
+                            });
+
+                            alert('장바구니에 추가되었습니다.');
+                            navigate('/cart');
+                        } catch (err: any) {
+                            alert(err.message || '장바구니 추가에 실패했습니다.');
+                        }
+                    }}
+                    className="flex-1 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                    장바구니
+                </button>
             </div>
 
             {/* Shipping Info */}
@@ -391,10 +437,10 @@ export default function ProductDetailPage() {
                     </div>
 
                     <div className="flex-1">
-                      {/* Note: Histogram data not available from backend 'SellerProductResponse' initially. 
-                          Ideally we'd calculate this or fetch it. For now, hiding or showing dummy bars. 
+                      {/* Note: Histogram data not available from backend 'SellerProductResponse' initially.
+                          Ideally we'd calculate this or fetch it. For now, hiding or showing dummy bars.
                           Since we only have list of reviews, we can calculate from that if all reviews are returned,
-                          but usually it's paginated. We will infer from the current list for now (up to 5). 
+                          but usually it's paginated. We will infer from the current list for now (up to 5).
                       */}
                       {[5, 4, 3, 2, 1].map((rating) => {
                         // Simple count from the 'reviews' list (which is minimal or first page)

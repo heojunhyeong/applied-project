@@ -193,8 +193,19 @@ export default function MembershipPage() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                const errorMessage = errorData?.message || `서버 오류 (${response.status})`;
+                const errorText = await response.text();
+                let errorMessage = `서버 오류 (${response.status})`;
+
+                try {
+                    // JSON 형식이면 파싱 시도
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // JSON이 아니면 텍스트 그대로 사용 (예: "인증 정보가 없습니다.")
+                    if (errorText && errorText.trim().length > 0) {
+                        errorMessage = errorText;
+                    }
+                }
                 throw new Error(errorMessage);
             }
 

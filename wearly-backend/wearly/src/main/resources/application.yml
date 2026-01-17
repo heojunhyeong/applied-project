@@ -3,9 +3,9 @@ spring:
     name: wearly
 
   datasource:
-    #url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     #url: jdbc:mysql://mysql:3306/wearly_mysql
-    url: jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
     password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver

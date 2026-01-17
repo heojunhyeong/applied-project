@@ -4,6 +4,7 @@ import com.team.wearly.domain.payment.dto.response.TossBillingConfirmResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
@@ -26,13 +27,12 @@ public class TossPaymentClient {
     @Value("${payment.toss.secret-key:}")
     private String secretKey;
 
-
     /**
      * 프론트엔드에서 전달받은 결제 정보를 토스 서버에 보내 최종 결제 승인을 요청함
      *
      * @param paymentKey 토스에서 발행한 결제 고유 키
-     * @param orderId 우리 시스템의 주문 번호
-     * @param amount 결제 금액
+     * @param orderId    우리 시스템의 주문 번호
+     * @param amount     결제 금액
      * @return 토스에서 응답한 결제 승인 상세 정보
      * @author 허준형
      * @DateOfCreated 2026-01-10
@@ -63,11 +63,11 @@ public class TossPaymentClient {
             ResponseEntity<TossConfirmResponse> response = restTemplate.postForEntity(
                     url,
                     request,
-                    TossConfirmResponse.class
-            );
+                    TossConfirmResponse.class);
             return response.getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("토스 결제 승인 요청 실패: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
-            // @TODO 해당 예외 추후 커스텀 예외로 교체 에정
             throw new RuntimeException("토스 결제 승인 요청 실패", e);
         }
 
@@ -76,17 +76,18 @@ public class TossPaymentClient {
     /**
      * 발급된 빌링키를 사용하여 사용자의 개입 없이 정기 결제를 실행함
      *
-     * @param billingKey 자동 결제용 빌링키
+     * @param billingKey  자동 결제용 빌링키
      * @param customerKey 고객 식별 키
-     * @param orderId 주문 번호
-     * @param amount 결제 금액
-     * @param orderName 주문 상품명
+     * @param orderId     주문 번호
+     * @param amount      결제 금액
+     * @param orderName   주문 상품명
      * @return 결제 승인 응답 정보
      * @author 허준형
      * @DateOfCreated 2026-01-15
      * @DateOfEdit 2026-01-15
      */
-    public TossConfirmResponse executeBillingPayment(String billingKey, String customerKey, String orderId, Long amount, String orderName) {
+    public TossConfirmResponse executeBillingPayment(String billingKey, String customerKey, String orderId, Long amount,
+            String orderName) {
         // 빌링키 결제 API URL
         String url = "https://api.tosspayments.com/v1/billing/" + billingKey;
 
@@ -110,9 +111,10 @@ public class TossPaymentClient {
             ResponseEntity<TossConfirmResponse> response = restTemplate.postForEntity(
                     url,
                     request,
-                    TossConfirmResponse.class
-            );
+                    TossConfirmResponse.class);
             return response.getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("빌링 결제 실행 실패: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             throw new RuntimeException("빌링 결제 실행 실패: " + e.getMessage());
         }
@@ -121,7 +123,7 @@ public class TossPaymentClient {
     /**
      * 이미 완료된 결제 건에 대해 부분 혹은 전체 취소를 요청함
      *
-     * @param paymentKey 취소할 결제의 고유 키
+     * @param paymentKey   취소할 결제의 고유 키
      * @param cancelReason 결제 취소 사유
      * @author 허준형
      * @DateOfCreated 2026-01-15
@@ -144,16 +146,17 @@ public class TossPaymentClient {
 
         try {
             restTemplate.postForEntity(url, request, Object.class);
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("토스 결제 취소 요청 실패: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             throw new RuntimeException("토스 결제 취소 요청 실패: " + e.getMessage());
         }
     }
 
-
     /**
      * 카드 인증 후 전달받은 authKey를 통해 정기 결제를 위한 빌링키를 최종 발급받음
      *
-     * @param authKey 토스 창에서 인증 후 받은 인증 키
+     * @param authKey     토스 창에서 인증 후 받은 인증 키
      * @param customerKey 고객 식별 키
      * @return 발급된 빌링키 정보를 포함한 응답 객체
      * @author 허준형
@@ -161,7 +164,7 @@ public class TossPaymentClient {
      * @DateOfEdit 2026-01-15
      */
     public TossBillingConfirmResponse issueBillingKey(String authKey, String customerKey) {
-        String url = "https://api.tosspayments.com/v1/billing/authorizations/confirm";
+        String url = "https://api.tosspayments.com/v1/billing/authorizations/issue";
 
         String authorizations = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -180,11 +183,12 @@ public class TossPaymentClient {
             ResponseEntity<TossBillingConfirmResponse> response = restTemplate.postForEntity(
                     url,
                     request,
-                    TossBillingConfirmResponse.class
-            );
+                    TossBillingConfirmResponse.class);
             return response.getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("빌링키 발급 요청 실패: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
-            throw new RuntimeException("빌링키 발급 요청 실패", e);
+            throw new RuntimeException("빌링키 발급 요청 실패: " + e.getMessage(), e);
         }
     }
 

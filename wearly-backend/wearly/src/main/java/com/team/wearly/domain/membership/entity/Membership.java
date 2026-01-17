@@ -25,7 +25,7 @@ public class Membership extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    private Long userId;
+    // private Long userId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // DB에는 user_id로 저장됨
@@ -51,7 +51,8 @@ public class Membership extends BaseTimeEntity {
     }
 
     public Long getUserId() {
-        if (this.user == null) return null;
+        if (this.user == null)
+            return null;
         return this.user.getId();
     }
 
@@ -65,5 +66,9 @@ public class Membership extends BaseTimeEntity {
 
     public String getUserName() {
         return this.user != null ? this.user.getUserName() : null;
+    }
+
+    public void updateOrderId(String orderId) {
+        this.orderId = orderId;
     }
 }

@@ -100,7 +100,7 @@ public class Product {
     }
 
     public void softDelete() {
-        this.status = ProductStatus.SOLD_OUT;
+        this.status = ProductStatus.DELETED;
     }
     @Column(nullable = true)
     private Long sellerId;  // 상품을 등록한 seller의 ID

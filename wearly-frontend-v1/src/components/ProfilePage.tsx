@@ -10,6 +10,7 @@ import {
   updateProfileImage,
 } from "../api/profile";
 import { getAccessToken, getRoleFromToken, UserRole } from "../utils/auth";
+import { downloadCoupon } from "../api/coupon";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
@@ -26,6 +27,9 @@ export default function ProfilePage() {
   const [imageUploading, setImageUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -180,6 +184,21 @@ export default function ProfilePage() {
     } finally {
       setImageUploading(false);
     }
+  };
+
+  const handleDownloadCoupon = async (benefitId: number) => {
+      setCouponLoading(true);
+      setCouponError(null);
+
+      try {
+          await downloadCoupon(benefitId);
+          setShowCouponModal(false);
+          alert("쿠폰이 발급되었습니다!");
+      } catch (e: any) {
+          setCouponError(e.message ?? "쿠폰 발급 중 오류가 발생했습니다.");
+      } finally {
+          setCouponLoading(false);
+      }
   };
 
   if (loadingProfile) {
@@ -411,6 +430,24 @@ export default function ProfilePage() {
         </div>
       </div>
 
+        {/* Coupon Section - 이 부분 추가 필요 */}
+        <div className="p-6 border-b border-gray-100">
+            <div className="flex items-start gap-6">
+                <div className="w-32 flex-shrink-0">
+                    <label className="text-sm text-gray-700">Coupon</label>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <button
+                        onClick={() => setShowCouponModal(true)}
+                        className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                    >
+                        쿠폰 발급받기
+                    </button>
+                </div>
+            </div>
+        </div>
+
       {/* Bottom Actions */}
       {isEditing && (
         <div className="p-6 bg-gray-50">
@@ -434,6 +471,68 @@ export default function ProfilePage() {
       )}
     </div>
   );
+
+    const couponModal = showCouponModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">쿠폰 발급</h2>
+                    <button
+                        onClick={() => {
+                            setShowCouponModal(false);
+                            setCouponError(null);
+                        }}
+                        className="text-gray-400 hover:text-gray-600"
+                        disabled={couponLoading}
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-6">
+                    발급받을 쿠폰을 선택해주세요.
+                </p>
+
+                {couponError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-600">{couponError}</p>
+                    </div>
+                )}
+
+                <div className="space-y-3">
+                    <button
+                        onClick={() => handleDownloadCoupon(1)}
+                        disabled={couponLoading}
+                        className="w-full px-4 py-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <div className="font-semibold text-gray-900">10% 할인 쿠폰</div>
+                        <div className="text-sm text-gray-600 mt-1">
+                            최소 주문금액: 10,000원 이상
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={() => handleDownloadCoupon(2)}
+                        disabled={couponLoading}
+                        className="w-full px-4 py-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <div className="font-semibold text-gray-900">5,000원 할인 쿠폰</div>
+                        <div className="text-sm text-gray-600 mt-1">
+                            최소 주문금액: 30,000원 이상
+                        </div>
+                    </button>
+                </div>
+
+                {couponLoading && (
+                    <div className="mt-4 text-center">
+                        <p className="text-sm text-gray-600">쿠폰 발급 중...</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 
   // 페이지 레이아웃 구성
   return isAdmin ? (
@@ -469,7 +568,8 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {profileCard}
+          {profileCard}
+          {couponModal}
       </div>
     </AdminLayout>
   ) : (
@@ -505,7 +605,8 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {profileCard}
+          {profileCard}
+          {couponModal}
       </div>
     </div>
   );

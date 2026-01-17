@@ -203,18 +203,21 @@ export default function ProductDetailPage() {
               </label>
               <div className="grid grid-cols-5 gap-2">
                 {sizes.length > 0 ? (
-                  sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`py-3 text-center border rounded-lg transition-all ${selectedSize === size
-                        ? "border-gray-900 bg-gray-900 text-white"
-                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-900"
-                        }`}
-                    >
-                      {size}
-                    </button>
-                  ))
+                  product.availableSizes?.map((sizeEnum) => {
+                    const displaySize = SIZE_MAP[sizeEnum];
+                    return (
+                      <button
+                        key={sizeEnum}
+                        onClick={() => setSelectedSize(sizeEnum)}
+                        className={`py-3 text-center border rounded-lg transition-all ${selectedSize === sizeEnum
+                          ? "border-gray-900 bg-gray-900 text-white"
+                          : "border-gray-300 bg-white text-gray-700 hover:border-gray-900"
+                          }`}
+                      >
+                        {displaySize}
+                      </button>
+                    );
+                  })
                 ) : (
                   <div className="col-span-5 text-gray-500 text-sm">
                     선택 가능한 사이즈가 없습니다.

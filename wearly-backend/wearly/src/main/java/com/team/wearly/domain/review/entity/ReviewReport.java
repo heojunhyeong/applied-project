@@ -31,9 +31,12 @@ public class ReviewReport extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "review_id", nullable = false)
-    private Long reviewId;
+    // 신고 대상 리뷰 연관관계 // 리뷰를 join하기 위한 FK 관계
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "review_id", nullable = false)
+    private ProductReview review;
 
+    // 신고자 ID // 신고한 사람(판매자 or 유저)
     @Column(name = "reporter_id", nullable = false)
     private Long reporterId;
 

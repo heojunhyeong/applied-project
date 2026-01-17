@@ -35,18 +35,8 @@ public class SellerReviewService {
     private final ProductReviewRepository productReviewRepository;
     private final ReviewReportRepository reviewReportRepository;
 
-
     /**
      * 판매자가 소유한 상품들에 달린 리뷰 목록을 조회함 (상품별, 상태별 필터링 지원)
-     *
-     * @param sellerId 판매자 식별자
-     * @param productId 특정 상품 식별자 (null일 경우 전체 상품 대상)
-     * @param status 리뷰 노출 상태 (null일 경우 전체 상태 대상)
-     * @param pageable 페이징 정보
-     * @return 리뷰 항목 응답 DTO 페이지
-     * @author 허보미
-     * @DateOfCreated 2026-01-12
-     * @DateOfEdit 2026-01-12
      */
     public Page<SellerReviewResponse.SellerReviewItemResponse> getMyProductReviews(
             Long sellerId,
@@ -54,8 +44,10 @@ public class SellerReviewService {
             ReviewStatus status,
             Pageable pageable
     ) {
+        // 판매자 소유 상품 리뷰 목록 조회 // productId/status 필터 적용
         Page<ProductReview> page = productReviewRepository.findSellerReviews(sellerId, productId, status, pageable);
 
+        // 엔티티 -> DTO 매핑 // 프론트 응답 형태로 변환
         return page.map(r -> new SellerReviewResponse.SellerReviewItemResponse(
                 r.getId(),
                 r.getProduct().getId(),
@@ -68,23 +60,17 @@ public class SellerReviewService {
         ));
     }
 
-
     /**
      * 판매자의 전체 상품 혹은 특정 상품의 평균 별점과 총 리뷰 수를 집계하여 반환함
-     *
-     * @param sellerId 판매자 식별자
-     * @param productId 특정 상품 식별자 (null일 경우 전체 통계)
-     * @return 평균 평점과 개수가 포함된 요약 DTO
-     * @author 허보미
-     * @DateOfCreated 2026-01-12
-     * @DateOfEdit 2026-01-12
      */
     public SellerReviewResponse.SellerReviewSummaryResponse getMyReviewSummary(Long sellerId, Long productId) {
+        // 평균/개수 집계 쿼리 실행 // (avg, count) 반환
         Object[] row = productReviewRepository.getSellerReviewSummary(sellerId, productId);
 
         double avg = 0.0;
         long cnt = 0L;
 
+        // 결과 파싱 // null 안전 처리
         if (row != null) {
             if (row[0] != null) avg = ((Number) row[0]).doubleValue();
             if (row[1] != null) cnt = ((Number) row[1]).longValue();
@@ -95,67 +81,53 @@ public class SellerReviewService {
 
     /**
      * 판매자가 등록한 각 상품별로 리뷰 통계(평균 별점, 리뷰 개수) 리스트를 조회함
-     *
-     * @param sellerId 판매자 식별자
-     * @return 상품별 리뷰 요약 정보 리스트
-     * @author 허보미
-     * @DateOfCreated 2026-01-12
-     * @DateOfEdit 2026-01-12
      */
     public List<ProductReviewSummaryResponse> getProductReviewSummaries(Long sellerId) {
+        // 판매자 상품별 리뷰 요약 리스트 조회 // group by product
         return productReviewRepository.getProductReviewSummaries(sellerId);
     }
 
     /**
      * 특정 리뷰가 본인 상품의 리뷰인지 확인하고, 중복 신고 여부를 체크한 뒤 관리자에게 신고 내역을 접수함
-     *
-     * @param sellerId 판매자 식별자
-     * @param reporterId 신고 주체 식별자
-     * @param reviewId 신고 대상 리뷰 식별자
-     * @param reason 신고 사유 (비방, 허위 사실 등)
-     * @author 허보미
-     * @DateOfCreated 2026-01-12
-     * @DateOfEdit 2026-01-12
      */
     @Transactional
     public void reportReview(Long sellerId, Long reporterId, Long reviewId, ReviewReportReason reason) {
+        // 신고 사유 필수 체크 // null이면 400
         if (reason == null) throw new ResponseStatusException(BAD_REQUEST, "reason은 필수");
 
+        // 본인 상품 리뷰인지 권한 체크 // 남의 상품 리뷰 신고 불가
         boolean exists = productReviewRepository.existsSellerReview(reviewId, sellerId);
+        if (!exists) throw new ResponseStatusException(FORBIDDEN, "본인 상품 리뷰만 신고 접수 가능");
 
-        if (!exists) {
-            throw new ResponseStatusException(FORBIDDEN, "본인 상품 리뷰만 신고 접수 가능");
-        }
-
-        if (reviewReportRepository.existsByReviewIdAndReporterId(reviewId, reporterId)) {
+        // 중복 신고 방지 // 같은 신고자가 같은 리뷰를 또 신고 못함
+        if (reviewReportRepository.existsByReview_IdAndReporterId(reviewId, reporterId)) {
             throw new ResponseStatusException(CONFLICT, "이미 신고 접수한 리뷰");
         }
 
+        // 신고 대상 리뷰 엔티티 로드 // 연관관계 저장용
+        ProductReview review = productReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "리뷰가 존재하지 않습니다."));
+
+        // 신고 엔티티 생성 // reviewId 대신 review 연관관계로 저장
         ReviewReport report = ReviewReport.builder()
-                .reviewId(reviewId)
+                .review(review)
                 .reporterId(reporterId)
                 .reason(reason)
                 .build();
 
+        // 신고 저장 // PENDING 기본값 유지
         reviewReportRepository.save(report);
     }
 
     /**
      * 판매자가 이전에 접수한 리뷰 신고들의 진행 상태(접수, 반려, 승인 등)를 조회함
-     *
-     * @param sellerId 판매자 식별자
-     * @param status 신고 처리 상태 필터 (Optional)
-     * @param pageable 페이징 정보
-     * @return 신고 내역 항목 DTO 페이지
-     * @author 허보미
-     * @DateOfCreated 2026-01-16
-     * @DateOfEdit 2026-01-16
      */
     public Page<SellerReviewReportItemResponse> getMyReviewReports(
             Long sellerId,
             ReviewReportStatus status,
             Pageable pageable
     ) {
+        // 판매자 기준 신고 목록 조회 // 상태 필터(optional) + 페이징
         return reviewReportRepository.findSellerReviewReports(sellerId, status, pageable);
     }
 }

@@ -1,202 +1,212 @@
-import { useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
-
-interface ProfileData {
-  userId: string;
-  email: string;
-  nickname: string;
-  introduction: string;
-  phoneNumber: string;
-  profileImage: string | null;
-}
-
-interface PasswordData {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
+import AdminLayout from "./admin/AdminLayout";
+import {
+  fetchProfile,
+  ProfileFormState,
+  ProfileResponse,
+  requestProfilePresignedUrl,
+  updateProfile,
+  updateProfileImage,
+} from "../api/profile";
+import { getAccessToken, getRoleFromToken, UserRole } from "../utils/auth";
 
 export default function ProfilePage() {
-  // Profile data
-  const [profile, setProfile] = useState<ProfileData>({
-    userId: "user12345",
-    email: "user@example.com",
-    nickname: "bomi123",
-    introduction:
-      "Fashion enthusiast who loves streetwear and vintage styles",
-    phoneNumber: "010-1234-5678",
-    profileImage: null,
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
+  const [form, setForm] = useState<ProfileFormState>({
+    nickname: "",
+    introduction: "",
+    phoneNumber: "",
+    imageUrl: null,
   });
 
-  // Edit states for each field
-  const [editingPassword, setEditingPassword] = useState(false);
-  const [editingEmail, setEditingEmail] = useState(false);
-  const [editingNickname, setEditingNickname] = useState(false);
-  const [editingIntroduction, setEditingIntroduction] =
-    useState(false);
-  const [editingPhoneNumber, setEditingPhoneNumber] =
-    useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
 
-  // Temporary values during editing
-  const [tempEmail, setTempEmail] = useState(profile.email);
-  const [tempNickname, setTempNickname] = useState(
-    profile.nickname,
-  );
-  const [tempIntroduction, setTempIntroduction] = useState(
-    profile.introduction,
-  );
-  const [tempPhoneNumber, setTempPhoneNumber] = useState(
-    profile.phoneNumber,
-  );
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Password editing values
-  const [passwordData, setPasswordData] =
-    useState<PasswordData>({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+  // 프로필 데이터를 폼 상태로 변환
+  const toFormState = (data: ProfileResponse): ProfileFormState => ({
+    nickname: data.userNickname ?? "",
+    introduction: data.introduction ?? "",
+    phoneNumber: data.phoneNumber ?? "",
+    imageUrl: data.imageUrl ?? null,
+  });
 
-  // Handle Edit/Cancel for Password
-  const handleEditPassword = () => {
-    if (editingPassword) {
-      // Cancel - reset password fields
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      setEditingPassword(false);
-    } else {
-      // Edit
-      setEditingPassword(true);
+  const isAdmin = role === "ADMIN";
+
+  // 프로필 조회
+  const loadProfile = async (resolvedRole?: UserRole) => {
+    const token = getAccessToken();
+    const roleFromToken = resolvedRole ?? getRoleFromToken(token);
+    if (!token || !roleFromToken) {
+      setErrorMessage("로그인이 필요합니다.");
+      setProfile(null);
+      return;
+    }
+
+    setRole(roleFromToken);
+    setLoadingProfile(true);
+    setErrorMessage(null);
+    try {
+      const data = await fetchProfile(roleFromToken);
+      setProfile(data);
+      setForm(toFormState(data));
+    } catch (e: any) {
+      setErrorMessage(e.message ?? "프로필 조회 중 오류");
+    } finally {
+      setLoadingProfile(false);
     }
   };
 
-  // Handle Save Password
-  const handleSavePassword = () => {
-    // Validate and save password (in real app)
-    alert("Password updated successfully");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setEditingPassword(false);
+  useEffect(() => {
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 편집 시작
+  const handleStartEdit = () => {
+    if (!profile || !role) return;
+    setForm(toFormState(profile));
+    setIsEditing(true);
   };
 
-  // Handle Cancel Password
-  const handleCancelPassword = () => {
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setEditingPassword(false);
+  // 편집 취소
+  const handleCancelEdit = () => {
+    if (!profile || !role) return;
+    setForm(toFormState(profile));
+    setIsEditing(false);
   };
 
-  // Handle Edit/Cancel for other fields
-  const handleEditEmail = () => {
-    if (editingEmail) {
-      setTempEmail(profile.email);
-      setEditingEmail(false);
-    } else {
-      setEditingEmail(true);
+  // 프로필 저장
+  const handleSave = async () => {
+    if (!profile || !role) return;
+
+    setSaving(true);
+    setErrorMessage(null);
+    try {
+      const updated = await updateProfile(role, form);
+      setProfile(updated);
+      setForm(toFormState(updated));
+      setIsEditing(false);
+    } catch (e: any) {
+      setErrorMessage(e.message ?? "프로필 수정 중 오류");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleEditNickname = () => {
-    if (editingNickname) {
-      setTempNickname(profile.nickname);
-      setEditingNickname(false);
-    } else {
-      setEditingNickname(true);
-    }
-  };
-
-  const handleEditIntroduction = () => {
-    if (editingIntroduction) {
-      setTempIntroduction(profile.introduction);
-      setEditingIntroduction(false);
-    } else {
-      setEditingIntroduction(true);
-    }
-  };
-
-  const handleEditPhoneNumber = () => {
-    if (editingPhoneNumber) {
-      setTempPhoneNumber(profile.phoneNumber);
-      setEditingPhoneNumber(false);
-    } else {
-      setEditingPhoneNumber(true);
-    }
-  };
-
-  // Handle Save (profile fields only, NOT password)
-  const handleSave = () => {
-    setProfile({
-      ...profile,
-      email: tempEmail,
-      nickname: tempNickname,
-      introduction: tempIntroduction,
-      phoneNumber: tempPhoneNumber,
-    });
-
-    // Exit edit mode for all fields
-    setEditingEmail(false);
-    setEditingNickname(false);
-    setEditingIntroduction(false);
-    setEditingPhoneNumber(false);
-
-    alert("Profile updated successfully");
-  };
-
-  // Handle Exit
-  const handleExit = () => {
-    // Reset all temp values
-    setTempEmail(profile.email);
-    setTempNickname(profile.nickname);
-    setTempIntroduction(profile.introduction);
-    setTempPhoneNumber(profile.phoneNumber);
-
-    // Exit edit mode for all fields
-    setEditingEmail(false);
-    setEditingNickname(false);
-    setEditingIntroduction(false);
-    setEditingPhoneNumber(false);
-    setEditingPassword(false);
-  };
-
-  // Handle profile image actions
+  // 프로필 이미지 변경 버튼 처리
   const handleChangePhoto = () => {
-    alert("Change Photo functionality (UI only)");
+    if (saving || imageUploading) return;
+    fileInputRef.current?.click();
   };
 
-  const handleDeletePhoto = () => {
-    alert("Delete Photo functionality (UI only)");
+  // 프로필 이미지 파일 선택
+  const handlePhotoSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !role) return;
+
+    setImageUploading(true);
+    setErrorMessage(null);
+
+    try {
+      const { presignedUrl, key, fileUrl, path } =
+        await requestProfilePresignedUrl(role, file.type);
+
+      await fetch(presignedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+
+      const uploadedUrl =
+        fileUrl || path || key || presignedUrl.split("?")[0];
+
+      const updated = await updateProfileImage(role, uploadedUrl);
+      setProfile(updated);
+      setForm(toFormState(updated));
+    } catch (e: any) {
+      setErrorMessage(e.message ?? "프로필 이미지 업로드 실패");
+    } finally {
+      setImageUploading(false);
+      event.target.value = "";
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-2xl text-gray-900">My Profile</h1>
-          <p className="text-sm text-gray-600 mt-2">
-            Manage your personal information
-          </p>
+  // 프로필 이미지 삭제
+  const handleDeletePhoto = async () => {
+    if (!role) return;
+    setImageUploading(true);
+    setErrorMessage(null);
+
+    try {
+      const updated = await updateProfileImage(role, null);
+      setProfile(updated);
+      setForm(toFormState(updated));
+    } catch (e: any) {
+      setErrorMessage(e.message ?? "프로필 이미지 삭제 실패");
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  if (loadingProfile) {
+    return isAdmin ? (
+      <AdminLayout>
+        <div className="p-8">
+          <p className="text-gray-600">Loading profile...</p>
         </div>
+      </AdminLayout>
+    ) : (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Loading profile...</p>
+      </div>
+    );
+  }
 
-        {/* Profile Card */}
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          {/* Section 1: Profile Image */}
+  if (!profile) {
+    const emptyState = (
+      <div className="text-center">
+        <p className="text-gray-700 mb-4">
+          {errorMessage || "프로필 정보를 불러오지 못했습니다."}
+        </p>
+        <button
+          onClick={() => loadProfile(role ?? undefined)}
+          className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+
+    return isAdmin ? (
+      <AdminLayout>
+        <div className="p-8">{emptyState}</div>
+      </AdminLayout>
+    ) : (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        {emptyState}
+      </div>
+    );
+  }
+
+  const currentImageUrl = isEditing ? form.imageUrl : profile.imageUrl;
+  const profileCard = (
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          {/* Profile Image */}
           <div className="p-8 border-b border-gray-200">
             <div className="flex flex-col items-center">
-              {/* Profile Image */}
               <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
-                {profile.profileImage ? (
+                {currentImageUrl ? (
                   <img
-                    src={profile.profileImage}
+                    src={currentImageUrl}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
@@ -204,331 +214,273 @@ export default function ProfilePage() {
                   <User className="w-14 h-14 text-gray-400" />
                 )}
               </div>
-              {/* Image Action Buttons */}
-              <div className="flex gap-3">
-                <button
-                  onClick={handleChangePhoto}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Change Photo
-                </button>
-                <button
-                  onClick={handleDeletePhoto}
-                  className="px-4 py-2 text-sm border border-gray-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
+
+              {isEditing && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleChangePhoto}
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    disabled={saving || imageUploading}
+                  >
+                    {imageUploading ? "Uploading..." : "Change Photo"}
+                  </button>
+                  <button
+                    onClick={handleDeletePhoto}
+                    className="px-4 py-2 text-sm border border-gray-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                    disabled={saving || imageUploading}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoSelected}
+              />
             </div>
           </div>
 
-          {/* Section 2: User Identity (Read-Only) */}
-          <div className="p-6 border-b border-gray-200 bg-gray-50">
+          {/* Read-Only Info */}
+          <div className="p-6 border-b border-gray-200 bg-gray-50 space-y-4">
             <div className="flex items-center gap-6">
               <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-600">
-                  User ID
-                </label>
+                <label className="text-sm text-gray-600">ID</label>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-900">{profile.id}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="w-32 flex-shrink-0">
+                <label className="text-sm text-gray-600">Name</label>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-900">
-                  {profile.userId}
+                  {profile.userName || "-"}
                 </p>
               </div>
-              <div className="w-24 flex-shrink-0"></div>
             </div>
-          </div>
 
-          {/* Section 4: Password (Separate Logic) */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-start gap-6">
+            <div className="flex items-center gap-6">
               <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">
-                  Password
-                </label>
+                <label className="text-sm text-gray-600">Email</label>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 py-2">
-                  ••••••••
+                <p className="text-sm text-gray-900">
+                  {profile.userEmail || "-"}
                 </p>
-
-                {/* Password Edit Section (Expanded) */}
-                {editingPassword && (
-                  <div className="mt-4 space-y-4 pt-4 border-t border-gray-200">
-                    <div>
-                      <label className="text-xs text-gray-600 mb-1 block">
-                        Current Password
-                      </label>
-                      <input
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            currentPassword: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                        placeholder="Enter current password"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-600 mb-1 block">
-                        New Password
-                      </label>
-                      <input
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            newPassword: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                        placeholder="Enter new password"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-600 mb-1 block">
-                        Confirm New Password
-                      </label>
-                      <input
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            confirmPassword: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                        placeholder="Confirm new password"
-                      />
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={handleSavePassword}
-                        className="px-5 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-                      >
-                        Save Password
-                      </button>
-                      <button
-                        onClick={handleCancelPassword}
-                        className="px-5 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-              <div className="w-24 flex-shrink-0 flex justify-end">
-                {!editingPassword && (
-                  <button
-                    onClick={handleEditPassword}
-                    className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                  >
-                    Edit
-                  </button>
+            </div>
+          </div>
+
+          {/* Editable: Nickname */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-start gap-6">
+              <div className="w-32 flex-shrink-0">
+                <label className="text-sm text-gray-700">
+                  Nickname <span className="text-red-500">*</span>
+                </label>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={form.nickname}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        nickname: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                    placeholder="Enter nickname"
+                    disabled={saving}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 py-2">
+                    {profile.userNickname || "-"}
+                  </p>
+                )}
+
+                {isEditing && (
+                  <div className="mt-2 text-xs text-gray-500 space-y-1">
+                    <p>• Required</p>
+                    <p>• Max 12 characters</p>
+                    <p>• Must not contain the word "admin"</p>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Section 3: Profile Information (Editable) */}
-          {/* Email Field */}
+          {/* Editable: Phone */}
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-start gap-6">
               <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">
-                  Email <span className="text-red-500">*</span>
-                </label>
+                <label className="text-sm text-gray-700">Phone Number</label>
               </div>
+
               <div className="flex-1 min-w-0">
-                {editingEmail ? (
-                  <div>
-                    <input
-                      type="email"
-                      value={tempEmail}
-                      onChange={(e) =>
-                        setTempEmail(e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                      placeholder="Enter email"
-                    />
-                    <div className="mt-2 text-xs text-gray-500 space-y-1">
-                      <p>• Required</p>
-                      <p>• Max 30 characters</p>
-                      <p>• Must be valid email format</p>
-                      <p>• Must not contain the word "admin"</p>
-                    </div>
-                  </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={form.phoneNumber}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        phoneNumber: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                    placeholder="010-1234-5678"
+                    disabled={saving}
+                  />
                 ) : (
                   <p className="text-sm text-gray-900 py-2">
-                    {profile.email}
+                    {profile.phoneNumber || "-"}
                   </p>
                 )}
               </div>
-              <div className="w-24 flex-shrink-0 flex justify-end">
-                <button
-                  onClick={handleEditEmail}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  {editingEmail ? "Cancel" : "Edit"}
-                </button>
-              </div>
             </div>
           </div>
 
-          {/* Nickname Field */}
+          {/* Editable: Introduction */}
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-start gap-6">
               <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">
-                  Nickname{" "}
-                  <span className="text-red-500">*</span>
-                </label>
+                <label className="text-sm text-gray-700">Introduction</label>
               </div>
-              <div className="flex-1 min-w-0">
-                {editingNickname ? (
-                  <div>
-                    <input
-                      type="text"
-                      value={tempNickname}
-                      onChange={(e) =>
-                        setTempNickname(e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                      placeholder="Enter nickname"
-                    />
-                    <div className="mt-2 text-xs text-gray-500 space-y-1">
-                      <p>• Required</p>
-                      <p>• Max 12 characters</p>
-                      <p>• Must not contain the word "admin"</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-900 py-2">
-                    {profile.nickname}
-                  </p>
-                )}
-              </div>
-              <div className="w-24 flex-shrink-0 flex justify-end">
-                <button
-                  onClick={handleEditNickname}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  {editingNickname ? "Cancel" : "Edit"}
-                </button>
-              </div>
-            </div>
-          </div>
 
-          {/* Phone Number Field */}
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">
-                  Phone Number
-                </label>
-              </div>
               <div className="flex-1 min-w-0">
-                {editingPhoneNumber ? (
-                  <div>
-                    <input
-                      type="text"
-                      value={tempPhoneNumber}
-                      onChange={(e) =>
-                        setTempPhoneNumber(e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                      placeholder="010-1234-5678"
-                    />
-                    <div className="mt-2 text-xs text-gray-500 space-y-1">
-                      <p>• Max 20 characters</p>
-                      <p>
-                        • Phone format validation (Korean phone
-                        numbers)
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-900 py-2">
-                    {profile.phoneNumber}
-                  </p>
-                )}
-              </div>
-              <div className="w-24 flex-shrink-0 flex justify-end">
-                <button
-                  onClick={handleEditPhoneNumber}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  {editingPhoneNumber ? "Cancel" : "Edit"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Introduction Field */}
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">
-                  Introduction
-                </label>
-              </div>
-              <div className="flex-1 min-w-0">
-                {editingIntroduction ? (
-                  <div>
-                    <textarea
-                      value={tempIntroduction}
-                      onChange={(e) =>
-                        setTempIntroduction(e.target.value)
-                      }
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
-                      placeholder="Tell us about yourself"
-                    />
-                    <div className="mt-2 text-xs text-gray-500">
-                      <p>• Max 255 characters</p>
-                    </div>
-                  </div>
+                {isEditing ? (
+                  <textarea
+                    value={form.introduction}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        introduction: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
+                    placeholder="Tell us about yourself"
+                    disabled={saving}
+                  />
                 ) : (
                   <p className="text-sm text-gray-900 py-2">
                     {profile.introduction || "No introduction"}
                   </p>
                 )}
-              </div>
-              <div className="w-24 flex-shrink-0 flex justify-end">
-                <button
-                  onClick={handleEditIntroduction}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  {editingIntroduction ? "Cancel" : "Edit"}
-                </button>
+
+                {isEditing && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    <p>• Max 255 characters</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Bottom Actions */}
-          <div className="p-6 bg-gray-50">
-            <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={handleExit}
-                className="px-6 py-2.5 text-sm border border-gray-300 rounded-md hover:bg-white transition-colors"
-              >
-                Exit
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-6 py-2.5 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-              >
-                Save
-              </button>
+          {isEditing && (
+            <div className="p-6 bg-gray-50">
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-6 py-2.5 text-sm border border-gray-300 rounded-md hover:bg-white transition-colors"
+                  disabled={saving}
+                >
+                  Exit
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-6 py-2.5 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
+  );
+
+  // 페이지 레이아웃 구성
+  return isAdmin ? (
+    <AdminLayout>
+      <div className="p-8">
+        {/* Page Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
+            <p className="text-sm text-gray-600 mt-2">
+              Manage admin profile information
+            </p>
+            {errorMessage && (
+              <p className="text-xs text-red-600 mt-2">{errorMessage}</p>
+            )}
+          </div>
+
+          {!isEditing ? (
+            <button
+              onClick={handleStartEdit}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Edit
+            </button>
+          ) : (
+            <button
+              onClick={handleCancelEdit}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              disabled={saving}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+
+        {profileCard}
+      </div>
+    </AdminLayout>
+  ) : (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Page Title */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl text-gray-900">My Profile</h1>
+            <p className="text-sm text-gray-600 mt-2">
+              Manage your personal information
+            </p>
+            {errorMessage && (
+              <p className="text-xs text-red-600 mt-2">{errorMessage}</p>
+            )}
+          </div>
+
+          {!isEditing ? (
+            <button
+              onClick={handleStartEdit}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Edit
+            </button>
+          ) : (
+            <button
+              onClick={handleCancelEdit}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              disabled={saving}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+
+        {profileCard}
       </div>
     </div>
   );

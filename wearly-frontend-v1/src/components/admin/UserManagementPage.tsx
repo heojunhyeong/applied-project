@@ -1,6 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import AdminLayout from './AdminLayout';
+import { apiFetch } from '../../api/http';
+
+interface UserResponse {
+  id: number;
+  userName: string;
+  userEmail: string;
+  userNickname: string;
+  introduction?: string;
+  phoneNumber?: string;
+  imageUrl?: string;
+  createdDate: string;
+  updatedDate: string;
+  deletedAt?: string;
+}
 
 interface User {
   id: number;
@@ -13,82 +27,95 @@ interface User {
 }
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      userId: 'U001',
-      email: 'user1@example.com',
-      nickname: 'bomi123',
-      userType: 'User',
-      createdDate: '2024-01-15',
-      status: 'Active',
-    },
-    {
-      id: 2,
-      userId: 'U002',
-      email: 'seller1@example.com',
-      nickname: 'fashionseller',
-      userType: 'Seller',
-      createdDate: '2024-01-20',
-      status: 'Active',
-    },
-    {
-      id: 3,
-      userId: 'U003',
-      email: 'user2@example.com',
-      nickname: 'shopper_kim',
-      userType: 'User',
-      createdDate: '2024-02-05',
-      status: 'Active',
-    },
-    {
-      id: 4,
-      userId: 'U004',
-      email: 'blocked@example.com',
-      nickname: 'baduser',
-      userType: 'User',
-      createdDate: '2024-03-10',
-      status: 'Blocked',
-    },
-    {
-      id: 5,
-      userId: 'U005',
-      email: 'seller2@example.com',
-      nickname: 'sneaker_store',
-      userType: 'Seller',
-      createdDate: '2024-03-15',
-      status: 'Active',
-    },
-    {
-      id: 6,
-      userId: 'U006',
-      email: 'user3@example.com',
-      nickname: 'fashion_lover',
-      userType: 'User',
-      createdDate: '2024-04-01',
-      status: 'Active',
-    },
-    {
-      id: 7,
-      userId: 'U007',
-      email: 'seller3@example.com',
-      nickname: 'streetwear_shop',
-      userType: 'Seller',
-      createdDate: '2024-04-10',
-      status: 'Blocked',
-    },
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [userTypeFilter, setUserTypeFilter] = useState<'All' | 'User' | 'Seller'>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Handle blocking a user
-  const handleBlockUser = (id: number) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === id ? { ...user, status: 'Blocked' as const } : user
-      )
-    );
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const allUsers: User[] = [];
+
+        // Fetch USER type
+        if (userTypeFilter === 'All' || userTypeFilter === 'User') {
+          const userResponse = await apiFetch<UserResponse[]>(
+            `/api/admin/users${searchQuery ? `?keyword=${encodeURIComponent(searchQuery)}` : ''}`
+          );
+          const mappedUsers = (userResponse || []).map((u) => ({
+            id: u.id,
+            userId: u.userName,
+            email: u.userEmail,
+            nickname: u.userNickname,
+            userType: 'User' as const,
+            createdDate: new Date(u.createdDate).toLocaleDateString(),
+            status: u.deletedAt ? ('Blocked' as const) : ('Active' as const),
+          }));
+          allUsers.push(...mappedUsers);
+        }
+
+        // Fetch SELLER type
+        if (userTypeFilter === 'All' || userTypeFilter === 'Seller') {
+          const sellerResponse = await apiFetch<UserResponse[]>(
+            `/api/admin/users?userType=SELLER${searchQuery ? `&keyword=${encodeURIComponent(searchQuery)}` : ''}`
+          );
+          const mappedSellers = (sellerResponse || []).map((s) => ({
+            id: s.id,
+            userId: s.userName,
+            email: s.userEmail,
+            nickname: s.userNickname,
+            userType: 'Seller' as const,
+            createdDate: new Date(s.createdDate).toLocaleDateString(),
+            status: s.deletedAt ? ('Blocked' as const) : ('Active' as const),
+          }));
+          allUsers.push(...mappedSellers);
+        }
+
+        setUsers(allUsers);
+      } catch (err: any) {
+        setError(err.message || '회원 목록을 불러오는데 실패했습니다.');
+        console.error('Failed to fetch users:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [userTypeFilter, searchQuery]);
+
+  // Handle blocking a user (soft delete)
+  const handleBlockUser = async (id: number, userType: 'User' | 'Seller') => {
+    if (!confirm('정말 이 회원을 차단하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      const endpoint =
+        userType === 'User'
+          ? `/api/admin/users/${id}`
+          : `/api/admin/users/sellers/${id}`;
+
+      await apiFetch(endpoint, {
+        method: 'DELETE',
+      });
+
+      // Update local state
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === id ? { ...user, status: 'Blocked' as const } : user
+        )
+      );
+
+      alert('회원이 차단되었습니다.');
+    } catch (err: any) {
+      alert(`차단 실패: ${err.message || '알 수 없는 오류가 발생했습니다.'}`);
+      console.error('Failed to block user:', err);
+    }
   };
 
   // Filter users based on user type and search query
@@ -106,6 +133,30 @@ export default function UserManagementPage() {
 
     return matchesType && matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-600">로딩 중...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">{error}</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -225,7 +276,7 @@ export default function UserManagementPage() {
                     <td className="px-6 py-4 text-sm">
                       {user.status === 'Active' ? (
                         <button
-                          onClick={() => handleBlockUser(user.id)}
+                          onClick={() => handleBlockUser(user.id, user.userType)}
                           className="px-4 py-2 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
                         >
                           Block

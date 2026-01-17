@@ -80,6 +80,9 @@ export default function LoginPage() {
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("role", role);
 
+      // authStateChange 이벤트 발생 (Header 컴포넌트에서 감지)
+      window.dispatchEvent(new Event("authStateChange"));
+
       alert("로그인이 완료되었습니다.");
       // 헤더 즉시 반영 목적: 새로고침 포함 이동
       window.location.href = "/";

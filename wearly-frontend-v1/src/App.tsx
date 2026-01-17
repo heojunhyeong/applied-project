@@ -50,13 +50,75 @@ function Header({ brandItems }: { brandItems: typeof brands }) {
   const sellerPageRef = useRef<HTMLDivElement>(null);
   const adminPageRef = useRef<HTMLDivElement>(null);
 
-  // ✅ 로그인 상태/권한 (A안: 로그인 응답에서 localStorage에 role 저장한다고 가정)
-  const token = localStorage.getItem("accessToken");
-  const role = localStorage.getItem("role") as Role | null; // "USER" | "SELLER" | "ADMIN"
+  // ✅ 로그인 상태/권한을 state로 관리하여 localStorage 변경 감지
+  const [token, setToken] = useState<string | null>(localStorage.getItem("accessToken"));
+  const [role, setRole] = useState<Role | null>(localStorage.getItem("role") as Role | null);
   const isLoggedIn = !!token;
 
-  const handleLogout = () => {
-    // TODO: 로그아웃 로직을 추가하세요 (토큰 제거, 리다이렉트 등)
+  // localStorage 변경 감지 (로그인/로그아웃 시 반영)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(localStorage.getItem("accessToken"));
+      setRole(localStorage.getItem("role") as Role | null);
+    };
+
+    // storage 이벤트 리스너 등록 (다른 탭에서 변경된 경우)
+    window.addEventListener("storage", handleStorageChange);
+
+    // 같은 탭에서 localStorage가 변경된 경우를 위한 커스텀 이벤트
+    window.addEventListener("authStateChange", handleStorageChange);
+
+    // 초기값 설정
+    handleStorageChange();
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authStateChange", handleStorageChange);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      
+      // 백엔드에 로그아웃 요청 (Refresh Token 삭제)
+      if (refreshToken) {
+        try {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken }),
+          });
+        } catch (err) {
+          // 로그아웃 API 호출 실패해도 클라이언트에서는 토큰 제거
+          console.error("Logout API error:", err);
+        }
+      }
+
+      // localStorage에서 토큰 및 권한 제거
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("role");
+
+      // 상태 업데이트
+      setToken(null);
+      setRole(null);
+
+      // authStateChange 이벤트 발생 (다른 컴포넌트에서도 감지 가능)
+      window.dispatchEvent(new Event("authStateChange"));
+
+      // 홈페이지로 리다이렉트
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Logout error:", err);
+      // 에러가 나도 토큰 제거는 수행
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("role");
+      setToken(null);
+      setRole(null);
+      window.location.href = "/";
+    }
   };
 
   // Close dropdown when clicking outside

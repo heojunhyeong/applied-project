@@ -4,6 +4,7 @@ import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.seller.dto.request.SellerProfileUpdateRequest;
 import com.team.wearly.domain.seller.dto.response.SellerProfileResponse;
+import com.team.wearly.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SellerProfileService {
 
     private final SellerRepository sellerRepository;
+    private final S3Service s3Service;
 
     /**
      * 판매자 식별자를 통해 현재 등록된 프로필 정보를 조회함
@@ -69,6 +71,7 @@ public class SellerProfileService {
 
     /**
      * S3 등 외부 스토리지에 업로드된 프로필 이미지의 경로를 DB에 저장함
+     * 기존 프로필 이미지가 있는 경우 S3에서 삭제함
      *
      * @param sellerId 판매자 식별자
      * @param imageUrl 업로드 완료된 이미지의 공개 URL
@@ -81,6 +84,20 @@ public class SellerProfileService {
     public SellerProfileResponse updateProfileImage(Long sellerId, String imageUrl) {
         Seller seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다."));
+
+        // 기존 이미지가 있는 경우 S3에서 삭제
+        String oldImageUrl = seller.getImageUrl();    //기존 이미지
+        if (oldImageUrl != null && !oldImageUrl.isBlank() && !oldImageUrl.equals(imageUrl)) {
+            try {
+                String oldKey = s3Service.extractKeyFromUrl(oldImageUrl);
+                if (oldKey != null) {
+                    s3Service.deleteObject(oldKey);
+                }
+            } catch (Exception e) {
+                // 에러 발생 시 무시 (로그만 남기고 계속 진행)
+            }
+        }
+
         seller.updateImageUrl(imageUrl);
         return SellerProfileResponse.from(seller);
     }

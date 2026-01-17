@@ -109,16 +109,18 @@ export default function ProfilePage() {
   // 프로필 이미지 파일 선택
   const handlePhotoSelected = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !role) return;
+    if (!file || !role || !profile) return;
 
     setImageUploading(true);
     setErrorMessage(null);
 
     try {
-      const { presignedUrl, key, fileUrl, path } =
+      // 1. Presigned URL 요청
+      const { presignedUrl, key } =
         await requestProfilePresignedUrl(role, file.type);
 
-      await fetch(presignedUrl, {
+      // 2. S3에 파일 업로드
+      const uploadResponse = await fetch(presignedUrl, {
         method: "PUT",
         headers: {
           "Content-Type": file.type,
@@ -126,14 +128,32 @@ export default function ProfilePage() {
         body: file,
       });
 
-      const uploadedUrl =
-        fileUrl || path || key || presignedUrl.split("?")[0];
+      if (!uploadResponse.ok) {
+        throw new Error(`S3 업로드 실패: ${uploadResponse.status}`);
+      }
 
-      const updated = await updateProfileImage(role, uploadedUrl);
+      // 3. 업로드된 이미지의 전체 URL 구성
+      // presignedUrl에서 쿼리 파라미터를 제거하면 실제 S3 객체 URL이 됩니다
+      // 백엔드의 extractKeyFromUrl이 파싱할 수 있는 형식으로 URL 생성
+      const uploadedUrl = presignedUrl.split("?")[0];
+
+      // 4. 프로필 이미지 URL 업데이트
+      // 백엔드의 updateProfileImage 메서드가 자동으로 기존 이미지를 S3에서 삭제합니다
+      // (UserProfileService.updateProfileImage에서 oldImageUrl을 추출하여 삭제)
+      const updated = await updateProfileImage(
+        role,
+        uploadedUrl,
+        role === "USER" && profile.userNickname ? profile.userNickname : undefined
+      );
       setProfile(updated);
       setForm(toFormState(updated));
     } catch (e: any) {
-      setErrorMessage(e.message ?? "프로필 이미지 업로드 실패");
+      // 에러 상태 코드 확인
+      if (e.status === 401 || e.status === 403) {
+        setErrorMessage("인증에 실패했습니다. 다시 로그인해주세요.");
+      } else {
+        setErrorMessage(e.message ?? "프로필 이미지 업로드 실패");
+      }
     } finally {
       setImageUploading(false);
       event.target.value = "";
@@ -142,12 +162,17 @@ export default function ProfilePage() {
 
   // 프로필 이미지 삭제
   const handleDeletePhoto = async () => {
-    if (!role) return;
+    if (!role || !profile) return;
     setImageUploading(true);
     setErrorMessage(null);
 
     try {
-      const updated = await updateProfileImage(role, null);
+      // USER 역할일 때는 현재 닉네임도 함께 전송해야 함
+      const updated = await updateProfileImage(
+        role,
+        null,
+        role === "USER" ? profile.userNickname : undefined
+      );
       setProfile(updated);
       setForm(toFormState(updated));
     } catch (e: any) {
@@ -200,214 +225,214 @@ export default function ProfilePage() {
   const currentImageUrl = isEditing ? form.imageUrl : profile.imageUrl;
   const profileCard = (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          {/* Profile Image */}
-          <div className="p-8 border-b border-gray-200">
-            <div className="flex flex-col items-center">
-              <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
-                {currentImageUrl ? (
-                  <img
-                    src={currentImageUrl}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-14 h-14 text-gray-400" />
-                )}
-              </div>
-
-              {isEditing && (
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleChangePhoto}
-                    className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                    disabled={saving || imageUploading}
-                  >
-                    {imageUploading ? "Uploading..." : "Change Photo"}
-                  </button>
-                  <button
-                    onClick={handleDeletePhoto}
-                    className="px-4 py-2 text-sm border border-gray-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
-                    disabled={saving || imageUploading}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoSelected}
+      {/* Profile Image */}
+      <div className="p-8 border-b border-gray-200">
+        <div className="flex flex-col items-center">
+          <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
+            {currentImageUrl ? (
+              <img
+                src={currentImageUrl}
+                alt="Profile"
+                className="w-full h-full object-cover"
               />
-            </div>
+            ) : (
+              <User className="w-14 h-14 text-gray-400" />
+            )}
           </div>
 
-          {/* Read-Only Info */}
-          <div className="p-6 border-b border-gray-200 bg-gray-50 space-y-4">
-            <div className="flex items-center gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-600">ID</label>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900">{profile.id}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-600">Name</label>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900">
-                  {profile.userName || "-"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-600">Email</label>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900">
-                  {profile.userEmail || "-"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Editable: Nickname */}
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">
-                  Nickname <span className="text-red-500">*</span>
-                </label>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={form.nickname}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        nickname: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                    placeholder="Enter nickname"
-                    disabled={saving}
-                  />
-                ) : (
-                  <p className="text-sm text-gray-900 py-2">
-                    {profile.userNickname || "-"}
-                  </p>
-                )}
-
-                {isEditing && (
-                  <div className="mt-2 text-xs text-gray-500 space-y-1">
-                    <p>• Required</p>
-                    <p>• Max 12 characters</p>
-                    <p>• Must not contain the word "admin"</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Editable: Phone */}
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">Phone Number</label>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={form.phoneNumber}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        phoneNumber: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                    placeholder="010-1234-5678"
-                    disabled={saving}
-                  />
-                ) : (
-                  <p className="text-sm text-gray-900 py-2">
-                    {profile.phoneNumber || "-"}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Editable: Introduction */}
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start gap-6">
-              <div className="w-32 flex-shrink-0">
-                <label className="text-sm text-gray-700">Introduction</label>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                {isEditing ? (
-                  <textarea
-                    value={form.introduction}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        introduction: e.target.value,
-                      }))
-                    }
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
-                    placeholder="Tell us about yourself"
-                    disabled={saving}
-                  />
-                ) : (
-                  <p className="text-sm text-gray-900 py-2">
-                    {profile.introduction || "No introduction"}
-                  </p>
-                )}
-
-                {isEditing && (
-                  <div className="mt-2 text-xs text-gray-500">
-                    <p>• Max 255 characters</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Actions */}
           {isEditing && (
-            <div className="p-6 bg-gray-50">
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={handleCancelEdit}
-                  className="px-6 py-2.5 text-sm border border-gray-300 rounded-md hover:bg-white transition-colors"
-                  disabled={saving}
-                >
-                  Exit
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-2.5 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save"}
-                </button>
-              </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleChangePhoto}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                disabled={saving || imageUploading}
+              >
+                {imageUploading ? "Uploading..." : "Change Photo"}
+              </button>
+              <button
+                onClick={handleDeletePhoto}
+                className="px-4 py-2 text-sm border border-gray-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                disabled={saving || imageUploading}
+              >
+                Delete
+              </button>
             </div>
           )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoSelected}
+          />
         </div>
+      </div>
+
+      {/* Read-Only Info */}
+      <div className="p-6 border-b border-gray-200 bg-gray-50 space-y-4">
+        <div className="flex items-center gap-6">
+          <div className="w-32 flex-shrink-0">
+            <label className="text-sm text-gray-600">ID</label>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-900">{profile.id}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="w-32 flex-shrink-0">
+            <label className="text-sm text-gray-600">Name</label>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-900">
+              {profile.userName || "-"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="w-32 flex-shrink-0">
+            <label className="text-sm text-gray-600">Email</label>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-900">
+              {profile.userEmail || "-"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Editable: Nickname */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-start gap-6">
+          <div className="w-32 flex-shrink-0">
+            <label className="text-sm text-gray-700">
+              Nickname <span className="text-red-500">*</span>
+            </label>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <input
+                type="text"
+                value={form.nickname}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    nickname: e.target.value,
+                  }))
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                placeholder="Enter nickname"
+                disabled={saving}
+              />
+            ) : (
+              <p className="text-sm text-gray-900 py-2">
+                {profile.userNickname || "-"}
+              </p>
+            )}
+
+            {isEditing && (
+              <div className="mt-2 text-xs text-gray-500 space-y-1">
+                <p>• Required</p>
+                <p>• Max 12 characters</p>
+                <p>• Must not contain the word "admin"</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Editable: Phone */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-start gap-6">
+          <div className="w-32 flex-shrink-0">
+            <label className="text-sm text-gray-700">Phone Number</label>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <input
+                type="text"
+                value={form.phoneNumber}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    phoneNumber: e.target.value,
+                  }))
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                placeholder="010-1234-5678"
+                disabled={saving}
+              />
+            ) : (
+              <p className="text-sm text-gray-900 py-2">
+                {profile.phoneNumber || "-"}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Editable: Introduction */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-start gap-6">
+          <div className="w-32 flex-shrink-0">
+            <label className="text-sm text-gray-700">Introduction</label>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <textarea
+                value={form.introduction}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    introduction: e.target.value,
+                  }))
+                }
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
+                placeholder="Tell us about yourself"
+                disabled={saving}
+              />
+            ) : (
+              <p className="text-sm text-gray-900 py-2">
+                {profile.introduction || "No introduction"}
+              </p>
+            )}
+
+            {isEditing && (
+              <div className="mt-2 text-xs text-gray-500">
+                <p>• Max 255 characters</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Actions */}
+      {isEditing && (
+        <div className="p-6 bg-gray-50">
+          <div className="flex items-center justify-end gap-3">
+            <button
+              onClick={handleCancelEdit}
+              className="px-6 py-2.5 text-sm border border-gray-300 rounded-md hover:bg-white transition-colors"
+              disabled={saving}
+            >
+              Exit
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-6 py-2.5 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 
   // 페이지 레이아웃 구성

@@ -305,13 +305,7 @@ export default function ProductDetailPage() {
                         }
 
                         try {
-                            // Convert display size (S, M, L, XL) to backend enum (SMALL, MEDIUM, LARGE, EXTRA_LARGE)
-                            const backendSize = SIZE_REVERSE_MAP[selectedSize];
-                            if (!backendSize) {
-                                alert('유효하지 않은 사이즈입니다.');
-                                return;
-                            }
-
+                            // selectedSize에 이미 백엔드 enum 값이 저장되어 있으므로 그대로 사용
                             await apiFetch(`/api/users/cart/items`, {
                                 method: 'POST',
                                 headers: {
@@ -320,7 +314,7 @@ export default function ProductDetailPage() {
                                 body: JSON.stringify({
                                     productId: Number(productId),
                                     quantity: quantity,
-                                    size: backendSize,
+                                    size: selectedSize, // SIZE_REVERSE_MAP 변환 제거
                                 }),
                             });
 

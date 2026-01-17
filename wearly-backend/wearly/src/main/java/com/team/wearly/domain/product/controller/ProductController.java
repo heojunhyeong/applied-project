@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,12 +37,21 @@ public class ProductController {
         return ResponseEntity.ok(productService.getCategoriesByBrand(brand));
     }
 
+    /**
+     * 상품 상세 조회 // 로그인한 SELLER이면 isMyProduct 판단해서 내려줌
+     */
     @GetMapping("/{productId}")
-    public ResponseEntity<SellerProductResponse> getProductDetail(@PathVariable Long productId) {
-        return ResponseEntity.ok(productService.getProductDetail(productId));
+    public ResponseEntity<SellerProductResponse> getProductDetail(
+            Authentication authentication,
+            @PathVariable Long productId
+    ) {
+        return ResponseEntity.ok(productService.getProductDetail(authentication, productId));
     }
 
-    //상품 리뷰 목록 조회 (페이징)
+
+    /**
+     * 상품 리뷰 목록 조회 (페이징)
+     */
     @GetMapping("/{productId}/reviews")
     public ResponseEntity<Page<ReviewResponse>> getProductReviews(
             @PathVariable Long productId,

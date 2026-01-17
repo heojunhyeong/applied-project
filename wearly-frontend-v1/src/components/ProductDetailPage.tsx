@@ -14,6 +14,14 @@ interface Review {
   createdDate: string;
 }
 
+type ReviewReportReason =
+  | "ABUSIVE_LANGUAGE"
+  | "FALSE_INFORMATION"
+  | "SPAM"
+  | "COPYRIGHT"
+  | "PRIVACY"
+  | "OTHER";
+
 interface Product {
   id: number;
   productName: string;
@@ -27,6 +35,7 @@ interface Product {
   reviews: Review[];
   averageRating: number;
   reviewCount: number;
+  isMyProduct?: boolean | null;
 }
 
 // Map backend size enums to display strings
@@ -44,6 +53,16 @@ const SIZE_REVERSE_MAP: Record<string, ProductSize> = {
     "XL": "EXTRA_LARGE"
 };
 
+const REVIEW_REPORT_REASON_OPTIONS: { value: ReviewReportReason; label: string }[] =
+  [
+    { value: "ABUSIVE_LANGUAGE", label: "욕설/비방" },
+    { value: "FALSE_INFORMATION", label: "허위 정보" },
+    { value: "SPAM", label: "스팸/광고" },
+    { value: "COPYRIGHT", label: "저작권 침해" },
+    { value: "PRIVACY", label: "개인정보 노출" },
+    { value: "OTHER", label: "기타" },
+  ];
+
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -56,12 +75,23 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState<
     "details" | "reviews"
   >("details");
+  const [openedReportReviewId, setOpenedReportReviewId] = useState<number | null>(
+    null
+  );
+  const [reportReasonByReviewId, setReportReasonByReviewId] = useState<
+    Record<number, ReviewReportReason | "">
+  >({});
+  const [reportingReviewId, setReportingReviewId] = useState<number | null>(null);
+  const [reportErrorByReviewId, setReportErrorByReviewId] = useState<
+    Record<number, string>
+  >({});
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!productId) return;
 
+    // // 상품 상세 조회 요청 처리
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -76,6 +106,69 @@ export default function ProductDetailPage() {
 
     fetchProduct();
   }, [productId]);
+
+  // // 리뷰 신고 패널 토글 처리
+  const handleToggleReportPanel = (reviewId: number) => {
+    setOpenedReportReviewId((prev) => (prev === reviewId ? null : reviewId));
+    setReportErrorByReviewId((prev) => ({ ...prev, [reviewId]: "" }));
+    setReportReasonByReviewId((prev) => ({
+      ...prev,
+      [reviewId]: prev[reviewId] ?? "",
+    }));
+  };
+
+  // // 리뷰 신고 사유 선택 처리
+  const handleReportReasonChange = (reviewId: number, reason: string) => {
+    setReportReasonByReviewId((prev) => ({
+      ...prev,
+      [reviewId]: reason as ReviewReportReason,
+    }));
+  };
+
+  // // 리뷰 신고 요청 처리
+  const handleSubmitReport = async (reviewId: number) => {
+    const selectedReason = reportReasonByReviewId[reviewId] ?? "";
+    if (!selectedReason) {
+      setReportErrorByReviewId((prev) => ({
+        ...prev,
+        [reviewId]: "신고 사유를 선택해주세요.",
+      }));
+      return;
+    }
+
+    const confirmed = window.confirm("이 리뷰를 신고할까요?");
+    if (!confirmed) return;
+
+    try {
+      setReportingReviewId(reviewId);
+      setReportErrorByReviewId((prev) => ({ ...prev, [reviewId]: "" }));
+      await apiFetch<void>(`/api/seller/reviews/${reviewId}/reports`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ reason: selectedReason }),
+      });
+      alert("신고 접수 완료");
+      setOpenedReportReviewId(null);
+      setReportErrorByReviewId((prev) => ({ ...prev, [reviewId]: "" }));
+    } catch (err: any) {
+      if (err?.status === 401 || err?.status === 403) {
+        setReportErrorByReviewId((prev) => ({
+          ...prev,
+          [reviewId]: "권한이 없습니다.",
+        }));
+        return;
+      }
+      setReportErrorByReviewId((prev) => ({
+        ...prev,
+        [reviewId]: err?.message ?? "신고 실패",
+      }));
+    } finally {
+      setReportingReviewId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -110,6 +203,7 @@ export default function ProductDetailPage() {
 
   // Use fetched reviews or empty array
   const reviews = product.reviews || [];
+  const isMyProduct = product.isMyProduct === true;
 
   return (
     <div className="bg-gray-50">
@@ -476,7 +570,13 @@ export default function ProductDetailPage() {
                 {/* Review List */}
                 <div className="space-y-6">
                   {reviews.length > 0 ? (
-                    reviews.map((review) => (
+                    reviews.map((review) => {
+                      const isReportPanelOpen = openedReportReviewId === review.reviewId;
+                      const selectedReason = reportReasonByReviewId[review.reviewId] ?? "";
+                      const reportError = reportErrorByReviewId[review.reviewId];
+                      const isReporting = reportingReviewId === review.reviewId;
+
+                      return (
                       <div
                         key={review.reviewId}
                         className="border-b border-gray-200 pb-6"
@@ -498,15 +598,69 @@ export default function ProductDetailPage() {
                               ))}
                             </div>
                           </div>
-                          <span className="text-sm text-gray-500">
-                            {new Date(review.createdDate).toLocaleDateString()}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-500">
+                              {new Date(review.createdDate).toLocaleDateString()}
+                            </span>
+                            {isMyProduct && (
+                              <button
+                                type="button"
+                                onClick={() => handleToggleReportPanel(review.reviewId)}
+                                className="px-3 py-1.5 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                              >
+                                신고
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <p className="text-gray-700 leading-relaxed mb-3">
                           {review.content}
                         </p>
+
+                        {isMyProduct && isReportPanelOpen && (
+                          <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <select
+                                value={selectedReason}
+                                onChange={(event) =>
+                                  handleReportReasonChange(
+                                    review.reviewId,
+                                    event.target.value
+                                  )
+                                }
+                                className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                              >
+                                <option value="">신고 사유 선택</option>
+                                {REVIEW_REPORT_REASON_OPTIONS.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => setOpenedReportReviewId(null)}
+                                className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100"
+                              >
+                                취소
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSubmitReport(review.reviewId)}
+                                disabled={!selectedReason || isReporting}
+                                className="px-3 py-2 text-sm border border-gray-900 text-gray-900 rounded-md hover:bg-gray-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                신고 제출
+                              </button>
+                            </div>
+                            {reportError && (
+                              <p className="text-sm text-red-600 mt-2">{reportError}</p>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-10 text-gray-500">
                       아직 작성된 리뷰가 없습니다.

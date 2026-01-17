@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Star, Minus, Plus, Heart, Share2 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { apiFetch } from "../api/http";
 
 const productImages = [
   "https://images.unsplash.com/photo-1761891873744-eb181eb1334a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZW5pbSUyMGplYW5zJTIwcHJvZHVjdHxlbnwxfHx8fDE3NjgzNjE3MzB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
@@ -112,6 +113,35 @@ export default function ProductDetailPage() {
   );
 
   const navigate = useNavigate();
+  const { productId } = useParams<{ productId: string }>();
+
+    const handleAddToCart = async () => {
+        // 사이즈 선택 확인
+        if (!selectedSize) {
+            alert("사이즈를 선택해주세요.");
+            return;
+        }
+
+        try {
+            // 장바구니에 상품 추가 API 호출
+            await apiFetch("/api/users/cart/items", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    productId: Number(productId),
+                    size: selectedSize,
+                    quantity: quantity,
+                }),
+            });
+
+            // 장바구니 페이지로 이동
+            navigate("/cart");
+        } catch (error: any) {
+            alert(error?.message || "장바구니에 상품을 추가하는데 실패했습니다.");
+        }
+    };
 
   return (
     <div className="bg-gray-50">

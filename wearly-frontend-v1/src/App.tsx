@@ -28,7 +28,9 @@ import ProductManagementPage from "./components/admin/ProductManagementPage";
 import OrderManagementPage from "./components/admin/OrderManagementPage";
 import ReviewManagementPage from "./components/admin/ReviewManagementPage";
 import PurchasePage from "./components/PurchasePage";
-import SellerPage from "./components/SellerPage";
+import SellerProfilePage from "./components/seller/SellerProfilePage";
+import SellerProductManagementPage from "./components/seller/SellerProductManagementPage";
+import SellerOrderManagementPage from "./components/seller/SellerOrderManagementPage";
 
 const brands = [
   { name: "LEVI'S", id: "levis" },
@@ -217,8 +219,8 @@ function Header({ brandItems }: { brandItems: typeof brands }) {
                 {isSellerPageOpen && (
                   <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                     <Link
-                      // 공통 프로필 페이지로 이동
-                      to="/profile"
+                      // 판매자 프로필 페이지로 이동
+                      to="/seller/profile"
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => {
                         // 판매자페이지 드롭다운 닫기
@@ -394,8 +396,10 @@ export default function App() {
           <Route path="/admin/orders" element={<OrderManagementPage />} />
           <Route path="/admin/reviews" element={<ReviewManagementPage />} />
           <Route path="/checkout" element={<PurchasePage />} />
-          <Route path="/seller/:tab" element={<SellerPage />} />
-          <Route path="/seller" element={<SellerPage />} />
+          <Route path="/seller/profile" element={<SellerProfilePage />} />
+          <Route path="/seller/products" element={<SellerProductManagementPage />} />
+          <Route path="/seller/orders" element={<SellerOrderManagementPage />} />
+          <Route path="/seller" element={<SellerProfilePage />} />
           {/* 없는 경로 접근 시 홈으로 fallback */}
           <Route path="*" element={<HomePage />} />
         </Routes>

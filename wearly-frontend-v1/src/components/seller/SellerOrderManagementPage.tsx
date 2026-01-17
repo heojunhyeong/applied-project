@@ -14,7 +14,7 @@ type DetailStatus =
   | "DELIVERY_COMPLETED"
   | "CANCELLED";
 
-type Carrier = "CJ" | "HANJIN" | "LOGEN" | "POST" | "ROCKET" | "ETC";
+type Carrier = "CJ" | "LOTTE" | "HANJIN" | "ROZEN";
 
 type SellerOrderDetailListResponse = {
   orderDetailId: number;
@@ -117,8 +117,9 @@ export default function SellerOrderManagementPage() {
   // // IN_DELIVERY 선택 시 확장되는 입력 폼 상태
   const [expandedOrderDetailId, setExpandedOrderDetailId] = useState<number | null>(null);
   const [tempStatusById, setTempStatusById] = useState<Record<number, DetailStatus>>({});
-  const [tempCarrier, setTempCarrier] = useState<Carrier | "">("");
-  const [tempInvoiceNumber, setTempInvoiceNumber] = useState("");
+  const [tempDeliveryInfoById, setTempDeliveryInfoById] = useState<
+    Record<number, { carrier: Carrier | ""; invoiceNumber: string }>
+  >({});
   const [savingOrderDetailId, setSavingOrderDetailId] = useState<number | null>(null);
   const [saveErrorById, setSaveErrorById] = useState<Record<number, string>>({});
 
@@ -253,17 +254,23 @@ export default function SellerOrderManagementPage() {
     if (nextStatus === "IN_DELIVERY") {
       // // 배송중은 저장 버튼을 눌러야만 실제 상태가 변경됨
       setExpandedOrderDetailId(od.orderDetailId);
-      setTempCarrier(od.carrier ?? "");
-      setTempInvoiceNumber(od.invoiceNumber ?? "");
+      setTempDeliveryInfoById((prev) => {
+        const existing = prev[od.orderDetailId];
+        return {
+          ...prev,
+          [od.orderDetailId]: {
+            carrier: existing?.carrier ?? od.carrier ?? "",
+            invoiceNumber: existing?.invoiceNumber ?? od.invoiceNumber ?? "",
+          },
+        };
+      });
       setSaveErrorById((prev) => ({ ...prev, [od.orderDetailId]: "" }));
       return;
     }
 
-    // // 배송중 입력폼이 열려있던 상태에서 다른 상태 선택 시 닫기 + 입력값 초기화
+    // // 배송중 입력폼이 열려있던 상태에서 다른 상태 선택 시 닫기
     if (expandedOrderDetailId === od.orderDetailId) {
       setExpandedOrderDetailId(null);
-      setTempCarrier("");
-      setTempInvoiceNumber("");
     }
 
     await handleImmediateStatusChange(od.orderDetailId, nextStatus);
@@ -271,7 +278,11 @@ export default function SellerOrderManagementPage() {
 
   // // 배송 정보 저장 + 배송중으로 상태 변경
   const handleDeliverySave = async (orderDetailId: number) => {
-    if (!tempCarrier || !tempInvoiceNumber.trim()) {
+    const tempInfo = tempDeliveryInfoById[orderDetailId];
+    const carrierValue = tempInfo?.carrier ?? "";
+    const invoiceValue = tempInfo?.invoiceNumber ?? "";
+
+    if (!carrierValue || !invoiceValue.trim()) {
       setSaveErrorById((prev) => ({
         ...prev,
         [orderDetailId]: "택배사와 송장번호를 입력해주세요.",
@@ -285,8 +296,8 @@ export default function SellerOrderManagementPage() {
 
       // // 저장 버튼 눌렀을 때만 IN_DELIVERY로 상태 변경 요청
       await updateDetailStatus(orderDetailId, "IN_DELIVERY", {
-        carrier: tempCarrier as Carrier,
-        invoiceNumber: tempInvoiceNumber.trim(),
+        carrier: carrierValue as Carrier,
+        invoiceNumber: invoiceValue.trim(),
       });
 
       // // 성공 시 화면 반영
@@ -296,8 +307,8 @@ export default function SellerOrderManagementPage() {
             ? {
                 ...od,
                 detailStatus: "IN_DELIVERY",
-                carrier: tempCarrier as Carrier,
-                invoiceNumber: tempInvoiceNumber.trim(),
+                carrier: carrierValue as Carrier,
+                invoiceNumber: invoiceValue.trim(),
               }
             : od
         )
@@ -305,8 +316,14 @@ export default function SellerOrderManagementPage() {
 
       setTempStatusById((prev) => ({ ...prev, [orderDetailId]: "IN_DELIVERY" }));
       setExpandedOrderDetailId(null);
-      setTempCarrier("");
-      setTempInvoiceNumber("");
+      // // 저장된 값은 화면에 계속 노출되도록 유지
+      setTempDeliveryInfoById((prev) => ({
+        ...prev,
+        [orderDetailId]: {
+          carrier: carrierValue as Carrier,
+          invoiceNumber: invoiceValue.trim(),
+        },
+      }));
     } catch (e: any) {
       setSaveErrorById((prev) => ({
         ...prev,
@@ -410,6 +427,11 @@ export default function SellerOrderManagementPage() {
                 filteredOrders.map((od) => {
                   const tempStatus = tempStatusById[od.orderDetailId] ?? od.detailStatus;
                   const isExpanded = expandedOrderDetailId === od.orderDetailId;
+                  const tempDeliveryInfo = tempDeliveryInfoById[od.orderDetailId];
+                  const displayCarrier = tempDeliveryInfo?.carrier || od.carrier || "";
+                  const displayInvoice =
+                    tempDeliveryInfo?.invoiceNumber || od.invoiceNumber || "";
+                  const hasDeliveryInfo = Boolean(displayCarrier || displayInvoice);
 
                   // // detailStatus가 특정 상태이면 드롭다운으로 상태변경 가능
                   const canEditStatus = EDITABLE_DETAIL_STATUSES.includes(od.detailStatus);
@@ -504,6 +526,16 @@ export default function SellerOrderManagementPage() {
                         </td>
                       </tr>
 
+                      {/* 입력/저장된 배송 정보는 항상 주문 상세 아래에 노출 */}
+                      {hasDeliveryInfo && (
+                        <tr className="bg-gray-50">
+                          <td colSpan={7} className="px-6 py-3 text-sm text-gray-700">
+                            택배사: {displayCarrier || "-"} / 송장번호:{" "}
+                            {displayInvoice || "-"}
+                          </td>
+                        </tr>
+                      )}
+
                       {/* 배송중 선택 시 아래로 펼쳐지는 입력 폼 */}
                       {isExpanded && (
                         <tr className="bg-gray-50">
@@ -519,17 +551,24 @@ export default function SellerOrderManagementPage() {
                                     택배사
                                   </label>
                                   <select
-                                    value={tempCarrier}
-                                    onChange={(e) => setTempCarrier(e.target.value as Carrier)}
+                                    value={tempDeliveryInfo?.carrier ?? ""}
+                                    onChange={(e) =>
+                                      setTempDeliveryInfoById((prev) => ({
+                                        ...prev,
+                                        [od.orderDetailId]: {
+                                          carrier: e.target.value as Carrier,
+                                          invoiceNumber:
+                                            prev[od.orderDetailId]?.invoiceNumber ?? "",
+                                        },
+                                      }))
+                                    }
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                                   >
                                     <option value="">선택</option>
                                     <option value="CJ">CJ</option>
+                                    <option value="LOTTE">LOTTE</option>
                                     <option value="HANJIN">HANJIN</option>
-                                    <option value="LOGEN">LOGEN</option>
-                                    <option value="POST">POST</option>
-                                    <option value="ROCKET">ROCKET</option>
-                                    <option value="ETC">ETC</option>
+                                    <option value="ROZEN">ROZEN</option>
                                   </select>
                                 </div>
 
@@ -539,8 +578,16 @@ export default function SellerOrderManagementPage() {
                                   </label>
                                   <input
                                     type="text"
-                                    value={tempInvoiceNumber}
-                                    onChange={(e) => setTempInvoiceNumber(e.target.value)}
+                                    value={tempDeliveryInfo?.invoiceNumber ?? ""}
+                                    onChange={(e) =>
+                                      setTempDeliveryInfoById((prev) => ({
+                                        ...prev,
+                                        [od.orderDetailId]: {
+                                          carrier: prev[od.orderDetailId]?.carrier ?? "",
+                                          invoiceNumber: e.target.value,
+                                        },
+                                      }))
+                                    }
                                     placeholder="송장번호 입력"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                                   />

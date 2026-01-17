@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api/http";
 
 type ProductStatus = "ON_SALE" | "SOLD_OUT" | "DELETED";
@@ -92,6 +93,7 @@ const SIZE_OPTIONS: { value: ProductSize; label: string }[] = [
 ];
 
 export default function SellerProductManagementPage() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productModalMode, setProductModalMode] =
@@ -223,6 +225,11 @@ export default function SellerProductManagementPage() {
     } catch (error: any) {
       setErrorMessage(error.message ?? "상품 상세 조회에 실패했습니다.");
     }
+  };
+
+  // 상품 클릭 시 상세 페이지로 이동
+  const handleProductNavigate = (productId: number) => {
+    navigate(`/product/${productId}`);
   };
 
   // 상태 색상 매핑
@@ -531,7 +538,11 @@ export default function SellerProductManagementPage() {
                   </tr>
                 ) : (
                   products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={product.id}
+                      onClick={() => handleProductNavigate(product.id)}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {product.id}
                       </td>
@@ -574,7 +585,10 @@ export default function SellerProductManagementPage() {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <button
-                          onClick={() => handleOpenEdit(product)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleOpenEdit(product);
+                          }}
                           className="px-4 py-2 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                         >
                           Edit

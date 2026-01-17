@@ -1,14 +1,9 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { Search } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
 
-const brands = [
-  { name: 'NIKE', id: 'nike', tagline: 'Just Do It' },
-  { name: 'ADIDAS', id: 'adidas', tagline: 'Impossible Is Nothing' },
-  { name: 'NEW BALANCE', id: 'new-balance', tagline: 'Fearlessly Independent' },
-  { name: 'REEBOK', id: 'reebok', tagline: 'Classic & Heritage' },
-  { name: 'THE NORTH FACE', id: 'the-north-face', tagline: 'Never Stop Exploring' },
-  { name: 'VANS', id: 'vans', tagline: 'Off The Wall' },
-];
+import { BRANDS } from '../constants/brands';
 
 export default function HomePage() {
   return (
@@ -44,7 +39,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {brands.map((brand) => (
+          {BRANDS.map((brand) => (
             <Link
               key={brand.id}
               to={`/brand/${brand.id}`}
@@ -67,6 +62,39 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-    </main>
+
+      {/* Search Section */}
+      <section className="bg-white border-t border-gray-100 py-20">
+        <div className="max-w-[1400px] mx-auto px-8 flex flex-col items-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Looking for something specific?
+          </h2>
+          <form
+            onSubmit={(e: FormEvent) => {
+              e.preventDefault();
+              const form = e.target as HTMLFormElement;
+              const input = form.elements.namedItem('q') as HTMLInputElement;
+              if (input.value.trim()) {
+                window.location.href = `/search?keyword=${encodeURIComponent(input.value)}`;
+              }
+            }}
+            className="relative w-full max-w-xl"
+          >
+            <input
+              name="q"
+              type="text"
+              placeholder="Search products..."
+              className="w-full h-12 pl-4 pr-24 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            />
+            <button
+              type="submit"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-10 px-6 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
+      </section>
+    </main >
   );
 }

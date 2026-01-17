@@ -3,8 +3,7 @@ import {
   ArrowLeft,
   Search,
   X,
-  ArrowUpDown,
-  AlertCircle
+  ArrowUpDown
 } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useState, useEffect, type FormEvent, type KeyboardEvent } from "react";
@@ -47,16 +46,15 @@ export default function BrandPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Debug State
-  const [debugTotalCount, setDebugTotalCount] = useState<number | null>(null);
-  const [debugBrandEnum, setDebugBrandEnum] = useState<string>("");
-  const [showDebug, setShowDebug] = useState(false);
+
 
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [searchInput, setSearchInput] = useState("");
   const [sortBy, setSortBy] = useState<
     "latest" | "price-low" | "price-high"
   >("latest");
+
+  const [appliedSearch, setAppliedSearch] = useState("");
 
   useEffect(() => {
     if (!brandName) return;
@@ -68,7 +66,6 @@ export default function BrandPage() {
 
         // Map URL friendly brand name to Backend Enum
         const brandEnum = brandName.toUpperCase().replace(/-/g, "_");
-        setDebugBrandEnum(brandEnum);
 
         // Map sort to backend enum
         let sortEnum = "LATEST";
@@ -80,8 +77,8 @@ export default function BrandPage() {
         if (selectedCategory !== "ALL") {
           params.append("category", selectedCategory);
         }
-        if (searchInput) {
-          params.append("keyword", searchInput);
+        if (appliedSearch) {
+          params.append("keyword", appliedSearch);
         }
         params.append("sort", sortEnum);
         params.append("size", "100");
@@ -89,11 +86,7 @@ export default function BrandPage() {
         const response = await apiFetch<PageResponse<Product>>(`/api/products?${params.toString()}`);
         setProducts(response.content);
 
-        // DEBUG: Fetch all products count to see if DB is empty
-        try {
-          const allProducts = await apiFetch<PageResponse<Product>>(`/api/products?size=1`);
-          setDebugTotalCount(allProducts.totalElements);
-        } catch (e) { }
+
 
       } catch (err: any) {
         console.error("Failed to fetch products:", err);
@@ -108,21 +101,18 @@ export default function BrandPage() {
       }
     };
 
-    // Debounce search
-    const timer = setTimeout(() => {
-      fetchProducts();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [brandName, selectedCategory, searchInput, sortBy]);
+    fetchProducts();
+  }, [brandName, selectedCategory, appliedSearch, sortBy]);
 
 
   const handleSearch = (e?: FormEvent) => {
     if (e) e.preventDefault();
+    setAppliedSearch(searchInput);
   };
 
   const handleClearSearch = () => {
     setSearchInput("");
+    setAppliedSearch("");
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -155,22 +145,7 @@ export default function BrandPage() {
             Explore our collection of {(brandName === 'levis' ? "LEVI'S" : displayBrandName).toLowerCase()} products
           </p>
 
-          <button
-            onClick={() => setShowDebug(!showDebug)}
-            className="text-xs text-gray-400 hover:text-gray-600 mb-4 flex items-center gap-1"
-          >
-            <AlertCircle className="w-3 h-3" /> Debug Info
-          </button>
 
-          {showDebug && (
-            <div className="bg-gray-100 p-4 rounded text-xs font-mono mb-6 space-y-1 text-gray-700">
-              <div>URL Brand Parameter: <strong>{brandName}</strong></div>
-              <div>Mapped Backend Enum: <strong>{debugBrandEnum}</strong></div>
-              <div>Total Products in DB (Any Brand): <strong>{debugTotalCount !== null ? debugTotalCount : 'Loading...'}</strong></div>
-              <div>Items Found for this Brand: <strong>{products.length}</strong></div>
-              <div>Current Error: <strong>{error || 'None'}</strong></div>
-            </div>
-          )}
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="mt-6">
@@ -216,8 +191,8 @@ export default function BrandPage() {
                     setSelectedCategory(category.id)
                   }
                   className={`px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${selectedCategory === category.id
-                      ? "bg-gray-900 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                   {category.label}

@@ -167,27 +167,57 @@ public class SellerOrderServiceImpl implements SellerOrderService {
             throw new IllegalStateException("detailStatus가 비어있습니다. 주문 생성 시 동기화가 필요합니다.");
         }
 
-        if (current == OrderStatus.BEFORE_PAID || current == OrderStatus.PAID) {
-            throw new IllegalStateException("아직 판매자가 처리할 수 없는 주문 상태입니다. current=" + current);
+        // // BEFORE_PAID는 판매자 수정 불가
+        if (current == OrderStatus.BEFORE_PAID) {
+            throw new IllegalStateException("결제 전 주문은 판매자가 처리할 수 없습니다. current=" + current);
         }
 
+        // // 상태 전이 검증
         if (!isAllowedTransition(current, next)) {
             throw new IllegalStateException("허용되지 않은 상태 변경입니다. " + current + " -> " + next);
         }
 
+        // // CHECK -> IN_DELIVERY로 바뀔 때: 요청에 택배사/송장번호가 오면 저장하고 진행
         if (current == OrderStatus.CHECK && next == OrderStatus.IN_DELIVERY) {
-            validateInvoiceRequired(orderDetailId);
+
+            if (request.carrier() == null) {
+                throw new IllegalStateException("택배사는 필수입니다.");
+            }
+            if (request.invoiceNumber() == null || request.invoiceNumber().isBlank()) {
+                throw new IllegalStateException("송장번호는 필수입니다.");
+            }
+
+            OrderDeliveryDetail deliveryDetail = orderDeliveryDetailRepository.findByOrderDetailId(orderDetailId)
+                    .orElseGet(() -> {
+                        OrderDeliveryDetail created = OrderDeliveryDetail.builder().build();
+                        created.assignOrderDetail(od);
+                        return created;
+                    });
+
+            deliveryDetail.updateInvoice(request.carrier(), request.invoiceNumber());
+            orderDeliveryDetailRepository.save(deliveryDetail);
         }
 
         od.updateDetailStatus(next);
     }
 
+
     private boolean isAllowedTransition(OrderStatus current, OrderStatus next) {
+        // // 결제 완료 후 판매자 처리 시작
+        if (current == OrderStatus.PAID && next == OrderStatus.WAIT_CHECK) return true;
+
+        // // 판매자 처리 플로우
         if (current == OrderStatus.WAIT_CHECK && next == OrderStatus.CHECK) return true;
         if (current == OrderStatus.CHECK && next == OrderStatus.IN_DELIVERY) return true;
         if (current == OrderStatus.IN_DELIVERY && next == OrderStatus.DELIVERY_COMPLETED) return true;
+
+        // // (선택) 취소 허용하고 싶으면 열어
+        // if (current == OrderStatus.PAID && next == OrderStatus.CANCELLED) return true;
+        // if (current == OrderStatus.WAIT_CHECK && next == OrderStatus.CANCELLED) return true;
+
         return false;
     }
+
 
     private void validateInvoiceRequired(Long orderDetailId) {
         OrderDeliveryDetail dd = orderDeliveryDetailRepository.findByOrderDetailId(orderDetailId)

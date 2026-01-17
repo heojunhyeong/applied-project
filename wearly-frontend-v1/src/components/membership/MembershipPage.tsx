@@ -381,7 +381,7 @@ export default function MembershipPage() {
                                 프리미엄 멤버십에 가입하세요
                             </h2>
                             <p className="text-gray-600">
-                                월 4,900원으로 다양한 혜택을 누려보세요
+                                월 4,900원으로 다양한 혜택을 누려보세요.
                             </p>
                         </div>
 

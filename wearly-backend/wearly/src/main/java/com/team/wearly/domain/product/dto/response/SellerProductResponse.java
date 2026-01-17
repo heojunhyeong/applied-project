@@ -22,7 +22,7 @@ public record SellerProductResponse(
         Brand brand,
         ProductCategory productCategory,
         Set<Size> availableSizes,
-        ProductStatus status,
+        ProductStatus displayStatus, //
         LocalDateTime createdDate,
         LocalDateTime updatedDate,
 
@@ -71,7 +71,7 @@ public record SellerProductResponse(
                 p.getBrand(),
                 p.getProductCategory(),
                 p.getAvailableSizes(),
-                p.getStatus(),
+                displayStatus, //
                 p.getCreatedDate(),
                 p.getUpdatedDate(),
                 reviews,       // 여기에 리뷰 리스트 주입

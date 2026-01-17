@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Star, Minus, Plus, Heart, Share2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
@@ -81,8 +81,7 @@ const qnaList = [
   {
     id: 3,
     question: "키 175cm에 몇 사이즈가 적당할까요?",
-    answer:
-      "체형에 따라 다르지만 보통 체형이시라면 32 사이즈를 추천드립니다.",
+    answer: "체형에 따라 다르지만 보통 체형이시라면 32 사이즈를 추천드립니다.",
     userName: "윤*우",
     date: "2026.01.08",
     answered: true,
@@ -101,47 +100,77 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<
-    "details" | "reviews" | "qna"
-  >("details");
+  const [activeTab, setActiveTab] = useState<"details" | "reviews" | "qna">(
+    "details"
+  );
 
-  const sizes = ["28", "30", "32", "34", "36"];
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const sizes = ["SMALL", "MEDIUM", "LARGE", "EXTRA_LARGE"];
+
+  const getSizeLabel = (size: string) => {
+    const sizeMap: Record<string, string> = {
+      SMALL: "S",
+      MEDIUM: "M",
+      LARGE: "L",
+      EXTRA_LARGE: "XL",
+    };
+    return sizeMap[size] || size;
+  };
+
   const originalPrice = 98000;
   const discountRate = 15;
-  const salePrice = Math.floor(
-    originalPrice * (1 - discountRate / 100),
-  );
+  const salePrice = Math.floor(originalPrice * (1 - discountRate / 100));
 
   const navigate = useNavigate();
   const { productId } = useParams<{ productId: string }>();
 
-    const handleAddToCart = async () => {
-        // 사이즈 선택 확인
-        if (!selectedSize) {
-            alert("사이즈를 선택해주세요.");
-            return;
-        }
+  useEffect(() => {
+      const fetchProduct = async () => {
+          if (!productId) return;
+          try {
+              setLoading(true);
+              const data = await apiFetch(`/api/products/${productId}`);
+              setProduct(data);
+          } catch (error: any) {
+              alert(error?.message || "상품 정보를 불러오는데 실패했습니다.");
+              navigate("/");
+          } finally {
+              setLoading(false);
+          }
+      };
 
-        try {
-            // 장바구니에 상품 추가 API 호출
-            await apiFetch("/api/users/cart/items", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    productId: Number(productId),
-                    size: selectedSize,
-                    quantity: quantity,
-                }),
-            });
+      fetchProduct();
+      }, [productId, navigate]);
 
-            // 장바구니 페이지로 이동
-            navigate("/cart");
-        } catch (error: any) {
-            alert(error?.message || "장바구니에 상품을 추가하는데 실패했습니다.");
-        }
-    };
+  const handleAddToCart = async () => {
+    // 사이즈 선택 확인
+    if (!selectedSize) {
+      alert("사이즈를 선택해주세요.");
+      return;
+    }
+
+    try {
+      // 장바구니에 상품 추가 API 호출
+      await apiFetch("/api/users/cart/items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: Number(productId),
+          size: selectedSize,
+          quantity: quantity,
+        }),
+      });
+
+      // 장바구니 페이지로 이동
+      navigate("/cart");
+    } catch (error: any) {
+      alert(error?.message || "장바구니에 상품을 추가하는데 실패했습니다.");
+    }
+  };
 
   return (
     <div className="bg-gray-50">
@@ -230,7 +259,7 @@ export default function ProductDetailPage() {
               <label className="block text-sm font-medium text-gray-900 mb-3">
                 사이즈 선택
               </label>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {sizes.map((size) => (
                   <button
                     key={size}
@@ -241,7 +270,7 @@ export default function ProductDetailPage() {
                         : "border-gray-300 bg-white text-gray-700 hover:border-gray-900"
                     }`}
                   >
-                    {size}
+                    {getSizeLabel(size)}
                   </button>
                 ))}
               </div>
@@ -257,9 +286,7 @@ export default function ProductDetailPage() {
               </label>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() =>
-                    setQuantity(Math.max(1, quantity - 1))
-                  }
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100"
                 >
                   <Minus className="w-4 h-4" />
@@ -279,9 +306,7 @@ export default function ProductDetailPage() {
             {/* Total Price */}
             <div className="bg-gray-50 p-4 rounded-lg mb-6">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  총 상품금액
-                </span>
+                <span className="text-sm text-gray-600">총 상품금액</span>
                 <span className="text-2xl font-bold text-gray-900">
                   {(salePrice * quantity).toLocaleString()}원
                 </span>
@@ -291,12 +316,15 @@ export default function ProductDetailPage() {
             {/* Action Buttons */}
             <div className="flex gap-3 mb-4">
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={() => navigate("/checkout")}
                 className="flex-1 py-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
               >
                 구매하기
               </button>
-              <button className="flex-1 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
                 장바구니
               </button>
             </div>
@@ -306,25 +334,15 @@ export default function ProductDetailPage() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">배송비</span>
-                  <span className="text-gray-900">
-                    무료배송
-                  </span>
+                  <span className="text-gray-900">무료배송</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">
-                    배송예정
-                  </span>
-                  <span className="text-gray-900">
-                    1-2일 이내 출고
-                  </span>
+                  <span className="text-gray-600">배송예정</span>
+                  <span className="text-gray-900">1-2일 이내 출고</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">
-                    반품/교환
-                  </span>
-                  <span className="text-gray-900">
-                    수령 후 7일 이내
-                  </span>
+                  <span className="text-gray-600">반품/교환</span>
+                  <span className="text-gray-900">수령 후 7일 이내</span>
                 </div>
               </div>
             </div>
@@ -371,72 +389,48 @@ export default function ProductDetailPage() {
                 {/* Product Description */}
                 <div className="prose max-w-none mb-8">
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    리바이스의 상징적인 501 오리지널 핏 진.
-                    1873년부터 이어져 온 클래식한 디자인으로,
-                    시대를 초월한 스타일을 선사합니다. 편안한
-                    핏과 내구성 있는 소재로 일상에서 자유롭게
-                    활용할 수 있습니다.
+                    리바이스의 상징적인 501 오리지널 핏 진. 1873년부터 이어져 온
+                    클래식한 디자인으로, 시대를 초월한 스타일을 선사합니다.
+                    편안한 핏과 내구성 있는 소재로 일상에서 자유롭게 활용할 수
+                    있습니다.
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    고급스러운 데님 원단을 사용하여 착용감이
-                    우수하며, 세탁 후에도 형태가 잘 유지됩니다.
-                    클래식 블루 워시로 어떤 스타일과도 매치하기
-                    좋습니다.
+                    고급스러운 데님 원단을 사용하여 착용감이 우수하며, 세탁
+                    후에도 형태가 잘 유지됩니다. 클래식 블루 워시로 어떤
+                    스타일과도 매치하기 좋습니다.
                   </p>
                 </div>
 
                 {/* Product Specifications */}
                 <div className="bg-gray-50 p-6 rounded-lg mb-8">
-                  <h3 className="font-bold text-gray-900 mb-4">
-                    제품 사양
-                  </h3>
+                  <h3 className="font-bold text-gray-900 mb-4">제품 사양</h3>
                   <div className="space-y-3 text-sm">
                     <div className="flex">
-                      <span className="w-32 text-gray-600">
-                        소재
-                      </span>
-                      <span className="text-gray-900">
-                        면 100%
-                      </span>
+                      <span className="w-32 text-gray-600">소재</span>
+                      <span className="text-gray-900">면 100%</span>
                     </div>
                     <div className="flex">
-                      <span className="w-32 text-gray-600">
-                        원산지
-                      </span>
+                      <span className="w-32 text-gray-600">원산지</span>
                       <span className="text-gray-900">USA</span>
                     </div>
                     <div className="flex">
-                      <span className="w-32 text-gray-600">
-                        색상
-                      </span>
-                      <span className="text-gray-900">
-                        Classic Blue
-                      </span>
+                      <span className="w-32 text-gray-600">색상</span>
+                      <span className="text-gray-900">Classic Blue</span>
                     </div>
                     <div className="flex">
-                      <span className="w-32 text-gray-600">
-                        핏
-                      </span>
-                      <span className="text-gray-900">
-                        Regular Fit
-                      </span>
+                      <span className="w-32 text-gray-600">핏</span>
+                      <span className="text-gray-900">Regular Fit</span>
                     </div>
                     <div className="flex">
-                      <span className="w-32 text-gray-600">
-                        제조사
-                      </span>
-                      <span className="text-gray-900">
-                        Levi Strauss & Co.
-                      </span>
+                      <span className="w-32 text-gray-600">제조사</span>
+                      <span className="text-gray-900">Levi Strauss & Co.</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Detail Images */}
                 <div className="space-y-4">
-                  <h3 className="font-bold text-gray-900 mb-4">
-                    상세 이미지
-                  </h3>
+                  <h3 className="font-bold text-gray-900 mb-4">상세 이미지</h3>
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
@@ -457,20 +451,11 @@ export default function ProductDetailPage() {
                     세탁 및 관리 방법
                   </h3>
                   <ul className="space-y-2 text-sm text-gray-700">
-                    <li>
-                      • 찬물 또는 미지근한 물로 세탁하세요
-                    </li>
+                    <li>• 찬물 또는 미지근한 물로 세탁하세요</li>
                     <li>• 표백제 사용을 피하세요</li>
-                    <li>
-                      • 뒤집어서 세탁하면 색상 보호에 도움이
-                      됩니다
-                    </li>
-                    <li>
-                      • 건조기 사용 시 저온으로 설정하세요
-                    </li>
-                    <li>
-                      • 직사광선을 피해 그늘에서 건조하세요
-                    </li>
+                    <li>• 뒤집어서 세탁하면 색상 보호에 도움이 됩니다</li>
+                    <li>• 건조기 사용 시 저온으로 설정하세요</li>
+                    <li>• 직사광선을 피해 그늘에서 건조하세요</li>
                   </ul>
                 </div>
               </div>
@@ -502,10 +487,9 @@ export default function ProductDetailPage() {
                     <div className="flex-1">
                       {[5, 4, 3, 2, 1].map((rating) => {
                         const count = reviews.filter(
-                          (r) => r.rating === rating,
+                          (r) => r.rating === rating
                         ).length;
-                        const percentage =
-                          (count / reviews.length) * 100;
+                        const percentage = (count / reviews.length) * 100;
                         return (
                           <div
                             key={rating}

@@ -12,4 +12,7 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
     boolean existsByUserEmail(String userEmail);
     boolean existsByUserNickname(String userNickname);
     boolean existsByUserName(String userName);
+
+    // 닉네임 중복 체크 메소드 (내 id 제외)
+    boolean existsByUserNicknameAndIdNot(String userNickname, Long id);
 }

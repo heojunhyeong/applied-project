@@ -1,4 +1,5 @@
-import { useState, type ChangeEvent } from "react";
+import { Fragment, useEffect, useState, type ChangeEvent } from "react";
+import { useParams } from "react-router-dom";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Package, ShoppingBag, Truck, X, Plus } from "lucide-react";
 
@@ -154,6 +155,7 @@ const mockOrders: Order[] = [
 
 export default function SellerPage() {
   const [activeMenu, setActiveMenu] = useState<"products" | "orders">("products");
+  const { tab } = useParams<{ tab?: string }>();
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -164,6 +166,20 @@ export default function SellerPage() {
     shippingCompany: "",
     trackingNumber: "",
   });
+
+  const setActiveMenuFromTab = (currentTab?: string) => {
+    // URL tab 값에 따라 activeMenu를 설정
+    if (currentTab === "orders") {
+      setActiveMenu("orders");
+      return;
+    }
+    setActiveMenu("products");
+  };
+
+  useEffect(() => {
+    // URL tab 변경을 감지해 메뉴를 자동 전환
+    setActiveMenuFromTab(tab);
+  }, [tab]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -679,9 +695,8 @@ export default function SellerPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {filteredOrders.map((order) => (
-                      <>
+                      <Fragment key={order.id}>
                         <tr
-                          key={order.id}
                           className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="px-6 py-4">
@@ -748,7 +763,7 @@ export default function SellerPage() {
                           </td>
                         </tr>
 
-                        {/* Inline Shipping Info Form */}
+                        {/* 선택된 주문의 배송 정보를 입력하는 영역 */}
                         {editingOrderId === order.id && (
                           <tr>
                             <td colSpan={8} className="px-6 py-6 bg-gray-50">
@@ -816,7 +831,7 @@ export default function SellerPage() {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     ))}
                   </tbody>
                 </table>

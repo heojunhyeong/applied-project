@@ -11,20 +11,22 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReviewReportRepository extends JpaRepository<ReviewReport, Long> {
 
-    boolean existsByReviewIdAndReporterId(Long reviewId, Long reporterId);
+    // 동일 신고 중복 방지 // 같은 reporter가 같은 review를 재신고 못하게
+    boolean existsByReview_IdAndReporterId(Long reviewId, Long reporterId);
 
+    // 판매자 기준 신고 목록 조회 // 상태 필터 선택 가능
     @Query("""
         select new com.team.wearly.domain.review.dto.response.SellerReviewReportItemResponse(
             rr.id,
-            rr.reviewId,
-            pr.product.id,
+            rr.review.id,
+            rr.review.product.id,
             rr.reporterId,
             rr.reason,
             rr.status,
             rr.createdDate
         )
         from ReviewReport rr
-        join ProductReview pr on pr.id = rr.reviewId
+        join rr.review pr
         join pr.product p
         where p.sellerId = :sellerId
           and (:status is null or rr.status = :status)

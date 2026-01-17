@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Users, Package, CreditCard } from 'lucide-react';
+import { UserCircle, Users, Package, CreditCard } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -10,6 +10,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
 
   const menuItems = [
+    {
+      name: 'My Profile',
+      path: '/profile',
+      icon: UserCircle,
+    },
     {
       name: 'User Management',
       path: '/admin/users',

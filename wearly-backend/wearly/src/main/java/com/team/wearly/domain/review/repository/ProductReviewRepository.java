@@ -14,10 +14,10 @@ import java.util.Optional;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
 
-    // 특정 상품의 리뷰를 페이징 처리해서 조회
+    // 특정 상품의 리뷰를 페이징 처리해서 조회 // 상품 상세 리뷰 페이지용
     Page<ProductReview> findByProductId(Long productId, Pageable pageable);
 
-    // 1) 리뷰 목록: seller 기준 + (옵션) productId + (옵션) status
+    // 판매자 기준 리뷰 목록 조회 // productId/status 필터 선택 가능
     @Query("""
         select r
         from ProductReview r
@@ -33,7 +33,7 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
             Pageable pageable
     );
 
-    // 2) 요약: seller 기준 + (옵션) productId
+    // 판매자 리뷰 요약(평균, 개수) // productId 있으면 해당 상품만, 없으면 전체
     @Query("""
         select coalesce(avg(r.rating), 0), count(r)
         from ProductReview r
@@ -46,7 +46,7 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
             @Param("productId") Long productId
     );
 
-    // 3) 상품별 요약 리스트 (DTO 분리 버전)
+    // 판매자 상품별 리뷰 요약 리스트 // 상품별 평균/개수
     @Query("""
         select new com.team.wearly.domain.review.dto.response.ProductReviewSummaryResponse(
             p.id,
@@ -62,19 +62,22 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
             @Param("sellerId") Long sellerId
     );
 
-
+    // 특정 리뷰가 판매자 소유 상품 리뷰인지 여부 // 신고/숨김 권한 체크용
     @Query("""
-    select count(pr) > 0
-    from ProductReview pr
-    join pr.product p
-    where pr.id = :reviewId
-      and p.sellerId = :sellerId
-""")
+        select count(pr) > 0
+        from ProductReview pr
+        join pr.product p
+        where pr.id = :reviewId
+          and p.sellerId = :sellerId
+        """)
     boolean existsSellerReview(
             @Param("reviewId") Long reviewId,
             @Param("sellerId") Long sellerId
     );
 
+    // 주문+상품 기준으로 리뷰 중복 작성 방지 // 한 주문의 한 상품에 리뷰 1개만
     Optional<ProductReview> findByReviewerIdAndOrderIdAndProductId(Long reviewerId, String orderId, Long productId);
+
+    // 특정 상품 리뷰 최신순 조회 // 사용자 리뷰 리스트 화면용
     List<ProductReview> findAllByProductIdOrderByCreatedDateDesc(Long productId);
 }

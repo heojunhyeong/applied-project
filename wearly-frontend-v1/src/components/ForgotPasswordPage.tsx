@@ -4,7 +4,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { ArrowLeft, Mail } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:8080'; // TODO: 환경변수로 관리
+const API_BASE_URL = ''; // TODO: 환경변수로 관리
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

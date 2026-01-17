@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-
-const API_BASE_URL = 'http://localhost:8080'; // TODO: 환경변수로 관리
+import { apiFetch } from '../api/http';
 
 interface OrderItem {
     productId: number;
@@ -24,6 +23,11 @@ interface OrderSheetResponse {
     totalProductPrice: number;
     availableCoupons: AvailableCoupon[];
     deliveryFee: number;
+}
+
+interface CreateOrderResponse {
+    orderId: string;
+    orderNumber: string;
 }
 
 export default function PurchasePage() {
@@ -60,23 +64,10 @@ export default function PurchasePage() {
                     if (size) params.append('size', size);
                 }
 
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE_URL}/api/users/orders/sheet?${params.toString()}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(token && { 'Authorization': `Bearer ${token}` }),
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('주문 시트를 불러오는데 실패했습니다.');
-                }
-
-                const data: OrderSheetResponse = await response.json();
+                const data = await apiFetch<OrderSheetResponse>(`/api/users/orders/sheet?${params.toString()}`);
                 setOrderSheet(data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+            } catch (err: any) {
+                setError(err.message || '알 수 없는 오류가 발생했습니다.');
                 console.error('주문 시트 로드 실패:', err);
             } finally {
                 setLoading(false);
@@ -139,38 +130,32 @@ export default function PurchasePage() {
                 userCouponId: selectedCouponId,
             };
 
-            const token = localStorage.getItem('token');
-            const createOrderResponse = await fetch(`${API_BASE_URL}/api/users/orders`, {
+            const createdOrder = await apiFetch<CreateOrderResponse>(`/api/users/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
                 },
                 body: JSON.stringify(orderRequest),
             });
 
-            if (!createOrderResponse.ok) {
-                const errorData = await createOrderResponse.json().catch(() => null);
-                throw new Error(errorData?.message || '주문 생성에 실패했습니다.');
-            }
-
-            const createdOrder = await createOrderResponse.json();
             const orderId = createdOrder.orderId; // 백엔드에서 생성된 ORD-2026...
 
             // 2. 토스 페이먼츠 결제창 호출
             // @ts-ignore: index.html에 로드된 TossPayments SDK를 사용합니다.
-            const tossPayments = window.TossPayments("test_ck_D5VqZkd6bROq049NEgvE8jYpQPa2");
+            const tossPayments = window.TossPayments("test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml");
 
-            await tossPayments.requestPayment('카드', {
+            await tossPayments.requestPayment('CARD', { // 대문자 'CARD'로 보내거나, 혹은 상점 설정에 따라 다름
                 amount: finalAmount,
                 orderId: orderId,
                 orderName: orderSheet.items[0].productName + (orderSheet.items.length > 1 ? ` 외 ${orderSheet.items.length - 1}건` : ''),
-                successUrl: `${window.location.origin}/payment/success`,
-                failUrl: `${window.location.origin}/payment/fail`,
+                successUrl: `http://localhost:70/payment/success`,
+                failUrl: `http://localhost:70/payment/fail`,
+                // 아래 옵션을 추가하면 QR결제/간편결제가 포함된 선택창이 뜰 확률이 높습니다.
+                method: 'CARD',
             });
 
-        } catch (err) {
-            alert(err instanceof Error ? err.message : '결제 처리 중 오류가 발생했습니다.');
+        } catch (err: any) {
+            alert(err.message || '결제 처리 중 오류가 발생했습니다.');
             console.error('결제 처리 실패:', err);
         } finally {
             setProcessingPayment(false);

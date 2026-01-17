@@ -55,23 +55,22 @@ public class OrderController {
             Authentication authentication,
             @RequestBody OrderCreateRequest request) {
 
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         return ResponseEntity.ok(orderService.createOrder(userId, request));
 
-        //테스트용, 위 주석으로 교체 필요
-//        Long userId;
-//        if (authentication == null || authentication.getName() == null) {
-//            userId = 2L; // DB에 넣은 테스트 유저 ID
-//        } else {
-//            try {
-//                userId = Long.parseLong(authentication.getName());
-//            } catch (NumberFormatException e) {
-//                userId = 2L; // 형식이 맞지 않을 경우 대비
-//            }
-//        }
-//        return ResponseEntity.ok(orderService.createOrder(userId, request));
+        // 테스트용, 위 주석으로 교체 필요
+        // Long userId;
+        // if (authentication == null || authentication.getName() == null) {
+        // userId = 2L; // DB에 넣은 테스트 유저 ID
+        // } else {
+        // try {
+        // userId = Long.parseLong(authentication.getName());
+        // } catch (NumberFormatException e) {
+        // userId = 2L; // 형식이 맞지 않을 경우 대비
+        // }
+        // }
+        // return ResponseEntity.ok(orderService.createOrder(userId, request));
     }
-
 
     /**
      * 현재 로그인한 사용자의 전체 주문 내역을 조회하는 API
@@ -84,10 +83,9 @@ public class OrderController {
      */
     @GetMapping
     public ResponseEntity<List<OrderHistoryResponse>> getMyOrders(Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         return ResponseEntity.ok(orderService.getOrderHistory(userId));
     }
-
 
     /**
      * 특정 주문 번호에 대한 상세 정보를 조회하는 API
@@ -110,7 +108,7 @@ public class OrderController {
      * 예: "감자"로 검색 시, 감자가 포함된 상품과 같은 날 주문된 고구마 등도 함께 반환됩니다.
      *
      * @param authentication 인증 정보 (사용자 ID 추출용)
-     * @param keyword 상품명 검색 키워드
+     * @param keyword        상품명 검색 키워드
      * @return 주문 상세 상품 목록
      */
     @GetMapping("/search")
@@ -123,12 +121,11 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-
     /**
      * 사용자가 상품 수령 후 구매를 최종 확정하는 API
      *
-     * @param userId 인증된 사용자의 식별자
-     * @param orderId 해당 상품이 포함된 주문 번호
+     * @param userId        인증된 사용자의 식별자
+     * @param orderId       해당 상품이 포함된 주문 번호
      * @param orderDetailId 확정할 개별 상품의 상세 번호
      * @return 구매 확정 성공 메시지
      * @author 허준형
@@ -153,7 +150,7 @@ public class OrderController {
             @RequestParam(required = false) Size size,
             Authentication authentication) {
 
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         OrderSheetResponse response = orderService.getOrderSheet(userId, cartItemIds, productId, quantity, size);
         return ResponseEntity.ok(response);
     }

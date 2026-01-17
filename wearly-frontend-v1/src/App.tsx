@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import SearchPage from "./components/SearchPage";
 import {
   ShoppingCart,
   Package,
@@ -10,6 +11,7 @@ import {
   Users,
   ClipboardList,
   MessageSquareWarning,
+  Crown,
 } from 'lucide-react';
 import HomePage from "./components/HomePage";
 import BrandPage from "./components/BrandPage";
@@ -31,18 +33,13 @@ import PurchasePage from "./components/PurchasePage";
 import SellerPage from "./components/SellerPage";
 import PaymentSuccessPage from "./components/PaymentSuccessPage";
 import MembershipPage from "./components/membership/MembershipPage";
+import ReviewFormPage from "./components/ReviewFormPage";
 
-const brands = [
-  { name: "LEVI'S", id: "levis" },
-  { name: "NIKE", id: "nike" },
-  { name: "ADIDAS", id: "adidas" },
-  { name: "NEW BALANCE", id: "new-balance" },
-  { name: "THE NORTH FACE", id: "the-north-face" },
-];
+import { BRANDS } from "./constants/brands";
 
 type Role = "USER" | "SELLER" | "ADMIN";
 
-function Header({ brandItems }: { brandItems: typeof brands }) {
+function Header({ brandItems }: { brandItems: typeof BRANDS }) {
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
   const [isSellerPageOpen, setIsSellerPageOpen] = useState(false);
   const [isAdminPageOpen, setIsAdminPageOpen] = useState(false);
@@ -80,7 +77,7 @@ function Header({ brandItems }: { brandItems: typeof brands }) {
   const handleLogout = async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
-      
+
       // 백엔드에 로그아웃 요청 (Refresh Token 삭제)
       if (refreshToken) {
         try {
@@ -207,35 +204,47 @@ function Header({ brandItems }: { brandItems: typeof brands }) {
                   <span>My Page</span>
                 </button>
 
-                {/* Dropdown Menu */}
-                {isMyPageOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                    <Link
-                      to="/orders"
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => {
-                        // 마이페이지 드롭다운 닫기
-                        setIsMyPageOpen(false);
-                      }}
-                    >
-                      <Package className="w-4 h-4" />
-                      Order History
-                    </Link>
-                    <div className="border-t border-gray-100"></div>
-                    <Link
-                      // 공통 프로필 페이지로 이동
-                      to="/profile"
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => {
-                        // 마이페이지 드롭다운 닫기
-                        setIsMyPageOpen(false);
-                      }}
-                    >
-                      <UserCircle className="w-4 h-4" />
-                      My Profile
-                    </Link>
-                  </div>
-                )}
+                  {/* Dropdown Menu */}
+                  {isMyPageOpen && (
+                      <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                          <Link
+                              to="/orders"
+                              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              onClick={() => {
+                                  // 마이페이지 드롭다운 닫기
+                                  setIsMyPageOpen(false);
+                              }}
+                          >
+                              <Package className="w-4 h-4" />
+                              Order History
+                          </Link>
+                          <div className="border-t border-gray-100"></div>
+                          <Link
+                              // 공통 프로필 페이지로 이동
+                              to="/profile"
+                              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              onClick={() => {
+                                  // 마이페이지 드롭다운 닫기
+                                  setIsMyPageOpen(false);
+                              }}
+                          >
+                              <UserCircle className="w-4 h-4" />
+                              My Profile
+                          </Link>
+                          <div className="border-t border-gray-100"></div>
+                          <Link
+                              to="/membership"
+                              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              onClick={() => {
+                                  // 마이페이지 드롭다운 닫기
+                                  setIsMyPageOpen(false);
+                              }}
+                          >
+                              <Crown className="w-4 h-4" />
+                              Membership
+                          </Link>
+                      </div>
+                  )}
               </div>
 
               <Link
@@ -438,12 +447,15 @@ export default function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <Header brandItems={brands} />
+        <Header brandItems={BRANDS} />
 
         <Routes>
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/brand/:brandName" element={<BrandPage />} />
+          <Route path="/brand/:brandName" element={<BrandPage />} />
           <Route path="/product/:productId" element={<ProductDetailPage />} />
+          <Route path="/product/:productId/review" element={<ReviewFormPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

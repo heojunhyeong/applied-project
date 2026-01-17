@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router';
 import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = '';
 
 export default function PaymentSuccessPage() {
     const [searchParams] = useSearchParams();
@@ -24,8 +24,8 @@ export default function PaymentSuccessPage() {
             }
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE_URL}/api/payments/confirm`, {
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(`${API_BASE_URL}/api/payment/toss/confirm`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -44,6 +44,7 @@ export default function ProfilePage() {
 
   const isAdmin = role === "ADMIN";
   const isSeller = role === "SELLER"; // // SELLER 여부
+  const isUser = role === "USER";
 
   // // 프로필 조회
   const loadProfile = async (resolvedRole?: UserRole) => {
@@ -468,22 +469,24 @@ export default function ProfilePage() {
       </div>
 
       {/* // Coupon */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-start gap-6">
-          <div className="w-32 flex-shrink-0">
-            <label className="text-sm text-gray-700">Coupon</label>
-          </div>
+      {isUser && (
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-start gap-6">
+            <div className="w-32 flex-shrink-0">
+              <label className="text-sm text-gray-700">Coupon</label>
+            </div>
 
-          <div className="flex-1 min-w-0">
-            <button
-              onClick={() => setShowCouponModal(true)}
-              className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-            >
-              쿠폰 발급받기
-            </button>
+            <div className="flex-1 min-w-0">
+              <button
+                onClick={() => setShowCouponModal(true)}
+                className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+              >
+                쿠폰 발급받기
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* // Bottom Actions */}
       {isEditing && (
@@ -510,6 +513,7 @@ export default function ProfilePage() {
   );
 
   const couponModal =
+    isUser &&
     showCouponModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">

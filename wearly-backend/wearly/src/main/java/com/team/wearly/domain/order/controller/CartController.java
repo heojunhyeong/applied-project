@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.team.wearly.domain.user.entity.User;
+import com.team.wearly.domain.user.entity.Seller;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,22 @@ import java.util.List;
 @RequestMapping("/api/users/cart")
 public class CartController {
     private final CartService cartService;
+
+    private Long getUserIdFromAuthentication(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new IllegalStateException("인증 정보가 없습니다.");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof User) {
+            return ((User) principal).getId();
+        } else if (principal instanceof Seller) {
+            return ((Seller) principal).getId();
+        } else {
+            throw new IllegalStateException("지원하지 않는 사용자 타입입니다.");
+        }
+    }
 
     /**
      * 현재 로그인한 사용자의 장바구니에 담긴 전체 상품 목록을 조회하는 API
@@ -32,7 +50,7 @@ public class CartController {
     public ResponseEntity<List<CartResponseDto>> getCartItems(
             Authentication authentication)
     {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         List<CartResponseDto> response = cartService.getCartItems(userId);
         return ResponseEntity.ok(response);
     }
@@ -52,7 +70,7 @@ public class CartController {
             Authentication authentication,
             @Valid @RequestBody CartRequestDto requestDto)
     {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         CartResponseDto response = cartService.addCart(userId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -72,7 +90,7 @@ public class CartController {
             Authentication authentication,
             @PathVariable Long productId)
     {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         cartService.deleteCartItem(userId, productId);
         return ResponseEntity.noContent().build();
     }
@@ -89,7 +107,7 @@ public class CartController {
     @DeleteMapping("/items")
     public ResponseEntity<Void> clearCart(Authentication authentication)
     {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getUserIdFromAuthentication(authentication);
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();
     }

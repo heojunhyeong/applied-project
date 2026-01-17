@@ -31,6 +31,7 @@ import PurchasePage from "./components/PurchasePage";
 import SellerPage from "./components/SellerPage";
 import PaymentSuccessPage from "./components/PaymentSuccessPage";
 import MembershipPage from "./components/membership/MembershipPage";
+import ReviewFormPage from "./components/ReviewFormPage";
 
 const brands = [
   { name: "LEVI'S", id: "levis" },
@@ -80,7 +81,7 @@ function Header({ brandItems }: { brandItems: typeof brands }) {
   const handleLogout = async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
-      
+
       // 백엔드에 로그아웃 요청 (Refresh Token 삭제)
       if (refreshToken) {
         try {
@@ -443,7 +444,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/brand/:brandName" element={<BrandPage />} />
+          <Route path="/brand/:brandName" element={<BrandPage />} />
           <Route path="/product/:productId" element={<ProductDetailPage />} />
+          <Route path="/product/:productId/review" element={<ReviewFormPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

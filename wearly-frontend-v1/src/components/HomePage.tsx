@@ -2,11 +2,12 @@ import { Link } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 const brands = [
-  { name: "LEVI'S", id: 'levis', tagline: 'Classic American Denim' },
-  { name: 'NIKE', id: 'nike', tagline: 'Athletic Performance Wear' },
-  { name: 'ADIDAS', id: 'adidas', tagline: 'Sport & Lifestyle' },
-  { name: 'NEW BALANCE', id: 'new-balance', tagline: 'Premium Running & Casual' },
-  { name: 'THE NORTH FACE', id: 'the-north-face', tagline: 'Outdoor & Adventure Gear' },
+  { name: 'NIKE', id: 'nike', tagline: 'Just Do It' },
+  { name: 'ADIDAS', id: 'adidas', tagline: 'Impossible Is Nothing' },
+  { name: 'NEW BALANCE', id: 'new-balance', tagline: 'Fearlessly Independent' },
+  { name: 'REEBOK', id: 'reebok', tagline: 'Classic & Heritage' },
+  { name: 'THE NORTH FACE', id: 'the-north-face', tagline: 'Never Stop Exploring' },
+  { name: 'VANS', id: 'vans', tagline: 'Off The Wall' },
 ];
 
 export default function HomePage() {

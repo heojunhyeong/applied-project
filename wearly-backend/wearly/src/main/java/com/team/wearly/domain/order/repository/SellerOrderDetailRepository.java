@@ -7,18 +7,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface SellerOrderDetailRepository extends JpaRepository<OrderDetail, Long> {
 
     /**
-     * 판매자 주문 상세 목록 조회 (전체)
-     * OrderDetail 기준
+     * ✅ Page + fetch join은 지뢰라서 제거
+     * 대신 EntityGraph로 필요한 연관만 한 번에 로딩
      */
+    @EntityGraph(attributePaths = {"order", "product"})
     @Query("""
         select od
         from OrderDetail od
-        join fetch od.order o
-        join fetch od.product p
-        left join fetch OrderDeliveryDetail odd on odd.orderDetail = od
         where od.sellerId = :sellerId
     """)
     Page<OrderDetail> findSellerOrderDetails(
@@ -26,15 +26,10 @@ public interface SellerOrderDetailRepository extends JpaRepository<OrderDetail, 
             Pageable pageable
     );
 
-    /**
-     * 판매자 주문 상세 목록 조회 (detailStatus 필터)
-     */
+    @EntityGraph(attributePaths = {"order", "product"})
     @Query("""
         select od
         from OrderDetail od
-        join fetch od.order o
-        join fetch od.product p
-        left join fetch OrderDeliveryDetail odd on odd.orderDetail = od
         where od.sellerId = :sellerId
           and od.detailStatus = :status
     """)
@@ -45,19 +40,19 @@ public interface SellerOrderDetailRepository extends JpaRepository<OrderDetail, 
     );
 
     /**
-     * 판매자 주문 상세 단건 조회 (권한 체크)
+     * 상세 단건은 fetch join 써도 됨 (Page 아님)
+     * orderDelivery도 같이 땡겨오려고 join fetch 유지
      */
     @Query("""
         select od
         from OrderDetail od
         join fetch od.order o
         join fetch od.product p
-        left join fetch OrderDeliveryDetail odd on odd.orderDetail = od
         left join fetch o.orderDelivery d
         where od.id = :orderDetailId
           and od.sellerId = :sellerId
     """)
-    java.util.Optional<OrderDetail> findDetailByIdAndSellerId(
+    Optional<OrderDetail> findDetailByIdAndSellerId(
             @Param("orderDetailId") Long orderDetailId,
             @Param("sellerId") Long sellerId
     );

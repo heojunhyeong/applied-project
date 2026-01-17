@@ -14,8 +14,14 @@ import java.util.Optional;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
 
-    // 특정 상품의 리뷰를 페이징 처리해서 조회 // 상품 상세 리뷰 페이지용
-    Page<ProductReview> findByProductId(Long productId, Pageable pageable);
+    // 특정 상품의 리뷰를 페이징 처리해서 조회 // 상품 상세 리뷰 페이지용 (ACTIVE만 조회)
+    @Query("""
+        select r
+        from ProductReview r
+        where r.product.id = :productId
+          and r.status = 'ACTIVE'
+        """)
+    Page<ProductReview> findByProductId(@Param("productId") Long productId, Pageable pageable);
 
     // 판매자 기준 리뷰 목록 조회 // productId/status 필터 선택 가능
     @Query("""
@@ -78,6 +84,13 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     // 주문+상품 기준으로 리뷰 중복 작성 방지 // 한 주문의 한 상품에 리뷰 1개만
     Optional<ProductReview> findByReviewerIdAndOrderIdAndProductId(Long reviewerId, String orderId, Long productId);
 
-    // 특정 상품 리뷰 최신순 조회 // 사용자 리뷰 리스트 화면용
-    List<ProductReview> findAllByProductIdOrderByCreatedDateDesc(Long productId);
+    // 특정 상품 리뷰 최신순 조회 // 사용자 리뷰 리스트 화면용 (ACTIVE만 조회)
+    @Query("""
+        select r
+        from ProductReview r
+        where r.product.id = :productId
+          and r.status = 'ACTIVE'
+        order by r.createdDate desc
+        """)
+    List<ProductReview> findAllByProductIdOrderByCreatedDateDesc(@Param("productId") Long productId);
 }

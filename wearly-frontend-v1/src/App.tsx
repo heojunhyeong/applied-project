@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import SearchPage from "./components/SearchPage";
 import {
   ShoppingCart,
   Package,
@@ -33,17 +34,11 @@ import PaymentSuccessPage from "./components/PaymentSuccessPage";
 import MembershipPage from "./components/membership/MembershipPage";
 import ReviewFormPage from "./components/ReviewFormPage";
 
-const brands = [
-  { name: "LEVI'S", id: "levis" },
-  { name: "NIKE", id: "nike" },
-  { name: "ADIDAS", id: "adidas" },
-  { name: "NEW BALANCE", id: "new-balance" },
-  { name: "THE NORTH FACE", id: "the-north-face" },
-];
+import { BRANDS } from "./constants/brands";
 
 type Role = "USER" | "SELLER" | "ADMIN";
 
-function Header({ brandItems }: { brandItems: typeof brands }) {
+function Header({ brandItems }: { brandItems: typeof BRANDS }) {
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
   const [isSellerPageOpen, setIsSellerPageOpen] = useState(false);
   const [isAdminPageOpen, setIsAdminPageOpen] = useState(false);
@@ -439,9 +434,10 @@ export default function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <Header brandItems={brands} />
+        <Header brandItems={BRANDS} />
 
         <Routes>
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/brand/:brandName" element={<BrandPage />} />
           <Route path="/brand/:brandName" element={<BrandPage />} />

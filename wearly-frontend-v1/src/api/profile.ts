@@ -22,9 +22,7 @@ export type ProfileFormState = {
 
 type PresignedUrlResponse = {
   presignedUrl: string;
-  key?: string;
-  fileUrl?: string;
-  path?: string;
+  key: string;
 };
 
 const PROFILE_ENDPOINTS: Record<UserRole, string> = {
@@ -85,10 +83,20 @@ export const requestProfilePresignedUrl = async (
 // 프로필 이미지 반영 API
 export const updateProfileImage = async (
   role: UserRole,
-  imageUrl: string | null
+  imageUrl: string | null,
+  userNickname?: string // USER 역할일 때 필수
 ) => {
   const url = `${getBaseEndpoint(role)}/image`;
-  const payload = { imageUrl };
+  
+  // USER 역할일 때는 userNickname도 함께 보내야 함 (백엔드 validation 요구사항)
+  const payload =
+    role === "USER"
+      ? {
+          imageUrl,
+          userNickname: userNickname || "", // profile.userNickname이 항상 존재하므로 안전
+        }
+      : { imageUrl };
+      
   return apiFetch<ProfileResponse>(url, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

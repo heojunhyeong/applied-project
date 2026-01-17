@@ -4,6 +4,8 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+const API_BASE_URL = 'http://localhost:8080'; // TODO: 환경변수로 관리
+
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -12,31 +14,63 @@ export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  // Simulate token validation (UI only - for demo, tokens starting with "valid" are considered valid)
-  const isTokenValid = token && token.startsWith('valid');
+  // 토큰이 없으면 유효하지 않음
+  const isTokenValid = !!token;
 
   // Handle reset password
-  const handleResetPassword = (e: FormEvent) => {
+  const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
+    setPasswordError('');
+    setErrorMsg(null);
     
     // Validate password
     if (!newPassword) {
-      setPasswordError('Password is required');
+      setPasswordError('비밀번호는 필수입니다.');
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
+      setPasswordError('비밀번호는 최소 8자 이상이어야 합니다.');
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError('비밀번호가 일치하지 않습니다.');
       return;
     }
     
-    setPasswordError('');
-    // Navigate to success page
-    navigate('/reset-password/success');
+    if (!token) {
+      setPasswordError('유효하지 않은 링크입니다.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/api/password/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          newPassword: newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || '비밀번호 재설정에 실패했습니다.');
+      }
+
+      // 성공 시 성공 페이지로 이동
+      navigate('/reset-password/success');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : '비밀번호 재설정 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // If token is invalid or expired
@@ -50,10 +84,10 @@ export default function ResetPasswordPage() {
                 <AlertCircle className="w-8 h-8 text-red-600" />
               </div>
               <h1 className="text-2xl text-gray-900 mb-2">
-                Invalid reset link
+                유효하지 않은 링크입니다
               </h1>
               <p className="text-sm text-gray-600">
-                This reset link is invalid or expired.
+                이 재설정 링크는 유효하지 않거나 만료되었습니다.
               </p>
             </div>
 
@@ -63,7 +97,7 @@ export default function ResetPasswordPage() {
                 to="/forgot-password"
                 className="block w-full h-12 bg-gray-900 text-white text-center leading-[3rem] rounded-md hover:bg-gray-800 transition-colors"
               >
-                Request New Link
+                새 링크 요청하기
               </Link>
 
               {/* Back to Login */}
@@ -73,7 +107,7 @@ export default function ResetPasswordPage() {
                   className="text-sm text-gray-600 hover:text-gray-900 hover:underline inline-flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back to Login
+                  로그인으로 돌아가기
                 </Link>
               </div>
             </div>
@@ -91,30 +125,37 @@ export default function ResetPasswordPage() {
           {/* Token Verified Badge */}
           <div className="flex items-center justify-center gap-2 mb-6">
             <CheckCircle2 className="w-5 h-5 text-green-600" />
-            <span className="text-sm text-green-600 font-medium">Reset link verified</span>
+            <span className="text-sm text-green-600 font-medium">링크 확인됨</span>
           </div>
 
           <h1 className="text-2xl text-gray-900 mb-2 text-center">
-            Set a new password
+            새 비밀번호 설정
           </h1>
           <p className="text-sm text-gray-600 text-center mb-8">
-            Enter your new password below.
+            새로운 비밀번호를 입력해주세요.
           </p>
+
+          {errorMsg && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={handleResetPassword} className="space-y-6">
             {/* New Password Field */}
             <div className="space-y-2">
               <Label htmlFor="newPassword" className="text-gray-900">
-                New Password
+                새 비밀번호
               </Label>
               <Input
                 id="newPassword"
                 type="password"
-                placeholder="Enter new password"
+                placeholder="새 비밀번호를 입력하세요"
                 value={newPassword}
                 onChange={(e) => {
                   setNewPassword(e.target.value);
                   setPasswordError('');
+                  setErrorMsg(null);
                 }}
                 className={`w-full h-11 px-4 bg-gray-50 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
                   passwordError ? 'border-red-500' : 'border-gray-300'
@@ -125,16 +166,17 @@ export default function ResetPasswordPage() {
             {/* Confirm Password Field */}
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-gray-900">
-                Confirm New Password
+                새 비밀번호 확인
               </Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Confirm new password"
+                placeholder="새 비밀번호를 다시 입력하세요"
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
                   setPasswordError('');
+                  setErrorMsg(null);
                 }}
                 className={`w-full h-11 px-4 bg-gray-50 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
                   passwordError ? 'border-red-500' : 'border-gray-300'
@@ -145,7 +187,7 @@ export default function ResetPasswordPage() {
             {/* Password Rules Hint */}
             <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
               <p className="text-xs text-gray-600">
-                Password must be at least 8 characters long
+                비밀번호는 최소 8자 이상이어야 합니다.
               </p>
             </div>
 
@@ -159,9 +201,10 @@ export default function ResetPasswordPage() {
             {/* Reset Password Button */}
             <button
               type="submit"
-              className="w-full h-12 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors mt-8"
+              disabled={loading}
+              className="w-full h-12 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Reset Password
+              {loading ? '처리 중...' : '비밀번호 재설정'}
             </button>
 
             {/* Back to Login */}
@@ -171,7 +214,7 @@ export default function ResetPasswordPage() {
                 className="text-sm text-gray-600 hover:text-gray-900 hover:underline inline-flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to Login
+                로그인으로 돌아가기
               </Link>
             </div>
           </form>

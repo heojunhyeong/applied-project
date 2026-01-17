@@ -151,8 +151,9 @@ public class OrderController {
             @RequestParam(required = false) Long productId,
             @RequestParam(required = false) Long quantity,
             @RequestParam(required = false) Size size,
-            @AuthenticationPrincipal Long userId) { // 인증 방식에 따라 수정 필요
+            Authentication authentication) {
 
+        Long userId = Long.parseLong(authentication.getName());
         OrderSheetResponse response = orderService.getOrderSheet(userId, cartItemIds, productId, quantity, size);
         return ResponseEntity.ok(response);
     }

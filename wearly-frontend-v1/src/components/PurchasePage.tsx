@@ -1,135 +1,291 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
+
+const API_BASE_URL = 'http://localhost:8080'; // TODO: 환경변수로 관리
+
+interface OrderItem {
+    productId: number;
+    productName: string;
+    quantity: number;
+    price: number;
+    size: string;
+    imageUrl: string;
+}
+
+interface AvailableCoupon {
+    userCouponId: number;
+    couponName: string;
+    discountValue: number;
+    couponType: 'DISCOUNT_AMOUNT' | 'DISCOUNT_RATE';
+}
+
+interface OrderSheetResponse {
+    items: OrderItem[];
+    totalProductPrice: number;
+    availableCoupons: AvailableCoupon[];
+    deliveryFee: number;
+}
 
 export default function PurchasePage() {
-  const [address, setAddress] = useState('');
-  const [detailedAddress, setDetailedAddress] = useState('');
-  const [zipCode, setZipCode] = useState('');
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
-  const productTotal = 245000; // Example product total
-  const finalAmount = productTotal - appliedDiscount;
+    const [address, setAddress] = useState('');
+    const [detailedAddress, setDetailedAddress] = useState('');
+    const [zipCode, setZipCode] = useState('');
+    const [selectedCouponId, setSelectedCouponId] = useState<number | null>(null);
+    const [orderSheet, setOrderSheet] = useState<OrderSheetResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [processingPayment, setProcessingPayment] = useState(false);
 
-  const handleApplyCoupon = () => {
-    // UI-only behavior - simple mock discount
-    if (couponCode.trim()) {
-      setAppliedDiscount(25000);
+    // URL 파라미터에서 상품 정보 읽기
+    const productId = searchParams.get('productId');
+    const quantity = searchParams.get('quantity');
+    const size = searchParams.get('size');
+    const cartItemIds = searchParams.get('cartItemIds')?.split(',').map(Number).filter(Boolean);
+
+    // 주문 시트 데이터 로드
+    useEffect(() => {
+        const fetchOrderSheet = async () => {
+            try {
+                setLoading(true);
+                const params = new URLSearchParams();
+
+                if (cartItemIds && cartItemIds.length > 0) {
+                    cartItemIds.forEach(id => params.append('cartItemIds', id.toString()));
+                } else if (productId) {
+                    params.append('productId', productId);
+                    if (quantity) params.append('quantity', quantity);
+                    if (size) params.append('size', size);
+                }
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/users/orders/sheet?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { 'Authorization': `Bearer ${token}` }),
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('주문 시트를 불러오는데 실패했습니다.');
+                }
+
+                const data: OrderSheetResponse = await response.json();
+                setOrderSheet(data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+                console.error('주문 시트 로드 실패:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (productId || (cartItemIds && cartItemIds.length > 0)) {
+            fetchOrderSheet();
+        } else {
+            setError('주문 정보가 없습니다.');
+            setLoading(false);
+        }
+    }, [productId, quantity, size, cartItemIds]);
+
+    // 할인 금액 계산
+    const calculateDiscount = () => {
+        if (!orderSheet || !selectedCouponId) return 0;
+
+        const coupon = orderSheet.availableCoupons.find(c => c.userCouponId === selectedCouponId);
+        if (!coupon) return 0;
+
+        if (coupon.couponType === 'DISCOUNT_AMOUNT') {
+            return coupon.discountValue;
+        } else if (coupon.couponType === 'DISCOUNT_RATE') {
+            return Math.floor((orderSheet.totalProductPrice * coupon.discountValue) / 100);
+        }
+        return 0;
+    };
+
+    const appliedDiscount = calculateDiscount();
+    const productTotal = orderSheet?.totalProductPrice || 0;
+    const deliveryFee = orderSheet?.deliveryFee || 0;
+    const finalAmount = productTotal - appliedDiscount + deliveryFee;
+
+    // 결제 처리 (수정된 핵심 로직)
+    const handlePayment = async () => {
+        if (!address || !detailedAddress || !zipCode) {
+            alert('배송지 정보를 모두 입력해주세요.');
+            return;
+        }
+
+        if (!orderSheet) {
+            alert('주문 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+
+        try {
+            setProcessingPayment(true);
+
+            // 1. 백엔드 주문 생성 (BEFORE_PAID 상태)
+            const orderRequest = {
+                totalPrice: finalAmount,
+                productId: cartItemIds && cartItemIds.length > 0 ? null : (productId ? Number(productId) : null),
+                cartItemIds: cartItemIds && cartItemIds.length > 0 ? cartItemIds : null,
+                quantity: cartItemIds && cartItemIds.length > 0 ? null : (quantity ? Number(quantity) : null),
+                size: cartItemIds && cartItemIds.length > 0 ? null : size,
+                address: address,
+                detailAddress: detailedAddress,
+                zipCode: zipCode ? Number(zipCode) : null,
+                userCouponId: selectedCouponId,
+            };
+
+            const token = localStorage.getItem('token');
+            const createOrderResponse = await fetch(`${API_BASE_URL}/api/users/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
+                },
+                body: JSON.stringify(orderRequest),
+            });
+
+            if (!createOrderResponse.ok) {
+                const errorData = await createOrderResponse.json().catch(() => null);
+                throw new Error(errorData?.message || '주문 생성에 실패했습니다.');
+            }
+
+            const createdOrder = await createOrderResponse.json();
+            const orderId = createdOrder.orderId; // 백엔드에서 생성된 ORD-2026...
+
+            // 2. 토스 페이먼츠 결제창 호출
+            // @ts-ignore: index.html에 로드된 TossPayments SDK를 사용합니다.
+            const tossPayments = window.TossPayments("test_ck_D5VqZkd6bROq049NEgvE8jYpQPa2");
+
+            await tossPayments.requestPayment('카드', {
+                amount: finalAmount,
+                orderId: orderId,
+                orderName: orderSheet.items[0].productName + (orderSheet.items.length > 1 ? ` 외 ${orderSheet.items.length - 1}건` : ''),
+                successUrl: `${window.location.origin}/payment/success`,
+                failUrl: `${window.location.origin}/payment/fail`,
+            });
+
+        } catch (err) {
+            alert(err instanceof Error ? err.message : '결제 처리 중 오류가 발생했습니다.');
+            console.error('결제 처리 실패:', err);
+        } finally {
+            setProcessingPayment(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="max-w-[800px] mx-auto px-8 py-12 text-center">주문 정보를 불러오는 중...</div>
+        );
     }
-  };
 
-  const handlePayment = () => {
-    // UI-only behavior
-    alert('Payment processing...');
-  };
-
-  return (
-    <div className="max-w-[800px] mx-auto px-8 py-12">
-      {/* Page Title */}
-      <h1 className="text-3xl font-semibold text-gray-900 mb-12">Order / Payment</h1>
-
-      {/* Section 1: Shipping Address */}
-      <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Shipping Address</h2>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="address" className="block text-sm text-gray-700 mb-2">
-              Address
-            </label>
-            <input
-              type="text"
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="Enter your address"
-            />
-          </div>
-          <div>
-            <label htmlFor="detailedAddress" className="block text-sm text-gray-700 mb-2">
-              Detailed Address
-            </label>
-            <input
-              type="text"
-              id="detailedAddress"
-              value={detailedAddress}
-              onChange={(e) => setDetailedAddress(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="Enter detailed address (apartment, unit, etc.)"
-            />
-          </div>
-          <div>
-            <label htmlFor="zipCode" className="block text-sm text-gray-700 mb-2">
-              Zip Code
-            </label>
-            <input
-              type="text"
-              id="zipCode"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="Enter zip code"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Section 2: Coupon */}
-      <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Coupon</h2>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            placeholder="Enter coupon code"
-          />
-          <button
-            onClick={handleApplyCoupon}
-            className="px-6 py-3 bg-gray-200 text-gray-900 font-medium rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Apply Coupon
-          </button>
-        </div>
-        {appliedDiscount > 0 && (
-          <p className="text-sm text-green-600 mt-2">
-            Coupon applied! {appliedDiscount.toLocaleString()}원 discount
-          </p>
-        )}
-      </div>
-
-      {/* Section 3: Final Payment Amount */}
-      <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Final Payment Amount</h2>
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-gray-600">Product Total</span>
-            <span className="text-sm text-gray-900">{productTotal.toLocaleString()}원</span>
-          </div>
-          {appliedDiscount > 0 && (
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-600">Discount</span>
-              <span className="text-sm text-red-600">-{appliedDiscount.toLocaleString()}원</span>
+    if (error || !orderSheet) {
+        return (
+            <div className="max-w-[800px] mx-auto px-8 py-12 text-center text-red-600">
+                {error || '주문 정보를 불러올 수 없습니다.'}
             </div>
-          )}
-          <div className="border-t border-gray-300 pt-4 mt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-semibold text-gray-900">Final Amount</span>
-              <span className="text-2xl font-bold text-gray-900">{finalAmount.toLocaleString()}원</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        );
+    }
 
-      {/* Section 4: Payment Action */}
-      <div className="pt-8 border-t border-gray-200">
-        <button
-          onClick={handlePayment}
-          className="w-full py-4 bg-gray-900 text-white text-lg font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          Pay Now
-        </button>
-      </div>
-    </div>
-  );
+    return (
+        <div className="max-w-[800px] mx-auto px-8 py-12">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-12">주문 / 결제</h1>
+
+            {/* 주문 상품 목록 */}
+            <div className="mb-12">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">주문 상품</h2>
+                <div className="space-y-4">
+                    {orderSheet.items.map((item, index) => (
+                        <div key={index} className="flex gap-4 p-4 border border-gray-200 rounded-lg">
+                            <img src={item.imageUrl || '/placeholder-image.png'} alt={item.productName} className="w-24 h-24 object-cover rounded" />
+                            <div className="flex-1">
+                                <h3 className="font-medium text-gray-900">{item.productName}</h3>
+                                <p className="text-sm text-gray-600">사이즈: {item.size} / 수량: {item.quantity}</p>
+                                <p className="text-lg font-semibold text-gray-900 mt-2">
+                                    {(item.price * item.quantity).toLocaleString()}원
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* 배송지 정보 */}
+            <div className="mb-12">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">배송지 정보</h2>
+                <div className="space-y-4">
+                    <input
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="주소"
+                    />
+                    <input
+                        type="text"
+                        value={detailedAddress}
+                        onChange={(e) => setDetailedAddress(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="상세 주소"
+                    />
+                    <input
+                        type="text"
+                        value={zipCode}
+                        onChange={(e) => setZipCode(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="우편번호"
+                    />
+                </div>
+            </div>
+
+            {/* 쿠폰 선택 */}
+            <div className="mb-12">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">쿠폰 적용</h2>
+                <select
+                    value={selectedCouponId || ''}
+                    onChange={(e) => setSelectedCouponId(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                >
+                    <option value="">사용 가능한 쿠폰을 선택하세요</option>
+                    {orderSheet.availableCoupons.map((coupon) => (
+                        <option key={coupon.userCouponId} value={coupon.userCouponId}>
+                            {coupon.couponName} ({coupon.discountValue.toLocaleString()}{coupon.couponType === 'DISCOUNT_RATE' ? '%' : '원'} 할인)
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {/* 최종 결제 금액 */}
+            <div className="mb-12 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <div className="flex justify-between mb-2">
+                    <span>상품 금액</span>
+                    <span>{productTotal.toLocaleString()}원</span>
+                </div>
+                <div className="flex justify-between mb-2 text-red-600">
+                    <span>할인 금액</span>
+                    <span>-{appliedDiscount.toLocaleString()}원</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                    <span>배송비</span>
+                    <span>{deliveryFee.toLocaleString()}원</span>
+                </div>
+                <div className="flex justify-between mt-4 pt-4 border-t border-gray-300 font-bold text-xl">
+                    <span>최종 결제 금액</span>
+                    <span>{finalAmount.toLocaleString()}원</span>
+                </div>
+            </div>
+
+            <button
+                onClick={handlePayment}
+                disabled={processingPayment}
+                className="w-full py-4 bg-gray-900 text-white text-lg font-semibold rounded-lg hover:bg-gray-800 disabled:bg-gray-400"
+            >
+                {processingPayment ? '처리 중...' : `${finalAmount.toLocaleString()}원 결제하기`}
+            </button>
+        </div>
+    );
 }

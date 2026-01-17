@@ -211,6 +211,11 @@ export default function SignUpPage() {
                   Login
                 </Link>
               </p>
+              <p className="text-sm text-gray-600 mt-2">
+                <Link to="/forgot-password" className="text-gray-600 hover:text-gray-900 hover:underline">
+                  Forgot your password?
+                </Link>
+              </p>
             </div>
           </form>
         </div>

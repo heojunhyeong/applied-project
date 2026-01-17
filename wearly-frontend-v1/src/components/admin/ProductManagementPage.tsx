@@ -1,5 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
+import { apiFetch } from '../../api/http';
+
+interface ProductResponse {
+  id: number;
+  sellerId: number;
+  productName: string;
+  price: number;
+  status: 'ON_SALE' | 'SOLD_OUT' | 'STOPPED';
+  stockQuantity: number;
+  productCategory: string;
+  createdDate: string;
+  updatedDate: string;
+}
 
 interface Product {
   id: string;
@@ -12,88 +25,72 @@ interface Product {
 }
 
 export default function ProductManagementPage() {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 'P001',
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-      name: 'NIKE Air Max 270',
-      sellerId: 'S001',
-      price: 150,
-      stockQuantity: 10,
-      status: 'Selling',
-    },
-    {
-      id: 'P002',
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-      name: 'ADIDAS Originals Hoodie',
-      sellerId: 'S002',
-      price: 50,
-      stockQuantity: 5,
-      status: 'Selling',
-    },
-    {
-      id: 'P003',
-      image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400',
-      name: 'LEVIS 501 Original Jeans',
-      sellerId: 'S001',
-      price: 70,
-      stockQuantity: 0,
-      status: 'Out of Stock',
-    },
-    {
-      id: 'P004',
-      image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400',
-      name: 'NEW BALANCE 990v5',
-      sellerId: 'S003',
-      price: 120,
-      stockQuantity: 8,
-      status: 'Selling',
-    },
-    {
-      id: 'P005',
-      image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400',
-      name: 'THE NORTH FACE Nuptse Jacket',
-      sellerId: 'S002',
-      price: 200,
-      stockQuantity: 0,
-      status: 'Stopped',
-    },
-    {
-      id: 'P006',
-      image: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=400',
-      name: 'NIKE Sportswear Tech Fleece',
-      sellerId: 'S001',
-      price: 80,
-      stockQuantity: 12,
-      status: 'Selling',
-    },
-    {
-      id: 'P007',
-      image: 'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=400',
-      name: 'ADIDAS Ultraboost 22',
-      sellerId: 'S002',
-      price: 180,
-      stockQuantity: 0,
-      status: 'Out of Stock',
-    },
-    {
-      id: 'P008',
-      image: 'https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?w=400',
-      name: 'LEVIS Trucker Jacket',
-      sellerId: 'S001',
-      price: 100,
-      stockQuantity: 0,
-      status: 'Stopped',
-    },
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await apiFetch<ProductResponse[]>('/api/admin/products');
+        const mappedProducts = (response || []).map((p) => ({
+          id: p.id.toString(),
+          image: 'https://via.placeholder.com/400', // TODO: 실제 이미지 URL 사용
+          name: p.productName,
+          sellerId: p.sellerId.toString(),
+          price: p.price,
+          stockQuantity: p.stockQuantity,
+          status:
+            p.status === 'ON_SALE'
+              ? ('Selling' as const)
+              : p.status === 'SOLD_OUT'
+              ? ('Out of Stock' as const)
+              : ('Stopped' as const),
+        }));
+
+        setProducts(mappedProducts);
+      } catch (err: any) {
+        setError(err.message || '상품 목록을 불러오는데 실패했습니다.');
+        console.error('Failed to fetch products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Handle stopping a product
-  const handleStopSelling = (id: string) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id ? { ...product, status: 'Stopped' as const } : product
-      )
-    );
+  const handleStopSelling = async (id: string) => {
+    if (!confirm('정말 판매를 중지하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/admin/products/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'STOPPED' }),
+      });
+
+      // Update local state
+      setProducts((prevProducts) =>
+        prevProducts.map((product) =>
+          product.id === id ? { ...product, status: 'Stopped' as const } : product
+        )
+      );
+
+      alert('판매가 중지되었습니다.');
+    } catch (err: any) {
+      alert(`판매 중지 실패: ${err.message || '알 수 없는 오류가 발생했습니다.'}`);
+      console.error('Failed to stop selling:', err);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -108,6 +105,30 @@ export default function ProductManagementPage() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-600">로딩 중...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">{error}</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

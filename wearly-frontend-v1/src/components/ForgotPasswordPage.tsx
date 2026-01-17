@@ -4,25 +4,29 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { ArrowLeft, Mail } from 'lucide-react';
 
+const API_BASE_URL = 'http://localhost:8080'; // TODO: 환경변수로 관리
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Email validation
   const validateEmail = (email: string) => {
     if (!email) {
-      return 'Email is required';
+      return '이메일은 필수입니다.';
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return 'Invalid email format';
+      return '올바른 이메일 형식이 아닙니다.';
     }
     return '';
   };
 
   // Handle send reset link
-  const handleSendResetLink = (e: FormEvent) => {
+  const handleSendResetLink = async (e: FormEvent) => {
     e.preventDefault();
     const error = validateEmail(email);
     if (error) {
@@ -30,18 +34,64 @@ export default function ForgotPasswordPage() {
       return;
     }
     setEmailError('');
-    setEmailSent(true);
+    setErrorMsg(null);
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/api/password/reset/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || '비밀번호 재설정 요청에 실패했습니다.');
+      }
+
+      setEmailSent(true);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : '비밀번호 재설정 요청 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle resend link
-  const handleResendLink = () => {
+  const handleResendLink = async () => {
     const error = validateEmail(email);
     if (error) {
       setEmailError(error);
       return;
     }
     setEmailError('');
-    alert('Reset link has been resent to your email.');
+    setErrorMsg(null);
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/api/password/reset/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || '재전송에 실패했습니다.');
+      }
+
+      alert('비밀번호 재설정 링크가 다시 전송되었습니다.');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : '재전송 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,11 +101,17 @@ export default function ForgotPasswordPage() {
           // Email Input State
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
             <h1 className="text-2xl text-gray-900 mb-2 text-center">
-              Forgot your password?
+              비밀번호를 잊으셨나요?
             </h1>
             <p className="text-sm text-gray-600 text-center mb-8">
-              Enter your email and we'll send you a reset link.
+              이메일을 입력하시면 비밀번호 재설정 링크를 보내드립니다.
             </p>
+
+            {errorMsg && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMsg}
+              </div>
+            )}
 
             <form onSubmit={handleSendResetLink} className="space-y-6">
               {/* Email Field */}
@@ -71,6 +127,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => {
                     setEmail(e.target.value);
                     setEmailError('');
+                    setErrorMsg(null);
                   }}
                   className={`w-full h-11 px-4 bg-gray-50 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
                     emailError ? 'border-red-500' : 'border-gray-300'
@@ -84,9 +141,10 @@ export default function ForgotPasswordPage() {
               {/* Send Reset Link Button */}
               <button
                 type="submit"
-                className="w-full h-12 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors mt-8"
+                disabled={loading}
+                className="w-full h-12 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Reset Link
+                {loading ? '전송 중...' : '재설정 링크 전송'}
               </button>
 
               {/* Back to Login */}
@@ -96,7 +154,7 @@ export default function ForgotPasswordPage() {
                   className="text-sm text-gray-600 hover:text-gray-900 hover:underline inline-flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back to Login
+                  로그인으로 돌아가기
                 </Link>
               </div>
             </form>
@@ -109,20 +167,27 @@ export default function ForgotPasswordPage() {
                 <Mail className="w-8 h-8 text-blue-600" />
               </div>
               <h1 className="text-2xl text-gray-900 mb-2">
-                Check your email
+                이메일을 확인해주세요
               </h1>
               <p className="text-sm text-gray-600">
-                If an account exists for <span className="font-medium text-gray-900">{email}</span>, a reset link has been sent.
+                <span className="font-medium text-gray-900">{email}</span>로 등록된 계정이 있다면, 비밀번호 재설정 링크를 보내드렸습니다.
               </p>
             </div>
+
+            {errorMsg && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMsg}
+              </div>
+            )}
 
             <div className="space-y-4">
               {/* Resend Link Button */}
               <button
                 onClick={handleResendLink}
-                className="w-full h-12 bg-white text-gray-900 border-2 border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                disabled={loading}
+                className="w-full h-12 bg-white text-gray-900 border-2 border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Resend Link
+                {loading ? '재전송 중...' : '링크 다시 보내기'}
               </button>
 
               {/* Back to Login */}
@@ -132,7 +197,7 @@ export default function ForgotPasswordPage() {
                   className="text-sm text-gray-600 hover:text-gray-900 hover:underline inline-flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back to Login
+                  로그인으로 돌아가기
                 </Link>
               </div>
             </div>

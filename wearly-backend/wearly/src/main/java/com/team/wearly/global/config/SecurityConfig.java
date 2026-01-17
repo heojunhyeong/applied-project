@@ -4,6 +4,7 @@ import com.team.wearly.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -54,8 +55,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login").permitAll()  // 로그인 API 허용
                             .requestMatchers("/api/payment/**", "/api/orders/**", "/api/users/orders/**").permitAll()
                 .requestMatchers("/api/users/reviews").permitAll()
-                .requestMatchers("/api/password/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ADMIN 전용
+                .requestMatchers("/api/password/**", "/api/password/reset/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ADMIN    q전용
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //SELLER파트 전용
                 .requestMatchers("/api/products/seller/**").hasRole("SELLER")
                 .anyRequest().authenticated()  // 나머지는 JWT 토큰 필요

@@ -1,5 +1,6 @@
 package com.team.wearly.domain.review.repository;
 
+import com.team.wearly.domain.review.dto.response.AdminReviewReportResponse;
 import com.team.wearly.domain.review.dto.response.SellerReviewReportItemResponse;
 import com.team.wearly.domain.review.entity.ReviewReport;
 import com.team.wearly.domain.review.entity.enums.ReviewReportStatus;
@@ -33,6 +34,31 @@ public interface ReviewReportRepository extends JpaRepository<ReviewReport, Long
         """)
     Page<SellerReviewReportItemResponse> findSellerReviewReports(
             @Param("sellerId") Long sellerId,
+            @Param("status") ReviewReportStatus status,
+            Pageable pageable
+    );
+
+    // 관리자 기준 신고 목록 조회 // 상태 필터 선택 가능, 전체 신고 내역 조회
+    @Query("""
+        select new com.team.wearly.domain.review.dto.response.AdminReviewReportResponse(
+            rr.id,
+            rr.review.id,
+            rr.review.product.id,
+            rr.review.reviewerId,
+            rr.reporterId,
+            rr.review.content,
+            rr.review.rating,
+            rr.review.status,
+            rr.reason,
+            rr.status,
+            rr.createdDate,
+            rr.review.createdDate
+        )
+        from ReviewReport rr
+        join rr.review pr
+        where (:status is null or rr.status = :status)
+        """)
+    Page<AdminReviewReportResponse> findAdminReviewReports(
             @Param("status") ReviewReportStatus status,
             Pageable pageable
     );

@@ -1,5 +1,6 @@
 package com.team.wearly.domain.order.dto.response;
 
+import com.team.wearly.domain.product.entity.enums.Brand;
 import com.team.wearly.domain.product.entity.enums.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,7 @@ public class OrderDetailResponse {
     public static class OrderItemDto {
         private Long productId;
         private String productName;
+        private Brand brand;
         private Long quantity;
         private Long price;
         private String imageUrl;

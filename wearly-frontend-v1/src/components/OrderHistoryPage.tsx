@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Truck, Edit3, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../api/http';
@@ -45,6 +45,7 @@ interface Order {
 }
 
 export default function OrderHistoryPage() {
+    const navigate = useNavigate();
     const [inputValue, setInputValue] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [orders, setOrders] = useState<Order[]>([]);
@@ -322,7 +323,10 @@ export default function OrderHistoryPage() {
                                                                     View Review
                                                                 </Link>
                                                             ) : (
-                                                                <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                                                                <button 
+                                                                    onClick={() => navigate(`/product/${item.productId}/review?orderId=${order.orderId}`)}
+                                                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
+                                                                >
                                                                     <Edit3 className="w-4 h-4" />
                                                                     Write Review
                                                                 </button>

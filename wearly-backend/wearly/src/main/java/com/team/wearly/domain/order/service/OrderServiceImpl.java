@@ -266,6 +266,7 @@ public class OrderServiceImpl implements OrderService {
                     return OrderDetailResponse.OrderItemDto.builder()
                             .productId(item.getProduct().getId())
                             .productName(item.getProduct().getProductName())
+                            .brand(item.getProduct().getBrand())
                             .quantity(item.getQuantity())
                             .price(item.getPrice())
                             .imageUrl(item.getProduct().getImageUrl())
@@ -321,10 +322,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 상품명 키워드로 주문 상세 검색 (같은 날 주문된 상품 포함)
+     * 상품명 키워드로 주문 상세 검색 (같은 주문에 포함된 상품 포함)
      * @param userId 사용자 ID (본인의 주문만 검색)
      * @param keyword 상품명 검색 키워드
-     * @return 키워드가 포함된 상품과 같은 날 주문된 모든 상품의 주문 상세 목록
+     * @return 키워드가 포함된 상품과 같은 주문에 포함된 모든 상품의 주문 상세 목록
      */
     @Override
     @Transactional(readOnly = true)

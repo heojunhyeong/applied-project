@@ -24,6 +24,9 @@ public interface CartRepository extends JpaRepository<Cart,Long> {
             @Param("size") Size size
     );
 
+    @Query("SELECT c FROM Cart c JOIN FETCH c.product WHERE c.id IN :cartIds")
+    List<Cart> findAllByIdWithProduct(@Param("cartIds") List<Long> cartIds);
+
     // 장바구니 전체 삭제
     void deleteAllByUserId(Long userId);
 

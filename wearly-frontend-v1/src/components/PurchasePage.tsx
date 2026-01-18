@@ -123,39 +123,91 @@ export default function PurchasePage() {
             setProcessingPayment(true);
 
             // 1. 백엔드 주문 생성 (BEFORE_PAID 상태)
-            const orderRequest = {
+            const orderRequest: any = {
                 totalPrice: finalAmount,
-                productId: cartItemIds && cartItemIds.length > 0 ? null : (productId ? Number(productId) : null),
-                cartItemIds: cartItemIds && cartItemIds.length > 0 ? cartItemIds : null,
-                quantity: cartItemIds && cartItemIds.length > 0 ? null : (quantity ? Number(quantity) : null),
-                size: cartItemIds && cartItemIds.length > 0 ? null : size,
                 address: address,
                 detailAddress: detailedAddress,
                 zipCode: zipCode ? Number(zipCode) : null,
-                userCouponId: selectedCouponId,
             };
 
-            const createdOrder = await apiFetch<CreateOrderResponse>(`/api/users/orders`, {
+            // userCouponId는 선택된 경우에만 추가
+            if (selectedCouponId !== null && selectedCouponId !== undefined) {
+                orderRequest.userCouponId = selectedCouponId;
+            }
+
+            // cartItemIds가 있으면 장바구니 구매, 없으면 단일 상품 구매
+            if (cartItemIds && cartItemIds.length > 0) {
+                // 장바구니 구매: cartItemIds만 포함 (다른 필드는 포함하지 않음)
+                orderRequest.cartItemIds = cartItemIds;
+            } else if (productId) {
+                // 단일 상품 구매: productId, quantity, size만 포함
+                orderRequest.productId = Number(productId);
+                orderRequest.quantity = quantity ? Number(quantity) : null;
+                
+                // size를 백엔드 enum 형식으로 변환
+                if (size) {
+                    const sizeMap: Record<string, string> = {
+                        "S": "SMALL",
+                        "M": "MEDIUM",
+                        "L": "LARGE",
+                        "XL": "EXTRA_LARGE"
+                    };
+                    orderRequest.size = sizeMap[size.toUpperCase()] || size.toUpperCase();
+                }
+            }
+
+            // 디버깅: 실제 전송되는 요청 본문 확인
+            console.log('주문 요청 데이터:', JSON.stringify(orderRequest, null, 2));
+            console.log('cartItemIds:', cartItemIds);
+
+            // 디버깅: 실제 전송되는 요청 본문 확인
+            console.log('주문 요청 데이터:', JSON.stringify(orderRequest, null, 2));
+            console.log('cartItemIds:', cartItemIds);
+
+            // 직접 fetch로 호출하여 에러 응답 상세 확인
+            const token = localStorage.getItem("accessToken");
+            const response = await fetch(`/api/users/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify(orderRequest),
             });
 
-            const orderId = createdOrder.orderId; // 백엔드에서 생성된 ORD-2026...
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: errorText };
+                }
+                
+                console.error('백엔드 에러 응답:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorData
+                });
+                
+                const errorMessage = errorData?.message || errorData?.error || `서버 오류 (${response.status})`;
+                alert(errorMessage);
+                throw new Error(errorMessage);
+            }
+
+            const createdOrder = await response.json() as CreateOrderResponse;
+            const orderId = createdOrder.orderId;
 
             // 2. 토스 페이먼츠 결제창 호출
             // @ts-ignore: index.html에 로드된 TossPayments SDK를 사용합니다.
             const tossPayments = window.TossPayments("test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml");
 
-            await tossPayments.requestPayment('CARD', { // 대문자 'CARD'로 보내거나, 혹은 상점 설정에 따라 다름
+            await tossPayments.requestPayment('CARD', {
                 amount: finalAmount,
                 orderId: orderId,
                 orderName: orderSheet.items[0].productName + (orderSheet.items.length > 1 ? ` 외 ${orderSheet.items.length - 1}건` : ''),
                 successUrl: `http://localhost:70/payment/success`,
                 failUrl: `http://localhost:70/payment/fail`,
-                // 아래 옵션을 추가하면 QR결제/간편결제가 포함된 선택창이 뜰 확률이 높습니다.
                 method: 'CARD',
             });
 

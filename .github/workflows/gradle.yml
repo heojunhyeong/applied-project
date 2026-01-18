@@ -19,7 +19,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root1234
-          MYSQL_DATABASE: Wearly_MySQL
+          MYSQL_DATABASE: wearly_mysql
         ports:
           - 3306:3306
         options: >-
@@ -78,19 +78,19 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: wearly-frontend/package-lock.json
+          cache-dependency-path: wearly-frontend-v1/package-lock.json
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./wearly-frontend
+        working-directory: ./wearly-frontend-v1
 
       - name: Build frontend
         run: npm run build
-        working-directory: ./wearly-frontend
+        working-directory: ./wearly-frontend-v1
 
       - name: Lint frontend
         run: npm run lint
-        working-directory: ./wearly-frontend
+        working-directory: ./wearly-frontend-v1
         continue-on-error: true
 
   # EC2 배포 (PR merge 시)

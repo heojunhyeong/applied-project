@@ -5,6 +5,7 @@ import { apiFetch } from "../../api/http";
 
 type ProductStatus = "ON_SALE" | "SOLD_OUT" | "DELETED";
 type ProductSize = "SMALL" | "MEDIUM" | "LARGE" | "EXTRA_LARGE";
+
 type ProductBrand =
   | "NIKE"
   | "ADIDAS"
@@ -12,6 +13,7 @@ type ProductBrand =
   | "REEBOK"
   | "THE_NORTH_FACE"
   | "VANS";
+
 type ProductCategory =
   | "PADDING"
   | "SHIRT"
@@ -24,6 +26,7 @@ type ProductCategory =
 
 type ProductModalMode = "EDIT" | "CREATE";
 
+// ✅ 화면에서 관리할 Product 모델은 sizes로 통일
 type Product = {
   id: number;
   imageUrl: string;
@@ -34,7 +37,7 @@ type Product = {
   price: number;
   stockQuantity: number;
   status: ProductStatus;
-  availableSizes: ProductSize[];
+  sizes: ProductSize[]; // ✅
 };
 
 type SellerProductResponse = {
@@ -46,7 +49,10 @@ type SellerProductResponse = {
   imageUrl: string;
   brand: ProductBrand;
   productCategory: ProductCategory;
+
+  // ✅ 서버 응답은 availableSizes로 오니까 여기로 받음
   availableSizes?: ProductSize[];
+
   displayStatus?: ProductStatus;
   status?: ProductStatus;
 };
@@ -131,6 +137,7 @@ export default function SellerProductManagementPage() {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isProductModalOpen]);
 
   // 페이지 변경 시 목록 재조회
@@ -139,31 +146,54 @@ export default function SellerProductManagementPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // 상태 라벨 매핑
   const getStatusLabel = (status: ProductStatus) =>
     STATUS_OPTIONS.find((option) => option.value === status)?.label || "판매중";
 
-  // 브랜드 라벨 매핑
-  const getBrandLabel = (brand: ProductBrand) =>
-    BRAND_OPTIONS.find((option) => option.value === brand)?.label || brand;
+  // 상품 클릭 시 상세 페이지로 이동
+  const handleProductNavigate = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
 
-  // 카테고리 라벨 매핑
-  const getCategoryLabel = (category: ProductCategory) =>
-    CATEGORY_OPTIONS.find((option) => option.value === category)?.label || category;
+  // 상태 색상 매핑
+  const getStatusColor = (status: ProductStatus) => {
+    switch (status) {
+      case "ON_SALE":
+        return "bg-green-100 text-green-800";
+      case "SOLD_OUT":
+        return "bg-yellow-100 text-yellow-800";
+      case "DELETED":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
-  // 사이즈 선택 토글
+  const getEmptyDraftProduct = (): Product => ({
+    id: 0,
+    imageUrl: "",
+    description: "",
+    productName: "",
+    brand: "NIKE",
+    productCategory: "PADDING",
+    price: 0,
+    stockQuantity: 0,
+    status: "ON_SALE",
+    sizes: [], // ✅
+  });
+
+  // ✅ 사이즈 선택 토글 (draftProduct.sizes 기준)
   const toggleSize = (size: ProductSize) => {
     setDraftProduct((prev) => {
       if (!prev) return prev;
-      const exists = prev.availableSizes.includes(size);
+      const exists = prev.sizes.includes(size);
       const nextSizes = exists
-        ? prev.availableSizes.filter((item) => item !== size)
-        : [...prev.availableSizes, size];
-      return { ...prev, availableSizes: nextSizes };
+        ? prev.sizes.filter((item) => item !== size)
+        : [...prev.sizes, size];
+      return { ...prev, sizes: nextSizes };
     });
   };
 
-  // API 응답을 화면 모델로 변환
+  // ✅ API 응답을 화면 모델로 변환 (availableSizes -> sizes)
   const mapProductFromResponse = (data: SellerProductResponse): Product => {
     const status = data.displayStatus ?? data.status ?? "ON_SALE";
     return {
@@ -176,7 +206,7 @@ export default function SellerProductManagementPage() {
       price: Number(data.price),
       stockQuantity: Number(data.stockQuantity),
       status,
-      availableSizes: data.availableSizes ?? [],
+      sizes: data.availableSizes ?? [], // ✅
     };
   };
 
@@ -189,10 +219,10 @@ export default function SellerProductManagementPage() {
         `/api/seller/products?page=${nextPage}&size=${pageSize}&sort=createdDate,desc`,
         { method: "GET" }
       );
-      setProducts(response.content.map(mapProductFromResponse));
-      setTotalPages(response.totalPages);
-      setTotalElements(response.totalElements);
-      setPage(response.number);
+      setProducts((response.content ?? []).map(mapProductFromResponse));
+      setTotalPages(response.totalPages ?? 0);
+      setTotalElements(response.totalElements ?? 0);
+      setPage(response.number ?? nextPage);
     } catch (error: any) {
       setErrorMessage(error.message ?? "상품 목록 조회에 실패했습니다.");
     } finally {
@@ -227,38 +257,6 @@ export default function SellerProductManagementPage() {
     }
   };
 
-  // 상품 클릭 시 상세 페이지로 이동
-  const handleProductNavigate = (productId: number) => {
-    navigate(`/product/${productId}`);
-  };
-
-  // 상태 색상 매핑
-  const getStatusColor = (status: ProductStatus) => {
-    switch (status) {
-      case "ON_SALE":
-        return "bg-green-100 text-green-800";
-      case "SOLD_OUT":
-        return "bg-yellow-100 text-yellow-800";
-      case "DELETED":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getEmptyDraftProduct = (): Product => ({
-    id: 0,
-    imageUrl: "",
-    description: "",
-    productName: "",
-    brand: "NIKE",
-    productCategory: "PADDING",
-    price: 0,
-    stockQuantity: 0,
-    status: "ON_SALE",
-    availableSizes: [],
-  });
-
   // 상품 수정 모달 열기 (상세 재조회 포함)
   const handleOpenEdit = async (product: Product) => {
     setErrorMessage(null);
@@ -271,7 +269,7 @@ export default function SellerProductManagementPage() {
     setPriceInput(String(product.price));
     setStockInput(String(product.stockQuantity));
 
-    // 그 다음 상세 조회로 availableSizes까지 정확히 덮어쓰기
+    // 그 다음 상세 조회로 sizes까지 정확히 덮어쓰기
     await fetchProductDetail(product.id);
   };
 
@@ -331,12 +329,10 @@ export default function SellerProductManagementPage() {
     return result.url.split("?")[0];
   };
 
-  // 썸네일 이미지 변경
   const handleChangeThumbnail = () => {
     thumbnailInputRef.current?.click();
   };
 
-  // 설명 이미지 변경
   const handleChangeDescription = () => {
     descriptionInputRef.current?.click();
   };
@@ -365,10 +361,8 @@ export default function SellerProductManagementPage() {
     }
   };
 
-  // 상품 수정 API 호출 (PUT)
+  // ✅ 상품 수정 API 호출 (PUT)
   const updateMyProduct = async (productId: number, payload: Product) => {
-    // // 백엔드가 받는 DTO에 맞춰서 변환
-    // // description: 상세 이미지 URL로 쓰는 중이라 그대로 보냄
     const body = {
       productName: payload.productName,
       price: payload.price,
@@ -377,11 +371,11 @@ export default function SellerProductManagementPage() {
       imageUrl: payload.imageUrl,
       brand: payload.brand,
       productCategory: payload.productCategory,
-      sizes: payload.availableSizes, // // 백엔드 DTO가 sizes 필드면 이렇게
+      sizes: payload.sizes, // ✅ 핵심
       status: payload.status,
     };
 
-    // // 판매자 상품 수정 요청
+    console.log("[UPDATE body]", body); // ✅ 네트워크 확인용
     return apiFetch(`/api/seller/products/${productId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -389,7 +383,7 @@ export default function SellerProductManagementPage() {
     });
   };
 
-  // 상품 등록 API 호출 (POST)
+  // ✅ 상품 등록 API 호출 (POST)
   const createMyProduct = async (payload: Product) => {
     const body = {
       productName: payload.productName,
@@ -399,10 +393,11 @@ export default function SellerProductManagementPage() {
       imageUrl: payload.imageUrl,
       brand: payload.brand,
       productCategory: payload.productCategory,
-      sizes: payload.availableSizes,
+      sizes: payload.sizes, // ✅ 핵심
       status: payload.status,
     };
 
+    console.log("[CREATE body]", body); // ✅ 네트워크 확인용
     return apiFetch(`/api/seller/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -458,184 +453,183 @@ export default function SellerProductManagementPage() {
     }
   };
 
-
   return (
     <div className="p-8">
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          {/* Page Header */}
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Product Management
-              </h1>
-              <p className="text-sm text-gray-600 mt-2">
-                Manage your product listings and stock status
-              </p>
-              {errorMessage && (
-                <p className="text-sm text-red-600 mt-3">{errorMessage}</p>
-              )}
-            </div>
-            <button
-              onClick={handleOpenCreate}
-              className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-            >
-              상품 추가
-            </button>
+        {/* Page Header */}
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Product Management
+            </h1>
+            <p className="text-sm text-gray-600 mt-2">
+              Manage your product listings and stock status
+            </p>
+            {errorMessage && (
+              <p className="text-sm text-red-600 mt-3">{errorMessage}</p>
+            )}
           </div>
-
-          {/* Product Table */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Image
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Brand
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Edit
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {isLoading ? (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="px-6 py-12 text-center text-sm text-gray-500"
-                    >
-                      Loading products...
-                    </td>
-                  </tr>
-                ) : products.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="px-6 py-12 text-center text-sm text-gray-500"
-                    >
-                      No products found
-                    </td>
-                  </tr>
-                ) : (
-                  products.map((product) => (
-                    <tr
-                      key={product.id}
-                      onClick={() => handleProductNavigate(product.id)}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {product.id}
-                      </td>
-                      <td className="px-6 py-4">
-                        {product.imageUrl ? (
-                          <img
-                            src={product.imageUrl}
-                            alt={product.productName}
-                            className="w-16 h-16 object-cover rounded-md"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 rounded-md bg-gray-200" />
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900 max-w-[240px] truncate">
-                          {product.productName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {product.brand}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {product.productCategory}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {product.price.toLocaleString()}원
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {product.stockQuantity}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            product.status
-                          )}`}
-                        >
-                          {getStatusLabel(product.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleOpenEdit(product);
-                          }}
-                          className="px-4 py-2 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-600">
-              {totalElements.toLocaleString()} products total
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handlePrevPage}
-                disabled={page <= 0}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                Prev
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {page + 1} of {Math.max(totalPages, 1)}
-              </span>
-              <button
-                onClick={handleNextPage}
-                disabled={totalPages <= 0 || page >= totalPages - 1}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={handleOpenCreate}
+            className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+          >
+            상품 추가
+          </button>
         </div>
 
-        {/* Product Edit Modal */}
-        {isProductModalOpen &&
-          draftProduct &&
-          createPortal(
-            <div className="fixed inset-0 z-50">
-              <div className="absolute inset-0 bg-black/50" />
-              <div className="absolute inset-0 flex items-center justify-center p-6">
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Product Table */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  ID
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Image
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Brand
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Quantity
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Edit
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="px-6 py-12 text-center text-sm text-gray-500"
+                  >
+                    Loading products...
+                  </td>
+                </tr>
+              ) : products.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="px-6 py-12 text-center text-sm text-gray-500"
+                  >
+                    No products found
+                  </td>
+                </tr>
+              ) : (
+                products.map((product) => (
+                  <tr
+                    key={product.id}
+                    onClick={() => handleProductNavigate(product.id)}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {product.id}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.productName}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-md bg-gray-200" />
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900 max-w-[240px] truncate">
+                        {product.productName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {product.brand}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {product.productCategory}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {product.price.toLocaleString()}원
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {product.stockQuantity}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                          product.status
+                        )}`}
+                      >
+                        {getStatusLabel(product.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleOpenEdit(product);
+                        }}
+                        className="px-4 py-2 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-600">
+            {totalElements.toLocaleString()} products total
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrevPage}
+              disabled={page <= 0}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Prev
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {page + 1} of {Math.max(totalPages, 1)}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={totalPages <= 0 || page >= totalPages - 1}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Edit Modal */}
+      {isProductModalOpen &&
+        draftProduct &&
+        createPortal(
+          <div className="fixed inset-0 z-50">
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="absolute inset-0 flex items-center justify-center p-6">
+              <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Modal Header */}
                 <div className="border-b border-gray-200 px-6 py-5 flex items-center justify-between">
                   <div>
@@ -741,9 +735,7 @@ export default function SellerProductManagementPage() {
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(event) =>
-                            handleFileSelected(event, "DESCRIPTION")
-                          }
+                          onChange={(event) => handleFileSelected(event, "DESCRIPTION")}
                         />
                       </div>
                     </div>
@@ -774,9 +766,7 @@ export default function SellerProductManagementPage() {
                         value={draftProduct.brand}
                         onChange={(e) =>
                           setDraftProduct((prev) =>
-                            prev
-                              ? { ...prev, brand: e.target.value as ProductBrand }
-                              : prev
+                            prev ? { ...prev, brand: e.target.value as ProductBrand } : prev
                           )
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -797,10 +787,7 @@ export default function SellerProductManagementPage() {
                         onChange={(e) =>
                           setDraftProduct((prev) =>
                             prev
-                              ? {
-                                  ...prev,
-                                  productCategory: e.target.value as ProductCategory,
-                                }
+                              ? { ...prev, productCategory: e.target.value as ProductCategory }
                               : prev
                           )
                         }
@@ -821,9 +808,7 @@ export default function SellerProductManagementPage() {
                         value={draftProduct.status}
                         onChange={(e) =>
                           setDraftProduct((prev) =>
-                            prev
-                              ? { ...prev, status: e.target.value as ProductStatus }
-                              : prev
+                            prev ? { ...prev, status: e.target.value as ProductStatus } : prev
                           )
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -840,11 +825,11 @@ export default function SellerProductManagementPage() {
                         Price
                       </label>
                       <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={priceInput}
-                      onChange={(e) => setPriceInput(normalizeNumericInput(e.target.value))}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={priceInput}
+                        onChange={(e) => setPriceInput(normalizeNumericInput(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                       />
                     </div>
@@ -853,11 +838,11 @@ export default function SellerProductManagementPage() {
                         Stock Quantity
                       </label>
                       <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={stockInput}
-                      onChange={(e) => setStockInput(normalizeNumericInput(e.target.value))}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={stockInput}
+                        onChange={(e) => setStockInput(normalizeNumericInput(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                       />
                     </div>
@@ -870,9 +855,7 @@ export default function SellerProductManagementPage() {
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {SIZE_OPTIONS.map((option) => {
-                        const isSelected = draftProduct.availableSizes.includes(
-                          option.value
-                        );
+                        const isSelected = draftProduct.sizes.includes(option.value);
                         return (
                           <button
                             key={option.value}
@@ -888,6 +871,11 @@ export default function SellerProductManagementPage() {
                           </button>
                         );
                       })}
+                    </div>
+
+                    {/* ✅ 디버깅용 표시 */}
+                    <div className="mt-2 text-xs text-gray-500">
+                      selected: {draftProduct.sizes.join(", ")}
                     </div>
                   </div>
                 </div>
@@ -909,9 +897,9 @@ export default function SellerProductManagementPage() {
                 </div>
               </div>
             </div>
-            </div>,
-            document.body
-          )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

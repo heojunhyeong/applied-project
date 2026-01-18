@@ -28,6 +28,8 @@ import SellerLayout from "./components/seller/SellerLayout";
 import SellerProductManagementPage from "./components/seller/SellerProductManagementPage";
 import SellerOrderManagementPage from "./components/seller/SellerOrderManagementPage";
 
+import SettlementPage from './components/SettlementPage';
+
 import {
   ShoppingCart,
   Package,
@@ -507,6 +509,9 @@ export default function App() {
           <Route path="/membership" element={<MembershipPage />} />
 
           <Route path="*" element={<HomePage />} />
+
+          <Route path="/seller/settlement" element={<SettlementPage />} />
+
         </Routes>
       </div>
     </BrowserRouter>

@@ -266,6 +266,7 @@ public class OrderServiceImpl implements OrderService {
                     return OrderDetailResponse.OrderItemDto.builder()
                             .productId(item.getProduct().getId())
                             .productName(item.getProduct().getProductName())
+                            .brand(item.getProduct().getBrand())
                             .quantity(item.getQuantity())
                             .price(item.getPrice())
                             .imageUrl(item.getProduct().getImageUrl())

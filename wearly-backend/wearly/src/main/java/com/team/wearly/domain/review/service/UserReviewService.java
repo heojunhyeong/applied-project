@@ -13,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,15 @@ public class UserReviewService {
 
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "상품을 찾을 수 없습니다."));
+        
+        // 중복 리뷰 체크
+        Optional<ProductReview> existingReview = productReviewRepository
+                .findByReviewerIdAndOrderIdAndProductId(userId, request.orderId(), request.productId());
+        
+        if (existingReview.isPresent()) {
+            throw new ResponseStatusException(CONFLICT, "이미 리뷰를 작성한 상품입니다.");
+        }
+
 
         ProductReview review = ProductReview.builder()
                 .reviewerId(userId)

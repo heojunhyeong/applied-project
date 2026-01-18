@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Star, ArrowLeft } from "lucide-react";
 import { apiFetch } from "../api/http";
 
 export default function ReviewFormPage() {
     const { productId } = useParams<{ productId: string }>();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [rating, setRating] = useState(5);
     const [content, setContent] = useState("");
@@ -30,8 +31,8 @@ export default function ReviewFormPage() {
         setError(null);
 
         try {
-            // Generate a manual order ID as backend requires it but doesn't strictly validate existence yet
-            const manualOrderId = `manual-review-${Date.now()}`;
+            // 쿼리 파라미터에서 orderId를 가져오거나, 없으면 수동 생성
+            const orderId = searchParams.get('orderId') || `manual-review-${Date.now()}`;
 
             await apiFetch("/api/users/reviews", {
                 method: "POST",
@@ -40,7 +41,7 @@ export default function ReviewFormPage() {
                 },
                 body: JSON.stringify({
                     productId: Number(productId),
-                    orderId: manualOrderId,
+                    orderId: orderId,
                     rating,
                     content,
                 }),
@@ -50,7 +51,11 @@ export default function ReviewFormPage() {
             navigate(`/product/${productId}`);
         } catch (err: any) {
             console.error(err);
-            setError(err.message || "리뷰 등록에 실패했습니다.");
+            // 에러 메시지에서 상태 코드 제거 (예: "409 CONFLICT "메시지" -> "메시지")
+            let errorMessage = err.message || "리뷰 등록에 실패했습니다.";
+            // "숫자 상태코드 상태텍스트 "로 시작하는 경우 제거
+            errorMessage = errorMessage.replace(/^\d+\s+\w+\s+/, "");
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

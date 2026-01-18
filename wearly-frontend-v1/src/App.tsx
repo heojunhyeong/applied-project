@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 
 import SearchPage from "./components/SearchPage";
@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 
 import { BRANDS } from "./constants/brands";
+import { apiFetch } from "./api/http";
 
 type Role = "USER" | "SELLER" | "ADMIN";
 
@@ -62,6 +63,9 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
   );
   const isLoggedIn = !!token;
 
+  // 장바구니 고유 상품 개수 상태
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
+
   // // localStorage 변경 감지
   useEffect(() => {
     const handleStorageChange = () => {
@@ -78,6 +82,60 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
       window.removeEventListener("authStateChange", handleStorageChange);
     };
   }, []);
+
+    // 장바구니 고유 상품 개수 가져오기
+    const fetchCartItemCount = useCallback(async () => {
+        if (!isLoggedIn || role !== "USER") {
+            setCartItemCount(0);
+            return;
+        }
+
+        try {
+            interface CartResponseDto {
+                cartId: number;
+                productId: number;
+                productName: string;
+                price: number;
+                quantity: number;
+                size: string;
+                imageUrl: string;
+            }
+
+            const data = await apiFetch<CartResponseDto[]>(`/api/users/cart/items`);
+
+            // productId를 기준으로 고유한 상품 개수 계산 (같은 상품은 1개로 처리)
+            const uniqueProductIds = new Set(data.map(item => item.productId));
+            setCartItemCount(uniqueProductIds.size);
+        } catch (err) {
+            // 에러 발생 시 0으로 설정
+            setCartItemCount(0);
+        }
+    }, [isLoggedIn, role]);
+
+    // 로그인 상태나 역할이 변경될 때 장바구니 개수 업데이트
+    useEffect(() => {
+        fetchCartItemCount();
+    }, [fetchCartItemCount]);
+
+    // 페이지 포커스 시 장바구니 개수 업데이트
+    useEffect(() => {
+        const handleFocus = () => {
+            fetchCartItemCount();
+        };
+
+        window.addEventListener("focus", handleFocus);
+        return () => window.removeEventListener("focus", handleFocus);
+    }, [fetchCartItemCount]);
+
+    // 장바구니 변경 이벤트 리스너
+    useEffect(() => {
+        const handleCartChange = () => {
+            fetchCartItemCount();
+        };
+
+        window.addEventListener("cartChange", handleCartChange);
+        return () => window.removeEventListener("cartChange", handleCartChange);
+    }, [fetchCartItemCount]);
 
   // // 로그아웃 처리
   const handleLogout = async () => {
@@ -236,9 +294,11 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                 aria-label="cart"
               >
                 <ShoppingCart className="w-5 h-5 text-gray-700" />
-                <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
-                  2
-                </span>
+                  {cartItemCount > 0 && (
+                      <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                          {cartItemCount}
+                      </span>
+                  )}
               </Link>
 
               <button

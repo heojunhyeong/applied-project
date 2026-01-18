@@ -51,7 +51,11 @@ export default function ReviewFormPage() {
             navigate(`/product/${productId}`);
         } catch (err: any) {
             console.error(err);
-            setError(err.message || "리뷰 등록에 실패했습니다.");
+            // 에러 메시지에서 상태 코드 제거 (예: "409 CONFLICT "메시지" -> "메시지")
+            let errorMessage = err.message || "리뷰 등록에 실패했습니다.";
+            // "숫자 상태코드 상태텍스트 "로 시작하는 경우 제거
+            errorMessage = errorMessage.replace(/^\d+\s+\w+\s+/, "");
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

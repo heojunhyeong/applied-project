@@ -7,7 +7,7 @@ interface ProductResponse {
   sellerId: number;
   productName: string;
   price: number;
-  status: 'ON_SALE' | 'SOLD_OUT' | 'STOPPED';
+  status: 'ON_SALE' | 'SOLD_OUT' | 'DELETED';
   stockQuantity: number;
   productCategory: string;
   createdDate: string;
@@ -76,7 +76,7 @@ export default function ProductManagementPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'STOPPED' }),
+        body: JSON.stringify({ status: 'DELETED' }),
       });
 
       // Update local state

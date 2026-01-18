@@ -1,5 +1,6 @@
 package com.team.wearly.domain.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.wearly.domain.order.entity.enums.Carrier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,15 +19,17 @@ public class OrderDelivery {
     private Long id;
 
     private String address;
-
     private String detail_address;
-
     private Long zipCode;
 
-    @Enumerated(EnumType.STRING)
-    private Carrier carrier;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    @JsonIgnore
+    private Order order;
 
-    private Long invoiceNumber;
+    // Order 엔티티에서 호출할 내부용 메서드
+    protected void assignOrder(Order order) {
+        this.order = order;
+    }
 
-    //    private Long orderId;
 }

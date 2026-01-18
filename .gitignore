@@ -1,0 +1,21 @@
+# JetBrains
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend build
+target/
+build/
+
+# Frontend build & deps
+**/node_modules/
+**/dist/
+
+# Env
+.env
+.env.*
+**/.env
+**/.env.*

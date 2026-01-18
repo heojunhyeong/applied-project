@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: wearly
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/wearly?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://mysql:3306/wearly_mysql
+    #url: jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: root
+    password: root1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 테이블 자동 생성/수정 (회원가입 데이터 영구 저장)
+    show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100 # [필수] 컬렉션 조회 시 IN 쿼리로 한방에 가져옵니다.
+#        format_sql: true
+#        dialect: org.hibernate.dialect.MySQLDialect
+
+  # aws/s3
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      region:
+        static: ${AWS_REGION_STATIC}
+      s3:
+        bucket: ${AWS_S3_BUCKET}
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+
+app:
+  frontend-url: http://localhost:3000
+
+
+payment:
+  toss:
+    secret-key: "test_sk_ZLKGPx4M3MnpbbMpP9KEVBaWypv1"
+    client-key: "test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml"
+
+server:
+  port: 8080
+
+# JWT 설정
+jwt:
+  secret: your-256-bit-secret-key-for-jwt-token-generation-at-least-32-characters-long
+  expiration: 86400000  # Access Token: 24시간 (밀리초)
+  refresh-expiration: 604800000  # Refresh Token: 7일 (밀리초)

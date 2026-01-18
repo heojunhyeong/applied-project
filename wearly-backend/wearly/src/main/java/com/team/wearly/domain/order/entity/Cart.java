@@ -1,14 +1,17 @@
 package com.team.wearly.domain.order.entity;
 
+import com.team.wearly.domain.product.entity.Product;
+import com.team.wearly.domain.product.entity.enums.Size;
+import com.team.wearly.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Entity @Getter
-@Builder
+@Entity
+@Getter
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cart {
@@ -20,11 +23,16 @@ public class Cart {
     @Column(nullable = true)
     private Long quantity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Size size;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-
-//    private Long userId;
-
-//    private Long productId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
 }

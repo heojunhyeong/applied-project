@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { apiFetch } from '../api/http';
 
@@ -47,7 +47,12 @@ export default function PurchasePage() {
     const productId = searchParams.get('productId');
     const quantity = searchParams.get('quantity');
     const size = searchParams.get('size');
-    const cartItemIds = searchParams.get('cartItemIds')?.split(',').map(Number).filter(Boolean);
+    
+    // cartItemIds를 useMemo로 메모이제이션하여 무한루프 방지
+    const cartItemIds = useMemo(() => {
+        const ids = searchParams.get('cartItemIds');
+        return ids ? ids.split(',').map(Number).filter(Boolean) : undefined;
+    }, [searchParams]);
 
     // 주문 시트 데이터 로드
     useEffect(() => {

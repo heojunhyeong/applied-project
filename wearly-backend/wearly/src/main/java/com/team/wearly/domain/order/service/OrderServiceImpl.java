@@ -81,7 +81,7 @@ public class OrderServiceImpl implements OrderService {
 
         } else if (request.getCartItemIds() != null && !request.getCartItemIds().isEmpty()) {
 
-            List<Cart> selectedCarts = cartRepository.findAllById(request.getCartItemIds());
+            List<Cart> selectedCarts = cartRepository.findAllByIdWithProduct(request.getCartItemIds());
             if (selectedCarts.isEmpty()) throw new IllegalArgumentException("장바구니 항목이 존재하지 않습니다.");
 
             for (Cart cart : selectedCarts) {
@@ -127,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(request.getProductId()).orElseThrow();
             order.addOrderDetail(createOrderDetail(product, request.getQuantity(), request.getSize()));
         } else {
-            List<Cart> selectedCarts = cartRepository.findAllById(request.getCartItemIds());
+            List<Cart> selectedCarts = cartRepository.findAllByIdWithProduct(request.getCartItemIds());
             for (Cart cart : selectedCarts) {
                 order.addOrderDetail(createOrderDetail(cart.getProduct(), cart.getQuantity(), cart.getSize()));
             }

@@ -38,5 +38,11 @@ public class OrderDetailResponse {
         private Size size;
 
         private Long reviewId;
+
+        // 검색 결과에서 주문 정보를 함께 표시하기 위한 필드 (옵셔널)
+        private String orderId;
+        private LocalDateTime orderDate;
+        private Long orderTotalPrice;
+        private String orderStatus;
     }
 }

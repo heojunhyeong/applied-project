@@ -21,6 +21,11 @@ interface OrderItemDto {
     imageUrl: string;
     size: string;
     reviewId: number | null;
+    // 검색 결과에서 주문 정보 포함 (옵셔널)
+    orderId?: string;
+    orderDate?: string;
+    orderTotalPrice?: number;
+    orderStatus?: string;
 }
 
 interface OrderDetailResponse {
@@ -117,21 +122,36 @@ export default function OrderHistoryPage() {
 
         try {
             setLoading(true);
-            // 검색 API는 OrderItemDto 배열만 반환
+            // 검색 API는 OrderItemDto 배열을 반환 (이제 주문 정보 포함)
             const searchResults = await apiFetch<OrderItemDto[]>(
                 `/api/users/orders/search?keyword=${encodeURIComponent(keyword)}`
             );
 
-            // 검색 결과를 Order 형식으로 변환
-            // 각 OrderItemDto를 개별 주문 항목으로 표시
-            const transformedOrders: Order[] = searchResults.map((item, index) => ({
-                orderId: `search-${index}`, // 임시 주문 ID
-                orderDate: new Date().toISOString(), // 임시 날짜 (실제로는 주문 정보가 없음)
-                orderNumber: `search-${index}`,
-                items: [item], // 각 항목을 개별 주문 항목으로 표시
-                totalPrice: (item.price ?? 0) * (item.quantity ?? 0), // 개별 항목의 총 가격
-                orderStatus: 'PAID', // 기본 상태
-            }));
+            // 검색 결과를 orderId로 그룹화하여 같은 주문의 상품들을 함께 표시
+            const orderMap = new Map<string, Order>();
+            
+            searchResults.forEach((item) => {
+                const orderId = item.orderId || 'unknown';
+                
+                if (orderMap.has(orderId)) {
+                    // 이미 존재하는 주문에 상품 추가
+                    const existingOrder = orderMap.get(orderId)!;
+                    existingOrder.items.push(item);
+                } else {
+                    // 새로운 주문 생성
+                    orderMap.set(orderId, {
+                        orderId: orderId,
+                        orderDate: item.orderDate || new Date().toISOString(),
+                        orderNumber: orderId,
+                        items: [item],
+                        totalPrice: item.orderTotalPrice || 0,
+                        orderStatus: item.orderStatus || 'PAID',
+                    });
+                }
+            });
+
+            // Map의 값들을 배열로 변환
+            const transformedOrders: Order[] = Array.from(orderMap.values());
 
             setOrders(transformedOrders);
         } catch (err: any) {

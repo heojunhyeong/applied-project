@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login").permitAll()  // 로그인 API 허용
                             .requestMatchers("/api/payment/**", "/api/orders/**", "/api/users/orders/**").permitAll()
                 .requestMatchers("/api/users/reviews").permitAll()
-                .requestMatchers("/api/password/**", "/api/password/reset/**").permitAll()
+                .requestMatchers("/api/password/**", "/api/password/reset/**", "/api/seller/settlements").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ADMIN    q전용
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //SELLER파트 전용
                 .requestMatchers("/api/seller/products/**").hasRole("SELLER")

@@ -337,15 +337,23 @@ public class OrderServiceImpl implements OrderService {
         List<OrderDetail> orderDetails = orderRepository.findOrderDetailsByKeywordWithSameDateOrders(keyword, userId);
 
         return orderDetails.stream()    // 리스트를 자바 스트림으로 변환
-                .map(detail -> OrderDetailResponse.OrderItemDto.builder()
-                        .productId(detail.getProduct().getId())
-                        .productName(detail.getProduct().getProductName())
-                        .quantity(detail.getQuantity())
-                        .price(detail.getPrice())
-                        .imageUrl(detail.getProduct().getImageUrl())
-                        .size(detail.getSize())
-                        .reviewId(null) // 검색 결과에는 리뷰 ID는 필요 없을 수도 있음
-                        .build())
+                .map(detail -> {
+                    Order order = detail.getOrder();
+                    return OrderDetailResponse.OrderItemDto.builder()
+                            .productId(detail.getProduct().getId())
+                            .productName(detail.getProduct().getProductName())
+                            .quantity(detail.getQuantity())
+                            .price(detail.getPrice())
+                            .imageUrl(detail.getProduct().getImageUrl())
+                            .size(detail.getSize())
+                            .reviewId(null) // 검색 결과에는 리뷰 ID는 필요 없을 수도 있음
+                            // 주문 정보 추가
+                            .orderId(order.getOrderId())
+                            .orderDate(order.getCreatedDate())
+                            .orderTotalPrice(order.getTotalPrice())
+                            .orderStatus(order.getOrderStatus().name())
+                            .build();
+                })
                 .distinct() // 중복 제거
                 .collect(Collectors.toList());
     }

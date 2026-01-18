@@ -22,6 +22,7 @@ public class ProductAdminResponse {
     private ProductStatus status;       // 판매 상태
     private Long stockQuantity;         // 재고 수량
     private ProductCategory productCategory; // 카테고리
+    private String imageUrl;            // 상품 이미지 URL
     private LocalDateTime createdDate;  // 생성일
     private LocalDateTime updatedDate;  // 수정일
 
@@ -35,6 +36,7 @@ public class ProductAdminResponse {
                 .status(product.getStatus())
                 .stockQuantity(product.getStockQuantity())
                 .productCategory(product.getProductCategory())
+                .imageUrl(product.getImageUrl())
                 .createdDate(product.getCreatedDate())
                 .updatedDate(product.getUpdatedDate())
                 .build();

@@ -3,15 +3,16 @@ import AdminLayout from './AdminLayout';
 import { apiFetch } from '../../api/http';
 
 interface ProductResponse {
-  id: number;
-  sellerId: number;
-  productName: string;
-  price: number;
-  status: 'ON_SALE' | 'SOLD_OUT' | 'DELETED';
-  stockQuantity: number;
-  productCategory: string;
-  createdDate: string;
-  updatedDate: string;
+  id: number | null;
+  sellerId: number | null;
+  productName: string | null;
+  price: number | null;
+  status: 'ON_SALE' | 'SOLD_OUT' | 'DELETED' | null;
+  stockQuantity: number | null;
+  productCategory: string | null;
+  imageUrl: string | null;
+  createdDate: string | null;
+  updatedDate: string | null;
 }
 
 interface Product {
@@ -38,12 +39,12 @@ export default function ProductManagementPage() {
 
         const response = await apiFetch<ProductResponse[]>('/api/admin/products');
         const mappedProducts = (response || []).map((p) => ({
-          id: p.id.toString(),
-          image: 'https://via.placeholder.com/400', // TODO: 실제 이미지 URL 사용
-          name: p.productName,
-          sellerId: p.sellerId.toString(),
-          price: p.price,
-          stockQuantity: p.stockQuantity,
+          id: (p.id ?? 0).toString(),
+          image: p.imageUrl || 'https://via.placeholder.com/400',
+          name: p.productName || '',
+          sellerId: (p.sellerId ?? 0).toString(),
+          price: p.price ?? 0,
+          stockQuantity: p.stockQuantity ?? 0,
           status:
             p.status === 'ON_SALE'
               ? ('Selling' as const)
@@ -181,6 +182,9 @@ export default function ProductManagementPage() {
                       src={product.image}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded-md"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
+                      }}
                     />
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{product.name}</td>

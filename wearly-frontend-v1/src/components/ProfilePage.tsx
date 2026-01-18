@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { User } from "lucide-react";
 import AdminLayout from "./admin/AdminLayout";
+import SellerLayout from "./seller/SellerLayout"; // // SELLER 레이아웃 추가
 import {
   fetchProfile,
   ProfileFormState,
@@ -33,7 +34,7 @@ export default function ProfilePage() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 프로필 데이터를 폼 상태로 변환
+  // // 프로필 데이터를 폼 상태로 변환
   const toFormState = (data: ProfileResponse): ProfileFormState => ({
     nickname: data.userNickname ?? "",
     introduction: data.introduction ?? "",
@@ -42,11 +43,14 @@ export default function ProfilePage() {
   });
 
   const isAdmin = role === "ADMIN";
+  const isSeller = role === "SELLER"; // // SELLER 여부
+  const isUser = role === "USER";
 
-  // 프로필 조회
+  // // 프로필 조회
   const loadProfile = async (resolvedRole?: UserRole) => {
     const token = getAccessToken();
     const roleFromToken = resolvedRole ?? getRoleFromToken(token);
+
     if (!token || !roleFromToken) {
       setErrorMessage("로그인이 필요합니다.");
       setProfile(null);
@@ -56,6 +60,7 @@ export default function ProfilePage() {
     setRole(roleFromToken);
     setLoadingProfile(true);
     setErrorMessage(null);
+
     try {
       const data = await fetchProfile(roleFromToken);
       setProfile(data);
@@ -72,26 +77,27 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 편집 시작
+  // // 편집 시작
   const handleStartEdit = () => {
     if (!profile || !role) return;
     setForm(toFormState(profile));
     setIsEditing(true);
   };
 
-  // 편집 취소
+  // // 편집 취소
   const handleCancelEdit = () => {
     if (!profile || !role) return;
     setForm(toFormState(profile));
     setIsEditing(false);
   };
 
-  // 프로필 저장
+  // // 프로필 저장
   const handleSave = async () => {
     if (!profile || !role) return;
 
     setSaving(true);
     setErrorMessage(null);
+
     try {
       const updated = await updateProfile(role, form);
       setProfile(updated);
@@ -104,13 +110,13 @@ export default function ProfilePage() {
     }
   };
 
-  // 프로필 이미지 변경 버튼 처리
+  // // 프로필 이미지 변경 버튼 처리
   const handleChangePhoto = () => {
     if (saving || imageUploading) return;
     fileInputRef.current?.click();
   };
 
-  // 프로필 이미지 파일 선택
+  // // 프로필 이미지 파일 선택
   const handlePhotoSelected = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !role || !profile) return;
@@ -119,11 +125,10 @@ export default function ProfilePage() {
     setErrorMessage(null);
 
     try {
-      // 1. Presigned URL 요청
-      const { presignedUrl, key } =
-        await requestProfilePresignedUrl(role, file.type);
+      // // 1. Presigned URL 요청
+      const { presignedUrl } = await requestProfilePresignedUrl(role, file.type);
 
-      // 2. S3에 파일 업로드
+      // // 2. S3에 파일 업로드
       const uploadResponse = await fetch(presignedUrl, {
         method: "PUT",
         headers: {
@@ -136,23 +141,19 @@ export default function ProfilePage() {
         throw new Error(`S3 업로드 실패: ${uploadResponse.status}`);
       }
 
-      // 3. 업로드된 이미지의 전체 URL 구성
-      // presignedUrl에서 쿼리 파라미터를 제거하면 실제 S3 객체 URL이 됩니다
-      // 백엔드의 extractKeyFromUrl이 파싱할 수 있는 형식으로 URL 생성
+      // // 3. 업로드된 이미지의 실제 URL(쿼리 제거)
       const uploadedUrl = presignedUrl.split("?")[0];
 
-      // 4. 프로필 이미지 URL 업데이트
-      // 백엔드의 updateProfileImage 메서드가 자동으로 기존 이미지를 S3에서 삭제합니다
-      // (UserProfileService.updateProfileImage에서 oldImageUrl을 추출하여 삭제)
+      // // 4. 프로필 이미지 URL 업데이트
       const updated = await updateProfileImage(
         role,
         uploadedUrl,
         role === "USER" && profile.userNickname ? profile.userNickname : undefined
       );
+
       setProfile(updated);
       setForm(toFormState(updated));
     } catch (e: any) {
-      // 에러 상태 코드 확인
       if (e.status === 401 || e.status === 403) {
         setErrorMessage("인증에 실패했습니다. 다시 로그인해주세요.");
       } else {
@@ -164,19 +165,20 @@ export default function ProfilePage() {
     }
   };
 
-  // 프로필 이미지 삭제
+  // // 프로필 이미지 삭제
   const handleDeletePhoto = async () => {
     if (!role || !profile) return;
+
     setImageUploading(true);
     setErrorMessage(null);
 
     try {
-      // USER 역할일 때는 현재 닉네임도 함께 전송해야 함
       const updated = await updateProfileImage(
         role,
         null,
         role === "USER" ? profile.userNickname : undefined
       );
+
       setProfile(updated);
       setForm(toFormState(updated));
     } catch (e: any) {
@@ -186,35 +188,58 @@ export default function ProfilePage() {
     }
   };
 
+  // // 쿠폰 발급
   const handleDownloadCoupon = async (benefitId: number) => {
-      setCouponLoading(true);
-      setCouponError(null);
+    setCouponLoading(true);
+    setCouponError(null);
 
-      try {
-          await downloadCoupon(benefitId);
-          setShowCouponModal(false);
-          alert("쿠폰이 발급되었습니다!");
-      } catch (e: any) {
-          setCouponError(e.message ?? "쿠폰 발급 중 오류가 발생했습니다.");
-      } finally {
-          setCouponLoading(false);
-      }
+    try {
+      await downloadCoupon(benefitId);
+      setShowCouponModal(false);
+      alert("쿠폰이 발급되었습니다!");
+    } catch (e: any) {
+      setCouponError(e.message ?? "쿠폰 발급 중 오류가 발생했습니다.");
+    } finally {
+      setCouponLoading(false);
+    }
   };
 
+  // =========================
+  // // 로딩 상태 UI
+  // =========================
   if (loadingProfile) {
-    return isAdmin ? (
-      <AdminLayout>
-        <div className="p-8">
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
-      </AdminLayout>
-    ) : (
+    // // ADMIN / SELLER는 대시보드 레이아웃으로 로딩 표시
+    if (isAdmin) {
+      return (
+        <AdminLayout>
+          <div className="p-8">
+            <p className="text-gray-600">Loading profile...</p>
+          </div>
+        </AdminLayout>
+      );
+    }
+
+    if (isSeller) {
+      return (
+        <SellerLayout>
+          <div className="p-8">
+            <p className="text-gray-600">Loading profile...</p>
+          </div>
+        </SellerLayout>
+      );
+    }
+
+    // // USER는 기존 그대로
+    return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-600">Loading profile...</p>
       </div>
     );
   }
 
+  // =========================
+  // // 프로필 없을 때 UI
+  // =========================
   if (!profile) {
     const emptyState = (
       <div className="text-center">
@@ -230,21 +255,37 @@ export default function ProfilePage() {
       </div>
     );
 
-    return isAdmin ? (
-      <AdminLayout>
-        <div className="p-8">{emptyState}</div>
-      </AdminLayout>
-    ) : (
+    if (isAdmin) {
+      return (
+        <AdminLayout>
+          <div className="p-8">{emptyState}</div>
+        </AdminLayout>
+      );
+    }
+
+    if (isSeller) {
+      return (
+        <SellerLayout>
+          <div className="p-8">{emptyState}</div>
+        </SellerLayout>
+      );
+    }
+
+    return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         {emptyState}
       </div>
     );
   }
 
+  // =========================
+  // // 프로필 카드 UI(공통)
+  // =========================
   const currentImageUrl = isEditing ? form.imageUrl : profile.imageUrl;
+
   const profileCard = (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      {/* Profile Image */}
+      {/* // Profile Image */}
       <div className="p-8 border-b border-gray-200">
         <div className="flex flex-col items-center">
           <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
@@ -277,6 +318,7 @@ export default function ProfilePage() {
               </button>
             </div>
           )}
+
           <input
             ref={fileInputRef}
             type="file"
@@ -287,7 +329,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Read-Only Info */}
+      {/* // Read-Only Info */}
       <div className="p-6 border-b border-gray-200 bg-gray-50 space-y-4">
         <div className="flex items-center gap-6">
           <div className="w-32 flex-shrink-0">
@@ -303,9 +345,7 @@ export default function ProfilePage() {
             <label className="text-sm text-gray-600">Name</label>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-900">
-              {profile.userName || "-"}
-            </p>
+            <p className="text-sm text-gray-900">{profile.userName || "-"}</p>
           </div>
         </div>
 
@@ -314,14 +354,12 @@ export default function ProfilePage() {
             <label className="text-sm text-gray-600">Email</label>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-900">
-              {profile.userEmail || "-"}
-            </p>
+            <p className="text-sm text-gray-900">{profile.userEmail || "-"}</p>
           </div>
         </div>
       </div>
 
-      {/* Editable: Nickname */}
+      {/* // Editable: Nickname */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-start gap-6">
           <div className="w-32 flex-shrink-0">
@@ -362,7 +400,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Editable: Phone */}
+      {/* // Editable: Phone */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-start gap-6">
           <div className="w-32 flex-shrink-0">
@@ -393,7 +431,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Editable: Introduction */}
+      {/* // Editable: Introduction */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-start gap-6">
           <div className="w-32 flex-shrink-0">
@@ -430,25 +468,27 @@ export default function ProfilePage() {
         </div>
       </div>
 
-        {/* Coupon Section - 이 부분 추가 필요 */}
+      {/* // Coupon */}
+      {isUser && (
         <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start gap-6">
-                <div className="w-32 flex-shrink-0">
-                    <label className="text-sm text-gray-700">Coupon</label>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                    <button
-                        onClick={() => setShowCouponModal(true)}
-                        className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-                    >
-                        쿠폰 발급받기
-                    </button>
-                </div>
+          <div className="flex items-start gap-6">
+            <div className="w-32 flex-shrink-0">
+              <label className="text-sm text-gray-700">Coupon</label>
             </div>
-        </div>
 
-      {/* Bottom Actions */}
+            <div className="flex-1 min-w-0">
+              <button
+                onClick={() => setShowCouponModal(true)}
+                className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+              >
+                쿠폰 발급받기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* // Bottom Actions */}
       {isEditing && (
         <div className="p-6 bg-gray-50">
           <div className="flex items-center justify-end gap-3">
@@ -472,141 +512,138 @@ export default function ProfilePage() {
     </div>
   );
 
-    const couponModal = showCouponModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-900">쿠폰 발급</h2>
-                    <button
-                        onClick={() => {
-                            setShowCouponModal(false);
-                            setCouponError(null);
-                        }}
-                        className="text-gray-400 hover:text-gray-600"
-                        disabled={couponLoading}
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+  const couponModal =
+    isUser &&
+    showCouponModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">쿠폰 발급</h2>
+            <button
+              onClick={() => {
+                setShowCouponModal(false);
+                setCouponError(null);
+              }}
+              className="text-gray-400 hover:text-gray-600"
+              disabled={couponLoading}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
-                <p className="text-sm text-gray-600 mb-6">
-                    발급받을 쿠폰을 선택해주세요.
-                </p>
+          <p className="text-sm text-gray-600 mb-6">발급받을 쿠폰을 선택해주세요.</p>
 
-                {couponError && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-600">{couponError}</p>
-                    </div>
-                )}
-
-                <div className="space-y-3">
-                    <button
-                        onClick={() => handleDownloadCoupon(1)}
-                        disabled={couponLoading}
-                        className="w-full px-4 py-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <div className="font-semibold text-gray-900">10% 할인 쿠폰</div>
-                        <div className="text-sm text-gray-600 mt-1">
-                            최소 주문금액: 10,000원 이상
-                        </div>
-                    </button>
-
-                    <button
-                        onClick={() => handleDownloadCoupon(2)}
-                        disabled={couponLoading}
-                        className="w-full px-4 py-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <div className="font-semibold text-gray-900">5,000원 할인 쿠폰</div>
-                        <div className="text-sm text-gray-600 mt-1">
-                            최소 주문금액: 30,000원 이상
-                        </div>
-                    </button>
-                </div>
-
-                {couponLoading && (
-                    <div className="mt-4 text-center">
-                        <p className="text-sm text-gray-600">쿠폰 발급 중...</p>
-                    </div>
-                )}
+          {couponError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{couponError}</p>
             </div>
+          )}
+
+          <div className="space-y-3">
+            <button
+              onClick={() => handleDownloadCoupon(1)}
+              disabled={couponLoading}
+              className="w-full px-4 py-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="font-semibold text-gray-900">10% 할인 쿠폰</div>
+              <div className="text-sm text-gray-600 mt-1">
+                최소 주문금액: 10,000원 이상
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleDownloadCoupon(2)}
+              disabled={couponLoading}
+              className="w-full px-4 py-3 text-left border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="font-semibold text-gray-900">5,000원 할인 쿠폰</div>
+              <div className="text-sm text-gray-600 mt-1">
+                최소 주문금액: 30,000원 이상
+              </div>
+            </button>
+          </div>
+
+          {couponLoading && (
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">쿠폰 발급 중...</p>
+            </div>
+          )}
         </div>
+      </div>
     );
 
-  // 페이지 레이아웃 구성
-  return isAdmin ? (
-    <AdminLayout>
-      <div className="p-8">
-        {/* Page Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
-            <p className="text-sm text-gray-600 mt-2">
-              Manage admin profile information
-            </p>
-            {errorMessage && (
-              <p className="text-xs text-red-600 mt-2">{errorMessage}</p>
-            )}
-          </div>
+  // =========================
+  // // 공통 헤더 영역 (ADMIN/SELLER 같이 쓰게)
+  // =========================
+  const pageHeader = (
+    <div className="mb-8 flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
+        <p className="text-sm text-gray-600 mt-2">
+          {isAdmin
+            ? "Manage admin profile information"
+            : isSeller
+            ? "Manage seller profile information"
+            : "Manage your personal information"}
+        </p>
+        {errorMessage && <p className="text-xs text-red-600 mt-2">{errorMessage}</p>}
+      </div>
 
-          {!isEditing ? (
-            <button
-              onClick={handleStartEdit}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Edit
-            </button>
-          ) : (
-            <button
-              onClick={handleCancelEdit}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              disabled={saving}
-            >
-              Cancel
-            </button>
-          )}
-        </div>
+      {!isEditing ? (
+        <button
+          onClick={handleStartEdit}
+          className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          Edit
+        </button>
+      ) : (
+        <button
+          onClick={handleCancelEdit}
+          className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          disabled={saving}
+        >
+          Cancel
+        </button>
+      )}
+    </div>
+  );
 
+  // =========================
+  // // 최종 렌더링: ADMIN / SELLER / USER 분기
+  // =========================
+  if (isAdmin) {
+    return (
+      <AdminLayout>
+        <div className="p-8">
+          {pageHeader}
           {profileCard}
           {couponModal}
-      </div>
-    </AdminLayout>
-  ) : (
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (isSeller) {
+    return (
+      <SellerLayout>
+        <div className="p-8">
+          {pageHeader}
+          {profileCard}
+          {couponModal}
+        </div>
+      </SellerLayout>
+    );
+  }
+
+  // // USER는 기존 UI 유지
+  return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Page Title */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl text-gray-900">My Profile</h1>
-            <p className="text-sm text-gray-600 mt-2">
-              Manage your personal information
-            </p>
-            {errorMessage && (
-              <p className="text-xs text-red-600 mt-2">{errorMessage}</p>
-            )}
-          </div>
-
-          {!isEditing ? (
-            <button
-              onClick={handleStartEdit}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Edit
-            </button>
-          ) : (
-            <button
-              onClick={handleCancelEdit}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              disabled={saving}
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-
-          {profileCard}
-          {couponModal}
+        {pageHeader}
+        {profileCard}
+        {couponModal}
       </div>
     </div>
   );

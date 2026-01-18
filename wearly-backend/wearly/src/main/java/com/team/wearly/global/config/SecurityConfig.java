@@ -58,7 +58,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/password/**", "/api/password/reset/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ADMIN    q전용
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //SELLER파트 전용
-                .requestMatchers("/api/products/seller/**").hasRole("SELLER")
+                .requestMatchers("/api/seller/products/**").hasRole("SELLER")
+                .requestMatchers("/api/seller/orders/**").hasRole("SELLER")
                 .anyRequest().authenticated()  // 나머지는 JWT 토큰 필요
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

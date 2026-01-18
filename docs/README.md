@@ -54,3 +54,38 @@ applied-project
 │  └─ Dockerfile
 ├─ .env                         # 환경 변수 관리
 └─ docker-compose.yml           # 시스템 통합 실행 설정
+
+---
+# 로컬 개발 환경 실행 가이드
+
+이 프로젝트는 Docker를 사용하여 로컬 환경을 빠르고 일관되게 구축할 수 있도록 구성되었습니다. 각 파트별 또는 전체 시스템 실행 방법은 다음과 같습니다.
+
+## 1. 백엔드 개발 환경 실행
+백엔드 서버와 데이터베이스를 실행
+
+```bash
+# 백엔드 디렉토리로 이동
+cd wearly-backend/wearly
+
+# 프로젝트 빌드 및 컨테이너 실행
+docker compose up --build
+```
+
+## 1. 프론트엔드 개발 환경 실행
+```bash
+# 프론트엔드 디렉토리로 이동
+cd wearly-frontend-v1
+
+# 도커 이미지 빌드
+docker build -t wearly-frontend:dev .
+
+# 컨테이너 실행 (로컬 70번 포트 연결)
+docker run --rm -p 70:70 wearly-frontend:dev
+```
+
+## 2. 전체 시스템 통합 실행
+```bash
+# 프로젝트 루트(applied-project) 디렉토리에서 실행
+docker compose up --build
+```
+### 접근 주소 : http://localhost:70/

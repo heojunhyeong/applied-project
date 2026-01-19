@@ -256,6 +256,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderId(order.getOrderId())
                 .orderDate(order.getCreatedDate())
                 .totalPrice(order.getTotalPrice())
+                .couponDiscountPrice(order.getCouponDiscountPrice() != null ? order.getCouponDiscountPrice() : 0L)
                 .orderStatus(order.getOrderStatus().name())
                 .address(order.getOrderDelivery().getAddress())
                 .detailAddress(order.getOrderDelivery().getDetail_address())

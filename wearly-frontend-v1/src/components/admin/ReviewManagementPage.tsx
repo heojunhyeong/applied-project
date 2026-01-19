@@ -280,7 +280,7 @@ export default function ReviewManagementPage() {
                     {expandedReviewId === review.reportId && (
                       <tr className="bg-blue-50/30">
                         <td></td>
-                        <td colSpan={5} className="px-6 py-4">
+                        <td colSpan={6} className="px-6 py-4">
                           <div className="border border-gray-300 rounded bg-white p-4">
                             {/* Comment Content */}
                             <div className="mb-4">
@@ -336,7 +336,7 @@ export default function ReviewManagementPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
                     No review reports found
                   </td>
                 </tr>

@@ -8,7 +8,6 @@ interface OrderListResponse {
   orderNumber: string;
   userId: number;
   userName: string | null;
-  paymentStatus: string;
   totalAmount: number;
 }
 
@@ -24,8 +23,6 @@ interface OrderDetailResponse {
   couponDiscountPrice: number;
   finalPrice: number;
   orderStatus: string;
-  deliveryStatus: string;
-  isPaid: boolean;
   paymentInfo?: {
     exists: boolean;
     status: string;
@@ -40,6 +37,8 @@ interface OrderDetailResponse {
     quantity: number;
     price: number;
     totalItemPrice: number;
+    sellerId: number | null;
+    sellerName: string | null;
   }>;
   deliveryInfo?: {
     address: string;
@@ -54,8 +53,8 @@ interface OrderProduct {
   productName: string;
   quantity: number;
   price: number;
-  sellerId: string;
-  status: 'Completed' | 'Pending' | 'Cancelled';
+  sellerId: string | null;
+  sellerName: string | null;
 }
 
 interface Order {
@@ -89,7 +88,7 @@ export default function OrderManagementPage() {
           userId: o.userId.toString(),
           userName: o.userName || o.userId.toString(),
           totalAmount: o.totalAmount || 0,
-          orderStatus: o.paymentStatus === 'O' ? ('Completed' as const) : ('Pending' as const),
+          orderStatus: 'Completed' as const, // 결제는 필수이므로 항상 Completed
           products: [],
         }));
 
@@ -127,8 +126,8 @@ export default function OrderManagementPage() {
         productName: item.productName,
         quantity: item.quantity,
         price: item.price,
-        sellerId: '', // TODO: Get from product detail
-        status: statusMap[detail.orderStatus] || 'Pending',
+        sellerId: item.sellerId?.toString() || null,
+        sellerName: item.sellerName || item.sellerId?.toString() || null,
       }));
 
       setOrders((prevOrders) =>
@@ -260,9 +259,6 @@ export default function OrderManagementPage() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Total Amount
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Order Status
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -289,35 +285,13 @@ export default function OrderManagementPage() {
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {order.totalAmount.toLocaleString()}원
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            order.orderStatus
-                          )}`}
-                        >
-                          {order.orderStatus}
-                        </span>
-                        {order.orderStatus === 'Pending' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCancelOrder(order.orderId);
-                            }}
-                            className="px-3 py-1 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        )}
-                      </div>
-                    </td>
                   </tr>
 
                   {/* Expanded Order Detail */}
                   {expandedOrderId === order.orderId && (
                     <tr className="bg-blue-50/30">
                       <td></td>
-                      <td colSpan={5} className="px-6 py-4">
+                      <td colSpan={4} className="px-6 py-4">
                         <div className="border border-gray-300 rounded bg-white p-4">
                           {(order.orderStatus === 'Pending' || order.detail?.orderStatus === 'BEFORE_PAID') && (
                             <div className="mb-4 flex justify-end">
@@ -332,6 +306,44 @@ export default function OrderManagementPage() {
                               </button>
                             </div>
                           )}
+                          
+                          {/* Payment Info */}
+                          {order.detail?.paymentInfo && (
+                            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                Payment Details
+                              </h4>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Amount:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.amount?.toLocaleString()}원
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Method:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.paymentMethod || '-'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Payment Date:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.paymentDate 
+                                      ? new Date(order.detail.paymentInfo.paymentDate).toLocaleString('ko-KR')
+                                      : '-'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Status:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.status || '-'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           <table className="w-full">
                             <thead className="bg-gray-100 border-b border-gray-300">
                               <tr>
@@ -346,9 +358,6 @@ export default function OrderManagementPage() {
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                   Seller ID
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                  Status
                                 </th>
                               </tr>
                             </thead>
@@ -365,16 +374,7 @@ export default function OrderManagementPage() {
                                     {product.price.toLocaleString()}원
                                   </td>
                                   <td className="px-4 py-2 text-sm text-gray-900">
-                                    {product.sellerId}
-                                  </td>
-                                  <td className="px-4 py-2 text-sm">
-                                    <span
-                                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                        product.status
-                                      )}`}
-                                    >
-                                      {product.status}
-                                    </span>
+                                    {product.sellerName || product.sellerId || '-'}
                                   </td>
                                 </tr>
                               ))}

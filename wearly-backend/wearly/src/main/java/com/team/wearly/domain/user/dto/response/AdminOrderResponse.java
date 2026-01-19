@@ -50,6 +50,8 @@ public class AdminOrderResponse {
         private Long quantity;
         private Long price;
         private Long totalItemPrice;   // 상품 가격 * 수량
+        private Long sellerId;         // 판매자 ID
+        private String sellerName;     // 판매자 로그인 ID
     }
 
     @Getter

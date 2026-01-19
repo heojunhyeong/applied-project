@@ -105,6 +105,7 @@ public class AdminOrderService {
                 .userId(order.getUserId())
                 .userName(user != null ? user.getUserName() : null)
                 .totalAmount(totalAmount)
+                .orderStatus(order.getOrderStatus().name())
                 .build();
     }
 

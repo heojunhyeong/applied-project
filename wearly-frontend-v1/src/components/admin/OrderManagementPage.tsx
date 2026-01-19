@@ -8,7 +8,7 @@ interface OrderListResponse {
   orderNumber: string;
   userId: number;
   userName: string | null;
-  paymentStatus: string;
+  orderStatus: string;
   totalAmount: number;
 }
 
@@ -83,13 +83,23 @@ export default function OrderManagementPage() {
         setError(null);
 
         const response = await apiFetch<OrderListResponse[]>('/api/admin/orders');
+        
+        const statusMap: Record<string, 'Completed' | 'Pending' | 'Cancelled' | 'Refunded'> = {
+          DELIVERY_COMPLETED: 'Completed',
+          PAID: 'Completed',
+          BEFORE_PAID: 'Pending',
+          CANCELLED: 'Cancelled',
+          REFUNDED: 'Refunded',
+          RETURN_COMPLETED: 'Refunded',
+        };
+        
         const mappedOrders: Order[] = (response || []).map((o) => ({
           orderId: o.orderId.toString(),
           orderNumber: o.orderNumber,
           userId: o.userId.toString(),
           userName: o.userName || o.userId.toString(),
           totalAmount: o.totalAmount || 0,
-          orderStatus: o.paymentStatus === 'O' ? ('Completed' as const) : ('Pending' as const),
+          orderStatus: statusMap[o.orderStatus] || ('Pending' as const),
           products: [],
         }));
 

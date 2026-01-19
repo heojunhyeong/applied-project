@@ -15,6 +15,7 @@ public class AdminOrderResponse {
     private Long orderId;              // 주문 ID
     private String orderNumber;        // 주문 번호 (orderId)
     private Long userId;               // 회원 ID
+    private String userName;           // 회원 로그인 ID
     private String userNickname;       // 회원 닉네임
     private String userEmail;          // 회원 이메일
     private LocalDateTime orderDate;   // 주문 일시

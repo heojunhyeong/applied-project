@@ -104,7 +104,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@3.35.27.165 << EOF
-            cd /home/ec2-user/wearly
+            cd /home/ec2-user/applied-project
           
             # 1. 최신 코드 강제 동기화 (Untracked 파일인 .env는 보존됨)
             git fetch origin develop

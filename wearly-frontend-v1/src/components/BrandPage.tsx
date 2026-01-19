@@ -142,7 +142,7 @@ export default function BrandPage() {
             {brandName === 'levis' ? "LEVI'S" : displayBrandName.toUpperCase()}
           </h1>
           <p className="text-lg text-gray-600 mt-3 mb-6">
-            Explore our collection of {(brandName === 'levis' ? "LEVI'S" : displayBrandName).toLowerCase()} products
+            {(brandName === 'levis' ? "LEVI'S" : displayBrandName)} 의 상품 보기
           </p>
 
 
@@ -155,7 +155,7 @@ export default function BrandPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search by product name"
+                placeholder="상품 검색..."
                 className="w-full h-12 pl-4 pr-24 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
               {searchInput && (
@@ -270,7 +270,7 @@ export default function BrandPage() {
               <Search className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-lg text-gray-600">
-              No products found for {brandName}.
+              조건에 해당하는 상품이 없습니다
             </p>
             <button
               onClick={() => {
@@ -279,7 +279,7 @@ export default function BrandPage() {
               }}
               className="mt-6 px-6 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
             >
-              Clear Filters
+              전체 상품 보기
             </button>
           </div>
         )}

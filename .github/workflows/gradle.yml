@@ -3,13 +3,14 @@ name: CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "develop" ]
     types: [ closed ]
 
 jobs:
   # 백엔드 빌드 & 테스트
   build:
-    if: github.event.pull_request.merged == true
+    # PR이 닫혔고, 실제로 머지(merged)되었을 때만 실행
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -65,9 +66,9 @@ jobs:
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root1234
 
-  # 프론트엔드 빌드
+  # 2. 프론트엔드 빌드
   frontend-build:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop'
     runs-on: ubuntu-latest
 
     steps:
@@ -88,16 +89,11 @@ jobs:
         run: npm run build
         working-directory: ./wearly-frontend-v1
 
-#      - name: Lint frontend
-#        run: npm run lint
-#        working-directory: ./wearly-frontend-v1
-#        continue-on-error: true
-
-  # EC2 배포 (PR merge 시)
+  # 3. EC2 배포
   deploy:
     needs: [build, frontend-build]
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop'
 
     steps:
       - name: Setup SSH agent
@@ -109,11 +105,17 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@3.35.27.165 << EOF
             cd /home/ec2-user/wearly
-            git fetch origin
-            git checkout ${{ github.event.pull_request.base.ref }}
-            git pull origin ${{ github.event.pull_request.base.ref }}
+          
+            # 1. 최신 코드 강제 동기화 (Untracked 파일인 .env는 보존됨)
+            git fetch origin develop
+            git checkout develop
+            git reset --hard origin/develop
+          
+            # 2. 도커 재빌드 및 실행 (SecurityConfig 반영을 위해 --no-cache 권장)
             docker-compose down
             docker-compose build --no-cache
             docker-compose up -d
+          
+            # 3. 불필요한 이미지 정리
             docker system prune -f
           EOF

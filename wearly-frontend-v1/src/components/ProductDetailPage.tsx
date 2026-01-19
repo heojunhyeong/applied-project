@@ -228,8 +228,8 @@ export default function ProductDetailPage() {
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                      ? "border-gray-900"
-                      : "border-transparent hover:border-gray-300"
+                    ? "border-gray-900"
+                    : "border-transparent hover:border-gray-300"
                     }`}
                 >
                   <ImageWithFallback
@@ -667,15 +667,7 @@ export default function ProductDetailPage() {
                   )}
                 </div>
 
-                {/* Write Review Button */}
-                <div className="mt-8 text-center">
-                  <button
-                    onClick={() => navigate(`/product/${productId}/review`)}
-                    className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    리뷰 작성하기
-                  </button>
-                </div>
+
               </div>
             )}
           </div>

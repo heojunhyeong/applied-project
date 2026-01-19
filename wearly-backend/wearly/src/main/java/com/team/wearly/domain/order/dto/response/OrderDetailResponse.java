@@ -17,6 +17,7 @@ public class OrderDetailResponse {
     private String orderId;
     private LocalDateTime orderDate;
     private Long totalPrice;
+    private Long couponDiscountPrice; // 쿠폰 할인 금액 추가
     private String orderStatus;
 
     // 배송 정보

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router';
-import { Truck, Edit3, Search } from 'lucide-react';
+import { Truck, Edit3, Search, CreditCard } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../api/http';
 
@@ -32,6 +32,7 @@ interface OrderDetailResponse {
     orderId: string;
     orderDate: string;
     totalPrice: number;
+    couponDiscountPrice: number | null; // 쿠폰 할인 금액 추가
     orderStatus: string;
     address: string;
     detailAddress: string;
@@ -46,6 +47,7 @@ interface Order {
     orderNumber: string;
     items: OrderItemDto[];
     totalPrice: number;
+    couponDiscountPrice: number | null; // 쿠폰 할인 금액 추가
     orderStatus: string;
 }
 
@@ -79,6 +81,7 @@ export default function OrderHistoryPage() {
                             orderNumber: detail.orderId, // orderId를 주문번호로 사용
                             items: detail.orderItems,
                             totalPrice: detail.totalPrice,
+                            couponDiscountPrice: detail.couponDiscountPrice || null,
                             orderStatus: detail.orderStatus,
                         };
                     } catch (err) {
@@ -98,6 +101,7 @@ export default function OrderHistoryPage() {
                                 reviewId: null,
                             }],
                             totalPrice: orderSummary.totalPrice,
+                            couponDiscountPrice: null, // 요약 정보에서는 쿠폰 할인 정보가 없음
                             orderStatus: orderSummary.orderStatus,
                         };
                     }
@@ -146,6 +150,7 @@ export default function OrderHistoryPage() {
                         orderNumber: orderId,
                         items: [item],
                         totalPrice: item.orderTotalPrice || 0,
+                        couponDiscountPrice: null, // 검색 결과에서는 쿠폰 할인 정보가 없음
                         orderStatus: item.orderStatus || 'PAID',
                     });
                 }
@@ -185,6 +190,33 @@ export default function OrderHistoryPage() {
     // 돋보기 아이콘 클릭 핸들러
     const handleSearchClick = () => {
         setSearchTerm(inputValue);
+    };
+
+    // 결제하기 핸들러
+    const handlePayment = async (orderId: string, totalPrice: number, couponDiscountPrice: number | null, orderName: string) => {
+        try {
+            // 결제 금액 계산: totalPrice - couponDiscountPrice (백엔드 PaymentService와 동일한 로직)
+            const paymentAmount = totalPrice - (couponDiscountPrice || 0);
+            
+            // 토스 페이먼츠 결제창 호출
+            // @ts-ignore: index.html에 로드된 TossPayments SDK를 사용합니다.
+            const tossPayments = window.TossPayments("test_ck_Poxy1XQL8RJ011jA1yj987nO5Wml");
+
+            await tossPayments.requestPayment('CARD', {
+                amount: paymentAmount,
+                orderId: orderId,
+                orderName: orderName,
+                successUrl: `http://3.35.27.165:70/payment/success`,
+                failUrl: `http://3.35.27.165:70/payment/fail`,
+                method: 'CARD',
+            });
+        } catch (err: any) {
+            // 사용자가 결제창을 닫은 경우는 에러로 처리하지 않음
+            if (err.code !== 'USER_CANCEL') {
+                alert(err.message || '결제 처리 중 오류가 발생했습니다.');
+                console.error('결제 처리 실패:', err);
+            }
+        }
     };
 
     // 주문 상태를 읽기 쉬운 텍스트로 변환
@@ -326,29 +358,50 @@ export default function OrderHistoryPage() {
 
                                                         {/* Right: Action Buttons */}
                                                         <div className="flex flex-col gap-2 min-w-[140px]">
-                                                            <Link
-                                                                to={`/tracking/${order.orderNumber}`}
-                                                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
-                                                            >
-                                                                <Truck className="w-4 h-4" />
-                                                                배송 조회
-                                                            </Link>
-                                                            {item.reviewId ? (
-                                                                <Link
-                                                                    to={`/review/${item.reviewId}`}
-                                                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
-                                                                >
-                                                                    <Edit3 className="w-4 h-4" />
-                                                                    리뷰 보기
-                                                                </Link>
-                                                            ) : (
+                                                            {/* 결제 대기 상태일 때 결제하기 버튼 표시 */}
+                                                            {order.orderStatus === 'BEFORE_PAID' ? (
                                                                 <button
-                                                                    onClick={() => navigate(`/product/${item.productId}/review?orderId=${order.orderId}`)}
-                                                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
+                                                                    onClick={() => {
+                                                                        const orderName = order.items.length === 1
+                                                                            ? order.items[0].productName
+                                                                            : `${order.items[0].productName} 외 ${order.items.length - 1}건`;
+                                                                        handlePayment(order.orderId, order.totalPrice, order.couponDiscountPrice, orderName);
+                                                                    }}
+                                                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
                                                                 >
-                                                                    <Edit3 className="w-4 h-4" />
-                                                                    리뷰 작성
+                                                                    <CreditCard className="w-4 h-4" />
+                                                                    결제하기
                                                                 </button>
+                                                            ) : (
+                                                                <>
+                                                                    <Link
+                                                                        to={`/tracking/${order.orderNumber}`}
+                                                                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
+                                                                    >
+                                                                        <Truck className="w-4 h-4" />
+                                                                        배송 조회
+                                                                    </Link>
+                                                                    {/* 결제 완료 상태일 때만 리뷰 작성 버튼 표시 */}
+                                                                    {(order.orderStatus === 'PAID' || order.orderStatus === 'IN_DELIVERY' || order.orderStatus === 'DELIVERY_COMPLETED' || order.orderStatus === 'PURCHASE_CONFIRMED') && (
+                                                                        item.reviewId ? (
+                                                                            <Link
+                                                                                to={`/review/${item.reviewId}`}
+                                                                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
+                                                                            >
+                                                                                <Edit3 className="w-4 h-4" />
+                                                                                리뷰 보기
+                                                                            </Link>
+                                                                        ) : (
+                                                                            <button
+                                                                                onClick={() => navigate(`/product/${item.productId}/review?orderId=${order.orderId}`)}
+                                                                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
+                                                                            >
+                                                                                <Edit3 className="w-4 h-4" />
+                                                                                리뷰 작성
+                                                                            </button>
+                                                                        )
+                                                                    )}
+                                                                </>
                                                             )}
                                                         </div>
                                                     </div>

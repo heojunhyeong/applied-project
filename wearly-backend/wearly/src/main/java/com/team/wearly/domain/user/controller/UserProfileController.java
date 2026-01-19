@@ -118,5 +118,4 @@ public class UserProfileController {
         User user = getUser(authentication);
         return ResponseEntity.ok(userProfileService.updateProfileImage(user.getId(), request.imageUrl()));
     }
-
 }

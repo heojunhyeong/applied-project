@@ -3,6 +3,8 @@ package com.team.wearly.domain.order.service;
 import com.team.wearly.domain.coupon.entity.UserCoupon;
 import com.team.wearly.domain.coupon.entity.enums.CouponType;
 import com.team.wearly.domain.coupon.repository.UserCouponRepository;
+import com.team.wearly.domain.membership.entity.enums.MembershipStatus;
+import com.team.wearly.domain.membership.repository.MembershipRepository;
 import com.team.wearly.domain.order.dto.response.OrderDetailResponse;
 import com.team.wearly.domain.order.dto.response.OrderHistoryResponse;
 import com.team.wearly.domain.order.dto.response.OrderSheetResponse;
@@ -40,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final UserCouponRepository userCouponRepository;
     private final SettlementService settlementService;
-
+    private final MembershipRepository membershipRepository;
 
 
 
@@ -68,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
 
         long serverCalculatedProductPrice = 0L;
         long discountPrice = 0L;
-        long deliveryFee = 3000L;
+        long deliveryFee = calculateDeliveryFee(userId);
 
         if (request.getProductId() != null) {
 
@@ -196,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
                 .items(items)
                 .totalProductPrice(totalProductPrice)
                 .availableCoupons(coupons)
-                .deliveryFee(3000L)
+                .deliveryFee(calculateDeliveryFee(userId))
                 .build();
     }
     /**
@@ -387,5 +389,18 @@ public class OrderServiceImpl implements OrderService {
                 .sellerId(product.getSellerId())
                 .detailStatus(OrderStatus.BEFORE_PAID)
                 .build();
+    }
+
+    /**
+     * 사용자의 멤버십 상태를 확인하여 택배비를 계산
+     * 멤버십이 ACTIVE 상태인 경우 택배비는 무료(0원)
+     *
+     * @param userId 사용자 ID
+     * @return 택배비 (멤버십 ACTIVE: 0원, 그 외: 3000원)
+     */
+    private long calculateDeliveryFee(Long userId) {
+        return membershipRepository.findByUser_Id(userId)
+                .map(membership -> membership.getStatus() == MembershipStatus.ACTIVE ? 0L : 3000L)
+                .orElse(3000L); // 멤버십이 없는 경우 기본 택배비
     }
 }

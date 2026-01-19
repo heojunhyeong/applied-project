@@ -10,7 +10,9 @@ import com.team.wearly.domain.payment.entity.enums.PaymentStatus;
 import com.team.wearly.domain.payment.repository.PaymentRepository;
 import com.team.wearly.domain.user.dto.response.AdminOrderListResponse;
 import com.team.wearly.domain.user.dto.response.AdminOrderResponse;
+import com.team.wearly.domain.user.entity.Seller;
 import com.team.wearly.domain.user.entity.User;
+import com.team.wearly.domain.user.repository.SellerRepository;
 import com.team.wearly.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class AdminOrderService {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
     /**
      * 관리자용 주문 목록을 조회함 (회원 닉네임 검색 지원)
@@ -83,11 +86,6 @@ public class AdminOrderService {
         // User 정보 조회
         User user = userRepository.findById(order.getUserId())
                 .orElse(null);
-        
-        // 결제 정보 조회
-        Optional<Payment> paymentOpt = paymentRepository.findByOrderId(order.getOrderId());
-        boolean isPaid = paymentOpt.isPresent() && paymentOpt.get().getStatus() == PaymentStatus.DONE;
-        String paymentStatus = isPaid ? "O" : "X";
 
         // 총 주문 금액 계산 (쿠폰 할인 포함)
         Long totalAmount = order.getTotalPrice() - (order.getCouponDiscountPrice() != null ? order.getCouponDiscountPrice() : 0L);
@@ -97,7 +95,6 @@ public class AdminOrderService {
                 .orderNumber(order.getOrderId())
                 .userId(order.getUserId())
                 .userName(user != null ? user.getUserName() : null)
-                .paymentStatus(paymentStatus)
                 .totalAmount(totalAmount)
                 .build();
     }
@@ -206,6 +203,15 @@ public class AdminOrderService {
      * @DateOfEdit 2026-01-14
      */
     private AdminOrderResponse.OrderItemInfo convertToOrderItemInfo(OrderDetail detail) {
+        Long sellerId = detail.getProduct().getSellerId();
+        String sellerName = null;
+
+        // Seller 정보 조회 (userName을 위해)
+        if (sellerId != null) {
+            Optional<Seller> seller = sellerRepository.findById(sellerId);
+            sellerName = seller.map(Seller::getUserName).orElse(null);
+        }
+
         return AdminOrderResponse.OrderItemInfo.builder()
                 .productId(detail.getProduct().getId())
                 .productName(detail.getProduct().getProductName())
@@ -213,6 +219,8 @@ public class AdminOrderService {
                 .quantity(detail.getQuantity())
                 .price(detail.getPrice())
                 .totalItemPrice(detail.getPrice() * detail.getQuantity())
+                .sellerId(sellerId)
+                .sellerName(sellerName)
                 .build();
     }
 

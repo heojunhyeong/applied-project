@@ -205,6 +205,21 @@ export default function OrderManagementPage() {
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'Completed':
+        return '완료됨';
+      case 'Pending':
+        return '대기 중';
+      case 'Cancelled':
+        return '취소됨';
+      case 'Refunded':
+        return '환불됨';
+      default:
+        return status;
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -296,7 +311,7 @@ export default function OrderManagementPage() {
                             order.orderStatus
                           )}`}
                         >
-                          {order.orderStatus}
+                          {getStatusText(order.orderStatus)}
                         </span>
                         {order.orderStatus === 'Pending' && (
                           <button
@@ -306,13 +321,14 @@ export default function OrderManagementPage() {
                             }}
                             className="px-3 py-1 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
                           >
-                            Cancel
+                            주문 취소
                           </button>
                         )}
                       </div>
                     </td>
                   </tr>
 
+                  {/* Expanded Order Detail */}
                   {/* Expanded Order Detail */}
                   {expandedOrderId === order.orderId && (
                     <tr className="bg-blue-50/30">
@@ -332,6 +348,7 @@ export default function OrderManagementPage() {
                               </button>
                             </div>
                           )}
+
                           <table className="w-full">
                             <thead className="bg-gray-100 border-b border-gray-300">
                               <tr>
@@ -373,7 +390,7 @@ export default function OrderManagementPage() {
                                         product.status
                                       )}`}
                                     >
-                                      {product.status}
+                                      {getStatusText(product.status)}
                                     </span>
                                   </td>
                                 </tr>
@@ -388,8 +405,8 @@ export default function OrderManagementPage() {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-    </AdminLayout>
+        </div >
+      </div >
+    </AdminLayout >
   );
 }

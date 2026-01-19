@@ -5,6 +5,7 @@ import { apiFetch } from '../../api/http';
 interface ProductResponse {
   id: number | null;
   sellerId: number | null;
+  sellerName: string | null;
   productName: string | null;
   price: number | null;
   status: 'ON_SALE' | 'SOLD_OUT' | 'DELETED' | null;
@@ -20,6 +21,7 @@ interface Product {
   image: string;
   name: string;
   sellerId: string;
+  sellerName: string | null;
   price: number;
   stockQuantity: number;
   status: 'Selling' | 'Out of Stock' | 'Stopped';
@@ -43,6 +45,7 @@ export default function ProductManagementPage() {
           image: p.imageUrl || 'https://via.placeholder.com/400',
           name: p.productName || '',
           sellerId: (p.sellerId ?? 0).toString(),
+          sellerName: p.sellerName || (p.sellerId ?? 0).toString(),
           price: p.price ?? 0,
           stockQuantity: p.stockQuantity ?? 0,
           status:
@@ -188,7 +191,7 @@ export default function ProductManagementPage() {
                     />
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{product.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{product.sellerId}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{product.sellerName || product.sellerId}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">${product.price}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{product.stockQuantity}</td>
                   <td className="px-6 py-4 text-sm">

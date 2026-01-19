@@ -7,13 +7,16 @@ interface OrderListResponse {
   orderId: number;
   orderNumber: string;
   userId: number;
+  userName: string | null;
   paymentStatus: string;
+  totalAmount: number;
 }
 
 interface OrderDetailResponse {
   orderId: number;
   orderNumber: string;
   userId: number;
+  userName: string | null;
   userNickname: string;
   userEmail: string;
   orderDate: string;
@@ -59,6 +62,7 @@ interface Order {
   orderId: string;
   orderNumber: string;
   userId: string;
+  userName: string | null;
   totalAmount: number;
   orderStatus: 'Completed' | 'Pending' | 'Cancelled' | 'Refunded';
   products: OrderProduct[];
@@ -83,7 +87,8 @@ export default function OrderManagementPage() {
           orderId: o.orderId.toString(),
           orderNumber: o.orderNumber,
           userId: o.userId.toString(),
-          totalAmount: 0, // Will be filled from detail
+          userName: o.userName || o.userId.toString(),
+          totalAmount: o.totalAmount || 0,
           orderStatus: o.paymentStatus === 'O' ? ('Completed' as const) : ('Pending' as const),
           products: [],
         }));
@@ -127,17 +132,21 @@ export default function OrderManagementPage() {
       }));
 
       setOrders((prevOrders) =>
-        prevOrders.map((o) =>
-          o.orderId === orderId
-            ? {
-                ...o,
-                totalAmount: detail.finalPrice,
-                orderStatus: statusMap[detail.orderStatus] || 'Pending',
-                products: mappedProducts,
-                detail,
-              }
-            : o
-        )
+        prevOrders.map((o) => {
+          if (o.orderId === orderId) {
+            const newStatus = statusMap[detail.orderStatus] || o.orderStatus;
+            // 상세 정보를 불러올 때 상태가 실제로 변경된 경우에만 업데이트
+            // 목록에서 이미 표시된 상태와 다를 수 있으므로, 실제 서버 상태로 동기화
+            return {
+              ...o,
+              totalAmount: detail.finalPrice,
+              orderStatus: newStatus,
+              products: mappedProducts,
+              detail,
+            };
+          }
+          return o;
+        })
       );
     } catch (err: any) {
       console.error('Failed to fetch order detail:', err);
@@ -151,6 +160,33 @@ export default function OrderManagementPage() {
     } else {
       setExpandedOrderId(orderId);
       await fetchOrderDetail(orderId);
+    }
+  };
+
+  // Handle order cancellation
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm('정말 주문을 취소하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/admin/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+      });
+
+      // Update local state
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.orderId === orderId
+            ? { ...order, orderStatus: 'Cancelled' as const }
+            : order
+        )
+      );
+
+      alert('주문이 취소되었습니다.');
+    } catch (err: any) {
+      alert(`주문 취소 실패: ${err.message || '알 수 없는 오류가 발생했습니다.'}`);
+      console.error('Failed to cancel order:', err);
     }
   };
 
@@ -249,18 +285,31 @@ export default function OrderManagementPage() {
                       {order.orderId}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{order.userId}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{order.userName || order.userId}</td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {order.totalAmount.toLocaleString()}원
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                          order.orderStatus
-                        )}`}
-                      >
-                        {order.orderStatus}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                            order.orderStatus
+                          )}`}
+                        >
+                          {order.orderStatus}
+                        </span>
+                        {order.orderStatus === 'Pending' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCancelOrder(order.orderId);
+                            }}
+                            className="px-3 py-1 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
 
@@ -269,7 +318,20 @@ export default function OrderManagementPage() {
                     <tr className="bg-blue-50/30">
                       <td></td>
                       <td colSpan={5} className="px-6 py-4">
-                        <div className="border border-gray-300 rounded bg-white">
+                        <div className="border border-gray-300 rounded bg-white p-4">
+                          {(order.orderStatus === 'Pending' || order.detail?.orderStatus === 'BEFORE_PAID') && (
+                            <div className="mb-4 flex justify-end">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCancelOrder(order.orderId);
+                                }}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-colors"
+                              >
+                                Cancel Order
+                              </button>
+                            </div>
+                          )}
                           <table className="w-full">
                             <thead className="bg-gray-100 border-b border-gray-300">
                               <tr>

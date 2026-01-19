@@ -4,11 +4,14 @@ import com.team.wearly.domain.product.entity.Product;
 import com.team.wearly.domain.product.repository.ProductRepository;
 import com.team.wearly.domain.user.dto.request.UpdateProductStatusRequest;
 import com.team.wearly.domain.user.dto.response.ProductAdminResponse;
+import com.team.wearly.domain.user.entity.Seller;
+import com.team.wearly.domain.user.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +19,7 @@ import java.util.List;
 public class AdminProductService {
 
     private final ProductRepository productRepository;
+    private final SellerRepository sellerRepository;
 
     /**
      * 시스템에 등록된 모든 상품의 목록을 조회함
@@ -28,7 +32,7 @@ public class AdminProductService {
     public List<ProductAdminResponse> getProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()
-                .map(ProductAdminResponse::from)
+                .map(this::convertToProductAdminResponse)
                 .toList();
     }
 
@@ -46,7 +50,38 @@ public class AdminProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + productId));
         
-        return ProductAdminResponse.from(product);
+        return convertToProductAdminResponse(product);
+    }
+
+    /**
+     * Product 엔티티를 관리자용 응답 DTO로 변환하며 sellerName을 포함함
+     *
+     * @param product 상품 엔티티
+     * @return 관리자용 상품 정보 응답 DTO
+     */
+    private ProductAdminResponse convertToProductAdminResponse(Product product) {
+        Long sellerId = product.getSellerId();
+        String sellerName = null;
+
+        // Seller 정보 조회 (userName을 위해)
+        if (sellerId != null) {
+            Optional<Seller> seller = sellerRepository.findById(sellerId);
+            sellerName = seller.map(Seller::getUserName).orElse(null);
+        }
+
+        return ProductAdminResponse.builder()
+                .id(product.getId())
+                .sellerId(product.getSellerId())
+                .sellerName(sellerName)
+                .productName(product.getProductName())
+                .price(product.getPrice())
+                .status(product.getStatus())
+                .stockQuantity(product.getStockQuantity())
+                .productCategory(product.getProductCategory())
+                .imageUrl(product.getImageUrl())
+                .createdDate(product.getCreatedDate())
+                .updatedDate(product.getUpdatedDate())
+                .build();
     }
 
     /**

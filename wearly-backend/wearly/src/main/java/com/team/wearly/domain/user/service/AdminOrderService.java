@@ -80,16 +80,25 @@ public class AdminOrderService {
      * @DateOfEdit 2026-01-15
      */
     private AdminOrderListResponse convertToAdminOrderListResponse(Order order) {
+        // User 정보 조회
+        User user = userRepository.findById(order.getUserId())
+                .orElse(null);
+        
         // 결제 정보 조회
         Optional<Payment> paymentOpt = paymentRepository.findByOrderId(order.getOrderId());
         boolean isPaid = paymentOpt.isPresent() && paymentOpt.get().getStatus() == PaymentStatus.DONE;
         String paymentStatus = isPaid ? "O" : "X";
 
+        // 총 주문 금액 계산 (쿠폰 할인 포함)
+        Long totalAmount = order.getTotalPrice() - (order.getCouponDiscountPrice() != null ? order.getCouponDiscountPrice() : 0L);
+
         return AdminOrderListResponse.builder()
                 .orderId(order.getId())
                 .orderNumber(order.getOrderId())
                 .userId(order.getUserId())
+                .userName(user != null ? user.getUserName() : null)
                 .paymentStatus(paymentStatus)
+                .totalAmount(totalAmount)
                 .build();
     }
 
@@ -125,6 +134,7 @@ public class AdminOrderService {
                 .orderId(order.getId())
                 .orderNumber(order.getOrderId())
                 .userId(user != null ? user.getId() : null)
+                .userName(user != null ? user.getUserName() : null)
                 .userNickname(user != null ? user.getUserNickname() : "알 수 없음")
                 .userEmail(user != null ? user.getUserEmail() : "알 수 없음")
                 .orderDate(order.getCreatedDate())
@@ -204,6 +214,28 @@ public class AdminOrderService {
                 .price(detail.getPrice())
                 .totalItemPrice(detail.getPrice() * detail.getQuantity())
                 .build();
+    }
+
+    /**
+     * 관리자 권한으로 주문을 취소함
+     * Pending 상태(BEFORE_PAID)인 주문만 취소 가능
+     *
+     * @param orderId 취소할 주문의 식별자
+     * @throws IllegalArgumentException 주문을 찾을 수 없거나 취소할 수 없는 상태일 경우 발생
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-19
+     * @DateOfEdit 2026-01-19
+     */
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
+        
+        if (order.getOrderStatus() != OrderStatus.BEFORE_PAID) {
+            throw new IllegalStateException("Pending 상태의 주문만 취소할 수 있습니다.");
+        }
+        
+        order.updateStatus(OrderStatus.CANCELLED);
     }
 
 //    /**

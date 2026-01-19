@@ -175,7 +175,7 @@ export default function ReviewManagementPage() {
       <AdminLayout>
         <div className="p-8">
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-600">로딩 중...</p>
+            <p className="text-gray-600">리뷰 신고 목록을 불러오는 중...</p>
           </div>
         </div>
       </AdminLayout>
@@ -199,9 +199,9 @@ export default function ReviewManagementPage() {
       <div className="p-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Review Management</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">리뷰 관리</h1>
           <p className="text-sm text-gray-600 mt-2">
-            View and manage reported reviews
+            신고된 리뷰를 관리하세요
           </p>
         </div>
 
@@ -211,25 +211,25 @@ export default function ReviewManagementPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-12">
-                  
+
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Report ID
+                  신고 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Review ID
+                  리뷰 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product ID
+                  상품 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Reviewer ID
+                  작성자 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Report Status
+                  신고 상태
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Review Status
+                  리뷰 상태
                 </th>
               </tr>
             </thead>
@@ -285,20 +285,20 @@ export default function ReviewManagementPage() {
                             {/* Comment Content */}
                             <div className="mb-4">
                               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                                Review Content
+                                리뷰 내용
                               </h4>
                               <p className="text-sm text-gray-900 leading-relaxed">
                                 {review.reviewContent}
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
-                                Rating: {review.reviewRating}/5
+                                별점: {review.reviewRating}/5
                               </p>
                             </div>
 
                             {/* Report Reason */}
                             <div className="mb-4">
                               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                                Report Reason
+                                신고 사유
                               </h4>
                               <p className="text-sm text-gray-900">
                                 {review.reportReason}
@@ -315,7 +315,7 @@ export default function ReviewManagementPage() {
                                   }}
                                   className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors"
                                 >
-                                  Approve (Hide Review)
+                                  승인 (리뷰 숨김)
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -324,7 +324,7 @@ export default function ReviewManagementPage() {
                                   }}
                                   className="px-4 py-2 bg-gray-200 text-gray-900 text-sm font-medium rounded hover:bg-gray-300 transition-colors"
                                 >
-                                  Reject
+                                  반려
                                 </button>
                               </div>
                             )}
@@ -337,7 +337,7 @@ export default function ReviewManagementPage() {
               ) : (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                    No review reports found
+                    신고된 리뷰가 없습니다
                   </td>
                 </tr>
               )}

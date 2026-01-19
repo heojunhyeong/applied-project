@@ -307,14 +307,14 @@ export default function ProfilePage() {
                 className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                 disabled={saving || imageUploading}
               >
-                {imageUploading ? "Uploading..." : "Change Photo"}
+                {imageUploading ? "업로드 중..." : "사진 변경"}
               </button>
               <button
                 onClick={handleDeletePhoto}
                 className="px-4 py-2 text-sm border border-gray-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
                 disabled={saving || imageUploading}
               >
-                Delete
+                삭제
               </button>
             </div>
           )}
@@ -333,7 +333,7 @@ export default function ProfilePage() {
       <div className="p-6 border-b border-gray-200 bg-gray-50 space-y-4">
         <div className="flex items-center gap-6">
           <div className="w-32 flex-shrink-0">
-            <label className="text-sm text-gray-600">ID</label>
+            <label className="text-sm text-gray-600">아이디</label>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-900">{profile.id}</p>
@@ -342,7 +342,7 @@ export default function ProfilePage() {
 
         <div className="flex items-center gap-6">
           <div className="w-32 flex-shrink-0">
-            <label className="text-sm text-gray-600">Name</label>
+            <label className="text-sm text-gray-600">이름</label>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-900">{profile.userName || "-"}</p>
@@ -351,7 +351,7 @@ export default function ProfilePage() {
 
         <div className="flex items-center gap-6">
           <div className="w-32 flex-shrink-0">
-            <label className="text-sm text-gray-600">Email</label>
+            <label className="text-sm text-gray-600">이메일</label>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-900">{profile.userEmail || "-"}</p>
@@ -364,7 +364,7 @@ export default function ProfilePage() {
         <div className="flex items-start gap-6">
           <div className="w-32 flex-shrink-0">
             <label className="text-sm text-gray-700">
-              Nickname <span className="text-red-500">*</span>
+              닉네임 <span className="text-red-500">*</span>
             </label>
           </div>
 
@@ -380,7 +380,7 @@ export default function ProfilePage() {
                   }))
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
-                placeholder="Enter nickname"
+                placeholder="닉네임을 입력하세요"
                 disabled={saving}
               />
             ) : (
@@ -391,9 +391,9 @@ export default function ProfilePage() {
 
             {isEditing && (
               <div className="mt-2 text-xs text-gray-500 space-y-1">
-                <p>• Required</p>
-                <p>• Max 12 characters</p>
-                <p>• Must not contain the word "admin"</p>
+                <p>• 필수 항목</p>
+                <p>• 최대 12자</p>
+                <p>• "admin" 단어 포함 불가</p>
               </div>
             )}
           </div>
@@ -404,7 +404,7 @@ export default function ProfilePage() {
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-start gap-6">
           <div className="w-32 flex-shrink-0">
-            <label className="text-sm text-gray-700">Phone Number</label>
+            <label className="text-sm text-gray-700">전화번호</label>
           </div>
 
           <div className="flex-1 min-w-0">
@@ -435,7 +435,7 @@ export default function ProfilePage() {
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-start gap-6">
           <div className="w-32 flex-shrink-0">
-            <label className="text-sm text-gray-700">Introduction</label>
+            <label className="text-sm text-gray-700">소개</label>
           </div>
 
           <div className="flex-1 min-w-0">
@@ -450,18 +450,18 @@ export default function ProfilePage() {
                 }
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm resize-none"
-                placeholder="Tell us about yourself"
+                placeholder="자신을 소개해주세요"
                 disabled={saving}
               />
             ) : (
               <p className="text-sm text-gray-900 py-2">
-                {profile.introduction || "No introduction"}
+                {profile.introduction || "소개 없음"}
               </p>
             )}
 
             {isEditing && (
               <div className="mt-2 text-xs text-gray-500">
-                <p>• Max 255 characters</p>
+                <p>• 최대 255자</p>
               </div>
             )}
           </div>
@@ -473,7 +473,7 @@ export default function ProfilePage() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-start gap-6">
             <div className="w-32 flex-shrink-0">
-              <label className="text-sm text-gray-700">Coupon</label>
+              <label className="text-sm text-gray-700">쿠폰</label>
             </div>
 
             <div className="flex-1 min-w-0">
@@ -497,14 +497,14 @@ export default function ProfilePage() {
               className="px-6 py-2.5 text-sm border border-gray-300 rounded-md hover:bg-white transition-colors"
               disabled={saving}
             >
-              Exit
+              나가기
             </button>
             <button
               onClick={handleSave}
               className="px-6 py-2.5 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
               disabled={saving}
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? "저장 중..." : "저장"}
             </button>
           </div>
         </div>
@@ -580,13 +580,13 @@ export default function ProfilePage() {
   const pageHeader = (
     <div className="mb-8 flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">내 프로필</h1>
         <p className="text-sm text-gray-600 mt-2">
           {isAdmin
-            ? "Manage admin profile information"
+            ? "관리자 프로필 정보를 관리하세요"
             : isSeller
-            ? "Manage seller profile information"
-            : "Manage your personal information"}
+              ? "판매자 프로필 정보를 관리하세요"
+              : "개인 정보를 관리하세요"}
         </p>
         {errorMessage && <p className="text-xs text-red-600 mt-2">{errorMessage}</p>}
       </div>

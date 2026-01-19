@@ -55,7 +55,7 @@ export default function HomePage() {
               </div>
               <div className="px-8 py-4 bg-gray-50 border-t border-gray-100">
                 <p className="text-sm text-gray-500 text-center group-hover:text-gray-700 transition-colors">
-                  Shop Now →
+                  쇼핑하기 →
                 </p>
               </div>
             </Link>

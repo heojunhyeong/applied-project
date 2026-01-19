@@ -55,7 +55,7 @@ interface OrderProduct {
   quantity: number;
   price: number;
   sellerId: string;
-  status: 'Completed' | 'Pending' | 'Cancelled';
+  status: 'Completed' | 'Pending' | 'Cancelled' | 'Refunded';
 }
 
 interface Order {
@@ -114,7 +114,7 @@ export default function OrderManagementPage() {
 
     try {
       const detail = await apiFetch<OrderDetailResponse>(`/api/admin/orders/${orderId}`);
-      
+
       const statusMap: Record<string, 'Completed' | 'Pending' | 'Cancelled' | 'Refunded'> = {
         DELIVERY_COMPLETED: 'Completed',
         PAID: 'Completed',
@@ -210,7 +210,7 @@ export default function OrderManagementPage() {
       <AdminLayout>
         <div className="p-8">
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-600">로딩 중...</p>
+            <p className="text-gray-600">주문 목록을 불러오는 중...</p>
           </div>
         </div>
       </AdminLayout>
@@ -234,9 +234,9 @@ export default function OrderManagementPage() {
       <div className="p-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Order Management</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">주문 관리</h1>
           <p className="text-sm text-gray-600 mt-2">
-            View and manage all orders
+            전체 주문을 조회하고 관리하세요
           </p>
         </div>
 
@@ -246,22 +246,22 @@ export default function OrderManagementPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-12">
-                  
+
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Order ID
+                  주문 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Order Number
+                  주문 번호
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  User ID
+                  사용자 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Total Amount
+                  총 결제금액
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Order Status
+                  주문 상태
                 </th>
               </tr>
             </thead>
@@ -328,7 +328,7 @@ export default function OrderManagementPage() {
                                 }}
                                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-colors"
                               >
-                                Cancel Order
+                                주문 취소
                               </button>
                             </div>
                           )}
@@ -336,19 +336,19 @@ export default function OrderManagementPage() {
                             <thead className="bg-gray-100 border-b border-gray-300">
                               <tr>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                  Product Name
+                                  상품명
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                  Quantity
+                                  수량
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                  Price
+                                  가격
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                  Seller ID
+                                  판매자 ID
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                  Status
+                                  상태
                                 </th>
                               </tr>
                             </thead>

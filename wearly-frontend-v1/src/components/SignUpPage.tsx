@@ -92,7 +92,7 @@ export default function SignUpPage() {
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h1 className="text-2xl text-gray-900 mb-8 text-center">
-            Create your Wearly account
+            Wearly 회원가입
           </h1>
 
           {errorMsg && (
@@ -104,49 +104,49 @@ export default function SignUpPage() {
           <form className="space-y-6" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="userId" className="text-gray-900">
-                ID
+                아이디
               </Label>
               <Input
                 id="userId"
                 type="text"
                 value={form.userId}
                 onChange={onChange("userId")}
-                placeholder="Enter your username"
+                placeholder="아이디를 입력하세요"
                 className="w-full h-11 px-4 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="userPassword" className="text-gray-900">
-                Password
+                비밀번호
               </Label>
               <Input
                 id="userPassword"
                 type="password"
                 value={form.userPassword}
                 onChange={onChange("userPassword")}
-                placeholder="Enter your password"
+                placeholder="비밀번호를 입력하세요"
                 className="w-full h-11 px-4 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-gray-900">
-                Confirm Password
+                비밀번호 확인
               </Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={form.confirmPassword}
                 onChange={onChange("confirmPassword")}
-                placeholder="Re-enter your password"
+                placeholder="비밀번호를 다시 입력하세요"
                 className="w-full h-11 px-4 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="userEmail" className="text-gray-900">
-                Email
+                이메일
               </Label>
               <Input
                 id="userEmail"
@@ -160,20 +160,20 @@ export default function SignUpPage() {
 
             <div className="space-y-2">
               <Label htmlFor="nickName" className="text-gray-900">
-                Nickname
+                닉네임
               </Label>
               <Input
                 id="nickName"
                 type="text"
                 value={form.nickName}
                 onChange={onChange("nickName")}
-                placeholder="Enter your nickname"
+                placeholder="닉네임을 입력하세요"
                 className="w-full h-11 px-4 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <div className="space-y-3">
-              <Label className="text-gray-900">User Type</Label>
+              <Label className="text-gray-900">회원 유형</Label>
               <RadioGroup
                 value={form.userType}
                 onValueChange={(v) =>
@@ -184,13 +184,13 @@ export default function SignUpPage() {
                 <div className="flex items-center space-x-2 flex-1">
                   <RadioGroupItem value="user" id="user" />
                   <Label htmlFor="user" className="text-gray-700 cursor-pointer font-normal">
-                    User
+                    구매자
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2 flex-1">
                   <RadioGroupItem value="seller" id="seller" />
                   <Label htmlFor="seller" className="text-gray-700 cursor-pointer font-normal">
-                    Seller
+                    판매자
                   </Label>
                 </div>
               </RadioGroup>
@@ -201,19 +201,19 @@ export default function SignUpPage() {
               disabled={loading}
               className="w-full h-12 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Signing Up..." : "Sign Up"}
+              {loading ? "가입 중..." : "회원가입"}
             </button>
 
             <div className="text-center mt-6">
               <p className="text-sm text-gray-600">
-                Already have an account?{" "}
+                이미 계정이 있으신가요?{" "}
                 <Link to="/login" className="text-gray-900 hover:underline font-medium">
-                  Login
+                  로그인
                 </Link>
               </p>
               <p className="text-sm text-gray-600 mt-2">
                 <Link to="/forgot-password" className="text-gray-600 hover:text-gray-900 hover:underline">
-                  Forgot your password?
+                  비밀번호를 잊으셨나요?
                 </Link>
               </p>
             </div>

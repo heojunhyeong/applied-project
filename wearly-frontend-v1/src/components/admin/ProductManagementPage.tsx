@@ -52,8 +52,8 @@ export default function ProductManagementPage() {
             p.status === 'ON_SALE'
               ? ('Selling' as const)
               : p.status === 'SOLD_OUT'
-              ? ('Out of Stock' as const)
-              : ('Stopped' as const),
+                ? ('Out of Stock' as const)
+                : ('Stopped' as const),
         }));
 
         setProducts(mappedProducts);
@@ -115,7 +115,7 @@ export default function ProductManagementPage() {
       <AdminLayout>
         <div className="p-8">
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-600">로딩 중...</p>
+            <p className="text-gray-600">상품 목록을 불러오는 중...</p>
           </div>
         </div>
       </AdminLayout>
@@ -139,9 +139,9 @@ export default function ProductManagementPage() {
       <div className="p-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Product Management</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">상품 관리</h1>
           <p className="text-sm text-gray-600 mt-2">
-            Manage all products listed on the platform
+            플랫폼에 등록된 모든 상품을 관리하세요
           </p>
         </div>
 
@@ -151,28 +151,28 @@ export default function ProductManagementPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product ID
+                  상품 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product Image
+                  이미지
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product Name
+                  상품명
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Seller ID
+                  판매자 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Price
+                  가격
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Stock Quantity
+                  재고
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Status
+                  상태
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Action
+                  관리
                 </th>
               </tr>
             </thead>
@@ -209,11 +209,11 @@ export default function ProductManagementPage() {
                         onClick={() => handleStopSelling(product.id)}
                         className="px-4 py-2 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
                       >
-                        Stop Selling
+                        판매 중지
                       </button>
                     ) : (
                       <span className="px-4 py-2 text-xs font-medium text-gray-400 border border-gray-200 rounded-md bg-gray-50 cursor-not-allowed inline-block">
-                        Stopped
+                        중지됨
                       </span>
                     )}
                   </td>

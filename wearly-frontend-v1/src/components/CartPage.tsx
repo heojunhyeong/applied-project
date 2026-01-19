@@ -80,12 +80,12 @@ export default function CartPage() {
         };
 
         fetchCartItems();
-        
+
         // 페이지 포커스 시 다시 불러오기
         const handleFocus = () => {
             fetchCartItems();
         };
-        
+
         window.addEventListener('focus', handleFocus);
         return () => window.removeEventListener('focus', handleFocus);
     }, []);
@@ -359,10 +359,10 @@ export default function CartPage() {
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">
                         <h1 className="text-2xl text-gray-900">
-                            Cart ({availableItems.length})
+                            장바구니 ({availableItems.length})
                         </h1>
                         <div className="text-sm text-gray-600">
-                            01 Options &gt; <span className="font-semibold text-gray-900">02 Cart</span> &gt; 03 Order / Payment &gt; 04 Order Complete
+                            01 옵션 &gt; <span className="font-semibold text-gray-900">02 장바구니</span> &gt; 03 주문/결제 &gt; 04 주문완료
                         </div>
                     </div>
                 </div>
@@ -390,9 +390,8 @@ export default function CartPage() {
                                 {availableItems.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className={`p-6 flex gap-4 ${
-                                            index !== availableItems.length - 1 ? 'border-b border-gray-100' : ''
-                                        }`}
+                                        className={`p-6 flex gap-4 ${index !== availableItems.length - 1 ? 'border-b border-gray-100' : ''
+                                            }`}
                                     >
                                         {/* Checkbox */}
                                         <div className="flex items-start pt-1">
@@ -435,8 +434,8 @@ export default function CartPage() {
                                                 <Minus className="w-4 h-4 text-gray-600" />
                                             </button>
                                             <span className="w-12 text-center text-sm text-gray-900">
-                        {item.quantity}
-                      </span>
+                                                {item.quantity}
+                                            </span>
                                             <button
                                                 onClick={() => handleQuantityChange(item.id, 1)}
                                                 className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
@@ -463,14 +462,13 @@ export default function CartPage() {
                         {unavailableItems.length > 0 && (
                             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-6">
                                 <div className="px-6 py-3 bg-gray-100 border-b border-gray-200">
-                                    <p className="text-sm text-gray-700">Sold Out Items ({unavailableItems.length})</p>
+                                    <p className="text-sm text-gray-700">품절 상품 ({unavailableItems.length})</p>
                                 </div>
                                 {unavailableItems.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className={`p-6 flex gap-4 opacity-50 ${
-                                            index !== unavailableItems.length - 1 ? 'border-b border-gray-100' : ''
-                                        }`}
+                                        className={`p-6 flex gap-4 opacity-50 ${index !== unavailableItems.length - 1 ? 'border-b border-gray-100' : ''
+                                            }`}
                                     >
                                         {/* Checkbox (disabled) */}
                                         <div className="flex items-start pt-1">
@@ -498,7 +496,7 @@ export default function CartPage() {
                                             {item.option && (
                                                 <p className="text-xs text-gray-600 mb-2">{item.option}</p>
                                             )}
-                                            <p className="text-xs text-red-600 font-medium">Sold Out</p>
+                                            <p className="text-xs text-red-600 font-medium">품절</p>
                                         </div>
 
                                         {/* Delete Button */}
@@ -526,7 +524,7 @@ export default function CartPage() {
                                             onChange={handleSelectAll}
                                             className="w-5 h-5 rounded border-gray-300"
                                         />
-                                        <span className="text-sm text-gray-700">Select All</span>
+                                        <span className="text-sm text-gray-700">전체 선택</span>
                                     </label>
                                     <div className="flex gap-2 ml-auto">
                                         <button
@@ -534,14 +532,14 @@ export default function CartPage() {
                                             disabled={!hasSelectedItems}
                                             className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Delete Selected
+                                            선택 삭제
                                         </button>
                                         <button
                                             onClick={handleDeleteSoldOut}
                                             disabled={unavailableItems.length === 0}
                                             className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Delete Sold-out Items
+                                            품절 상품 삭제
                                         </button>
                                     </div>
                                 </div>
@@ -553,16 +551,16 @@ export default function CartPage() {
                     <div className="lg:col-span-1">
                         <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-6">
                             <h2 className="text-base font-semibold text-gray-900 mb-6">
-                                Order Summary
+                                주문 요약
                             </h2>
 
                             {/* Total Product Price */}
                             <div className="space-y-4 mb-6">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">Total Product Price</span>
+                                    <span className="text-sm text-gray-600">총 상품 금액</span>
                                     <span className="text-2xl font-bold text-gray-900">
-                    {totalPrice.toLocaleString()}원
-                  </span>
+                                        {totalPrice.toLocaleString()}원
+                                    </span>
                                 </div>
                             </div>
 
@@ -581,13 +579,13 @@ export default function CartPage() {
                                 }}
                                 className="w-full py-4 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-base font-medium"
                             >
-                                Buy Now
+                                구매하기
                             </button>
 
                             {/* Info Text */}
                             {!hasSelectedItems && (
                                 <p className="text-xs text-gray-500 text-center mt-3">
-                                    Please select at least one item
+                                    상품을 최소 하나 이상 선택해주세요
                                 </p>
                             )}
                         </div>

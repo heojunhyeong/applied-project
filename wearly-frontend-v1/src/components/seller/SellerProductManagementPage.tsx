@@ -349,10 +349,10 @@ export default function SellerProductManagementPage() {
       setDraftProduct((prev) =>
         prev
           ? {
-              ...prev,
-              imageUrl: type === "THUMBNAIL" ? uploadedUrl : prev.imageUrl,
-              description: type === "DESCRIPTION" ? uploadedUrl : prev.description,
-            }
+            ...prev,
+            imageUrl: type === "THUMBNAIL" ? uploadedUrl : prev.imageUrl,
+            description: type === "DESCRIPTION" ? uploadedUrl : prev.description,
+          }
           : prev
       );
       event.target.value = "";
@@ -460,10 +460,10 @@ export default function SellerProductManagementPage() {
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              Product Management
+              상품 관리
             </h1>
             <p className="text-sm text-gray-600 mt-2">
-              Manage your product listings and stock status
+              등록된 상품을 관리하고 재고 상태를 확인하세요
             </p>
             {errorMessage && (
               <p className="text-sm text-red-600 mt-3">{errorMessage}</p>
@@ -486,28 +486,28 @@ export default function SellerProductManagementPage() {
                   ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Image
+                  이미지
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Name
+                  상품명
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Brand
+                  브랜드
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Category
+                  카테고리
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Price
+                  가격
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Quantity
+                  재고
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Status
+                  상태
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Edit
+                  편집
                 </th>
               </tr>
             </thead>
@@ -518,7 +518,7 @@ export default function SellerProductManagementPage() {
                     colSpan={9}
                     className="px-6 py-12 text-center text-sm text-gray-500"
                   >
-                    Loading products...
+                    상품을 불러오는 중...
                   </td>
                 </tr>
               ) : products.length === 0 ? (
@@ -527,7 +527,7 @@ export default function SellerProductManagementPage() {
                     colSpan={9}
                     className="px-6 py-12 text-center text-sm text-gray-500"
                   >
-                    No products found
+                    등록된 상품이 없습니다
                   </td>
                 </tr>
               ) : (
@@ -585,7 +585,7 @@ export default function SellerProductManagementPage() {
                         }}
                         className="px-4 py-2 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                       >
-                        Edit
+                        수정
                       </button>
                     </td>
                   </tr>
@@ -598,7 +598,7 @@ export default function SellerProductManagementPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6">
           <div className="text-sm text-gray-600">
-            {totalElements.toLocaleString()} products total
+            {totalElements.toLocaleString()} 개의 상품
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -606,17 +606,17 @@ export default function SellerProductManagementPage() {
               disabled={page <= 0}
               className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Prev
+              이전
             </button>
             <span className="text-sm text-gray-600">
-              Page {page + 1} of {Math.max(totalPages, 1)}
+              페이지 {page + 1} / {Math.max(totalPages, 1)}
             </span>
             <button
               onClick={handleNextPage}
               disabled={totalPages <= 0 || page >= totalPages - 1}
               className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              다음
             </button>
           </div>
         </div>
@@ -634,7 +634,7 @@ export default function SellerProductManagementPage() {
                 <div className="border-b border-gray-200 px-6 py-5 flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">
-                      {productModalMode === "EDIT" ? "Edit Product" : "Add Product"}
+                      {productModalMode === "EDIT" ? "상품 수정" : "상품 등록"}
                     </h2>
                     <p className="text-sm text-gray-500 mt-1">
                       {productModalMode === "EDIT"
@@ -656,7 +656,7 @@ export default function SellerProductManagementPage() {
                   <div className="grid grid-cols-2 gap-6">
                     <div className="border border-gray-200 rounded-xl p-4">
                       <h3 className="text-sm font-medium text-gray-900 mb-3">
-                        Thumbnail
+                        썸네일 이미지
                       </h3>
                       <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                         {draftProduct.imageUrl ? (
@@ -666,7 +666,7 @@ export default function SellerProductManagementPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-xs text-gray-400">No Image</span>
+                          <span className="text-xs text-gray-400">이미지 없음</span>
                         )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
@@ -674,7 +674,7 @@ export default function SellerProductManagementPage() {
                           onClick={handleChangeThumbnail}
                           className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                         >
-                          Change
+                          변경
                         </button>
                         <input
                           type="text"
@@ -684,7 +684,7 @@ export default function SellerProductManagementPage() {
                               prev ? { ...prev, imageUrl: e.target.value } : prev
                             )
                           }
-                          placeholder="Paste URL"
+                          placeholder="URL 입력"
                           className="flex-1 px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                         />
                         <input
@@ -709,7 +709,7 @@ export default function SellerProductManagementPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-xs text-gray-400">No Image</span>
+                          <span className="text-xs text-gray-400">이미지 없음</span>
                         )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
@@ -717,7 +717,7 @@ export default function SellerProductManagementPage() {
                           onClick={handleChangeDescription}
                           className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                         >
-                          Change
+                          변경
                         </button>
                         <input
                           type="text"
@@ -727,7 +727,7 @@ export default function SellerProductManagementPage() {
                               prev ? { ...prev, description: e.target.value } : prev
                             )
                           }
-                          placeholder="Paste URL"
+                          placeholder="URL 입력"
                           className="flex-1 px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                         />
                         <input
@@ -745,7 +745,7 @@ export default function SellerProductManagementPage() {
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Product Name
+                        상품명
                       </label>
                       <input
                         type="text"
@@ -760,7 +760,7 @@ export default function SellerProductManagementPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Brand
+                        브랜드
                       </label>
                       <select
                         value={draftProduct.brand}
@@ -780,7 +780,7 @@ export default function SellerProductManagementPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Category
+                        카테고리
                       </label>
                       <select
                         value={draftProduct.productCategory}
@@ -802,7 +802,7 @@ export default function SellerProductManagementPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Status
+                        판매 상태
                       </label>
                       <select
                         value={draftProduct.status}
@@ -822,7 +822,7 @@ export default function SellerProductManagementPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Price
+                        가격
                       </label>
                       <input
                         type="text"
@@ -835,7 +835,7 @@ export default function SellerProductManagementPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Stock Quantity
+                        재고 수량
                       </label>
                       <input
                         type="text"
@@ -851,7 +851,7 @@ export default function SellerProductManagementPage() {
                   {/* Sizes Section */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Sizes
+                      사이즈 옵션
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {SIZE_OPTIONS.map((option) => {
@@ -861,11 +861,10 @@ export default function SellerProductManagementPage() {
                             key={option.value}
                             type="button"
                             onClick={() => toggleSize(option.value)}
-                            className={`px-3 py-2 text-xs font-medium border rounded-md transition-colors ${
-                              isSelected
-                                ? "bg-gray-900 text-white border-gray-900"
-                                : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50"
-                            }`}
+                            className={`px-3 py-2 text-xs font-medium border rounded-md transition-colors ${isSelected
+                              ? "bg-gray-900 text-white border-gray-900"
+                              : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50"
+                              }`}
                           >
                             {option.label}
                           </button>
@@ -884,15 +883,15 @@ export default function SellerProductManagementPage() {
                 <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
                   <button
                     onClick={handleCancelEdit}
-                    className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
                   >
-                    Cancel
+                    취소
                   </button>
                   <button
                     onClick={handleSaveEdit}
-                    className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 transition-colors"
                   >
-                    Save
+                    {productModalMode === "EDIT" ? "수정사항 저장" : "상품 등록"}
                   </button>
                 </div>
               </div>

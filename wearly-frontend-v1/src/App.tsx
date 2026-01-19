@@ -85,59 +85,59 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
     };
   }, []);
 
-    // 장바구니 고유 상품 개수 가져오기
-    const fetchCartItemCount = useCallback(async () => {
-        if (!isLoggedIn || role !== "USER") {
-            setCartItemCount(0);
-            return;
-        }
+  // 장바구니 고유 상품 개수 가져오기
+  const fetchCartItemCount = useCallback(async () => {
+    if (!isLoggedIn || role !== "USER") {
+      setCartItemCount(0);
+      return;
+    }
 
-        try {
-            interface CartResponseDto {
-                cartId: number;
-                productId: number;
-                productName: string;
-                price: number;
-                quantity: number;
-                size: string;
-                imageUrl: string;
-            }
+    try {
+      interface CartResponseDto {
+        cartId: number;
+        productId: number;
+        productName: string;
+        price: number;
+        quantity: number;
+        size: string;
+        imageUrl: string;
+      }
 
-            const data = await apiFetch<CartResponseDto[]>(`/api/users/cart/items`);
+      const data = await apiFetch<CartResponseDto[]>(`/api/users/cart/items`);
 
-            // productId를 기준으로 고유한 상품 개수 계산 (같은 상품은 1개로 처리)
-            const uniqueProductIds = new Set(data.map(item => item.productId));
-            setCartItemCount(uniqueProductIds.size);
-        } catch (err) {
-            // 에러 발생 시 0으로 설정
-            setCartItemCount(0);
-        }
-    }, [isLoggedIn, role]);
+      // productId를 기준으로 고유한 상품 개수 계산 (같은 상품은 1개로 처리)
+      const uniqueProductIds = new Set(data.map(item => item.productId));
+      setCartItemCount(uniqueProductIds.size);
+    } catch (err) {
+      // 에러 발생 시 0으로 설정
+      setCartItemCount(0);
+    }
+  }, [isLoggedIn, role]);
 
-    // 로그인 상태나 역할이 변경될 때 장바구니 개수 업데이트
-    useEffect(() => {
-        fetchCartItemCount();
-    }, [fetchCartItemCount]);
+  // 로그인 상태나 역할이 변경될 때 장바구니 개수 업데이트
+  useEffect(() => {
+    fetchCartItemCount();
+  }, [fetchCartItemCount]);
 
-    // 페이지 포커스 시 장바구니 개수 업데이트
-    useEffect(() => {
-        const handleFocus = () => {
-            fetchCartItemCount();
-        };
+  // 페이지 포커스 시 장바구니 개수 업데이트
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchCartItemCount();
+    };
 
-        window.addEventListener("focus", handleFocus);
-        return () => window.removeEventListener("focus", handleFocus);
-    }, [fetchCartItemCount]);
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [fetchCartItemCount]);
 
-    // 장바구니 변경 이벤트 리스너
-    useEffect(() => {
-        const handleCartChange = () => {
-            fetchCartItemCount();
-        };
+  // 장바구니 변경 이벤트 리스너
+  useEffect(() => {
+    const handleCartChange = () => {
+      fetchCartItemCount();
+    };
 
-        window.addEventListener("cartChange", handleCartChange);
-        return () => window.removeEventListener("cartChange", handleCartChange);
-    }, [fetchCartItemCount]);
+    window.addEventListener("cartChange", handleCartChange);
+    return () => window.removeEventListener("cartChange", handleCartChange);
+  }, [fetchCartItemCount]);
 
   // // 로그아웃 처리
   const handleLogout = async () => {
@@ -235,13 +235,13 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                 to="/signup"
                 className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
               >
-                Sign Up
+                회원가입
               </Link>
               <Link
                 to="/login"
                 className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
               >
-                Login
+                로그인
               </Link>
             </>
           )}
@@ -255,7 +255,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                   className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
                 >
                   <UserCircle className="w-5 h-5" />
-                  <span>My Page</span>
+                  <span>마이페이지</span>
                 </button>
 
                 {isMyPageOpen && (
@@ -266,7 +266,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsMyPageOpen(false)}
                     >
                       <Package className="w-4 h-4" />
-                      Order History
+                      주문 내역
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -275,7 +275,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsMyPageOpen(false)}
                     >
                       <UserCircle className="w-4 h-4" />
-                      My Profile
+                      내 프로필
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -284,7 +284,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsMyPageOpen(false)}
                     >
                       <Crown className="w-4 h-4" />
-                      Membership
+                      멤버십
                     </Link>
                   </div>
                 )}
@@ -296,11 +296,11 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                 aria-label="cart"
               >
                 <ShoppingCart className="w-5 h-5 text-gray-700" />
-                  {cartItemCount > 0 && (
-                      <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
-                          {cartItemCount}
-                      </span>
-                  )}
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                    {cartItemCount}
+                  </span>
+                )}
               </Link>
 
               <button
@@ -308,7 +308,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                 className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Logout</span>
+                <span>로그아웃</span>
               </button>
             </>
           )}
@@ -322,7 +322,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                   className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
                 >
                   <Store className="w-5 h-5" />
-                  <span>Seller Page</span>
+                  <span>판매자 페이지</span>
                 </button>
 
                 {isSellerPageOpen && (
@@ -333,7 +333,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsSellerPageOpen(false)}
                     >
                       <UserCircle className="w-4 h-4" />
-                      My Profile
+                      내 프로필
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -342,7 +342,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsSellerPageOpen(false)}
                     >
                       <Package className="w-4 h-4" />
-                      Product Management
+                      상품 관리
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -351,7 +351,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsSellerPageOpen(false)}
                     >
                       <Package className="w-4 h-4" />
-                      Order Management
+                      주문 관리
                     </Link>
                   </div>
                 )}
@@ -362,7 +362,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                 className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Logout</span>
+                <span>로그아웃</span>
               </button>
             </>
           )}
@@ -376,7 +376,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                   className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
                 >
                   <Shield className="w-5 h-5" />
-                  <span>Admin Page</span>
+                  <span>관리자 페이지</span>
                 </button>
 
                 {isAdminPageOpen && (
@@ -387,7 +387,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsAdminPageOpen(false)}
                     >
                       <UserCircle className="w-4 h-4" />
-                      My Profile
+                      내 프로필
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -396,7 +396,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsAdminPageOpen(false)}
                     >
                       <Users className="w-4 h-4" />
-                      User Management
+                      회원 관리
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -405,7 +405,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsAdminPageOpen(false)}
                     >
                       <Package className="w-4 h-4" />
-                      Product Management
+                      상품 관리
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -414,7 +414,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsAdminPageOpen(false)}
                     >
                       <ClipboardList className="w-4 h-4" />
-                      Order Management
+                      주문 관리
                     </Link>
                     <div className="border-t border-gray-100" />
                     <Link
@@ -423,7 +423,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                       onClick={() => setIsAdminPageOpen(false)}
                     >
                       <MessageSquareWarning className="w-4 h-4" />
-                      Review Management
+                      리뷰 관리
                     </Link>
                   </div>
                 )}
@@ -434,7 +434,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
                 className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Logout</span>
+                <span>로그아웃</span>
               </button>
             </>
           )}

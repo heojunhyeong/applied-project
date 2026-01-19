@@ -102,7 +102,7 @@ public class UserProfileController {
 
     /**
      * 클라이언트에서 S3 업로드를 마친 후, 해당 이미지의 접근 가능 URL을 사용자의 프로필 정보에 반영함
-     *
+     * test test
      * @param authentication 인증 정보 객체
      * @param request 이미지 URL 정보를 포함한 DTO
      * @return 최종 업데이트된 프로필 정보
@@ -118,5 +118,4 @@ public class UserProfileController {
         User user = getUser(authentication);
         return ResponseEntity.ok(userProfileService.updateProfileImage(user.getId(), request.imageUrl()));
     }
-
 }

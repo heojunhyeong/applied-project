@@ -10,17 +10,17 @@ type SellerLayoutProps = {
 export default function SellerLayout({ children }: SellerLayoutProps) {
   const menuItems = [
     {
-      name: "My Profile",
+      name: "내 프로필",
       path: "/profile", // // sellerProfile 페이지 없으니 공용 ProfilePage 재사용 (Admin과 동일)
       icon: UserCircle,
     },
     {
-      name: "Product Management",
+      name: "상품 관리",
       path: "/seller/products", // // 판매자 상품 관리
       icon: Package,
     },
     {
-      name: "Order Management",
+      name: "주문 관리",
       path: "/seller/orders", // // 판매자 주문 관리
       icon: CreditCard,
     },
@@ -31,7 +31,7 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
       {/* // Left Sidebar */}
       <aside className="w-64 bg-gray-900 text-white flex-shrink-0 sticky top-0 h-screen">
         <div className="p-6 border-b border-gray-800">
-          <h2 className="text-xl font-semibold">Seller Dashboard</h2>
+          <h2 className="text-xl font-semibold">판매자 대시보드</h2>
         </div>
 
         {/* // Sidebar Menu */}
@@ -44,10 +44,9 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
-                      `relative flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
-                        isActive
-                          ? "bg-gray-800 text-white"
-                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                      `relative flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive
+                        ? "bg-gray-800 text-white"
+                        : "text-gray-300 hover:bg-gray-800 hover:text-white"
                       }`
                     }
                   >

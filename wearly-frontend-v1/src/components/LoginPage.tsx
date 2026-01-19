@@ -100,7 +100,7 @@ export default function LoginPage() {
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h1 className="text-2xl text-gray-900 mb-8 text-center">
-            Login to Wearly
+            Wearly 로그인
           </h1>
 
           {errorMsg && (
@@ -112,28 +112,28 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="userId" className="text-gray-900">
-                ID
+                아이디
               </Label>
               <Input
                 id="userId"
                 type="text"
                 value={form.userId}
                 onChange={onChange("userId")}
-                placeholder="Enter your username"
+                placeholder="아이디를 입력하세요"
                 className="w-full h-11 px-4 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="userPassword" className="text-gray-900">
-                Password
+                비밀번호
               </Label>
               <Input
                 id="userPassword"
                 type="password"
                 value={form.userPassword}
                 onChange={onChange("userPassword")}
-                placeholder="Enter your password"
+                placeholder="비밀번호를 입력하세요"
                 className="w-full h-11 px-4 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
@@ -143,7 +143,7 @@ export default function LoginPage() {
                 to="/forgot-password"
                 className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
               >
-                Forgot your password?
+                비밀번호를 잊으셨나요?
               </Link>
             </div>
 
@@ -152,17 +152,17 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-12 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "로그인 중..." : "로그인"}
             </button>
 
             <div className="text-center mt-6">
               <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
+                계정이 없으신가요?{" "}
                 <Link
                   to="/signup"
                   className="text-gray-900 hover:underline font-medium"
                 >
-                  Sign Up
+                  회원가입
                 </Link>
               </p>
             </div>

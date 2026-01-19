@@ -130,10 +130,10 @@ export default function OrderHistoryPage() {
 
             // 검색 결과를 orderId로 그룹화하여 같은 주문의 상품들을 함께 표시
             const orderMap = new Map<string, Order>();
-            
+
             searchResults.forEach((item) => {
                 const orderId = item.orderId || 'unknown';
-                
+
                 if (orderMap.has(orderId)) {
                     // 이미 존재하는 주문에 상품 추가
                     const existingOrder = orderMap.get(orderId)!;
@@ -230,14 +230,14 @@ export default function OrderHistoryPage() {
             <div className="max-w-5xl mx-auto px-6 py-8">
                 {/* Page Title */}
                 <div className="mb-6">
-                    <h1 className="text-2xl text-gray-900">Order History</h1>
+                    <h1 className="text-2xl text-gray-900">주문 내역</h1>
                 </div>
 
                 {/* Search Bar */}
                 <div className="mb-6 relative">
                     <input
                         type="text"
-                        placeholder="Search ordered products"
+                        placeholder="주문한 상품 검색"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -260,13 +260,13 @@ export default function OrderHistoryPage() {
                             <div className="flex items-center justify-between px-4 py-3 bg-gray-100 rounded-lg">
                                 <div className="flex items-center gap-4">
                                     <span className="text-sm text-gray-900">
-                                        Order Date: {formatDate(order.orderDate)}
+                                        주문일자: {formatDate(order.orderDate)}
                                     </span>
                                     <span className="text-sm text-gray-500">
-                                        Order No. {order.orderNumber}
+                                        주문번호 {order.orderNumber}
                                     </span>
                                     <span className="text-sm text-gray-500">
-                                        Total: ₩{(order.totalPrice ?? 0).toLocaleString()}
+                                        총 결제금액: ₩{(order.totalPrice ?? 0).toLocaleString()}
                                     </span>
                                 </div>
                             </div>
@@ -302,24 +302,23 @@ export default function OrderHistoryPage() {
                                                                     ₩{(item.price ?? 0).toLocaleString()}
                                                                 </span>
                                                                 <span className="text-sm text-gray-500">
-                                                                    Quantity: {item.quantity ?? 0}
+                                                                    수량: {item.quantity ?? 0}
                                                                 </span>
                                                                 {item.size && (
                                                                     <span className="text-sm text-gray-500">
-                                                                        Size: {typeof item.size === 'string' ? item.size : String(item.size)}
+                                                                        사이즈: {typeof item.size === 'string' ? item.size : String(item.size)}
                                                                     </span>
                                                                 )}
                                                             </div>
 
                                                             {/* Delivery Status */}
                                                             <div className="mt-4 flex items-center gap-3">
-                                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm border ${
-                                                                    order.orderStatus === 'DELIVERY_COMPLETED' || order.orderStatus === 'PURCHASE_CONFIRMED'
+                                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm border ${order.orderStatus === 'DELIVERY_COMPLETED' || order.orderStatus === 'PURCHASE_CONFIRMED'
                                                                         ? 'bg-green-50 text-green-700 border-green-200'
                                                                         : order.orderStatus === 'IN_DELIVERY'
-                                                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                                                        : 'bg-gray-50 text-gray-700 border-gray-200'
-                                                                }`}>
+                                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                                                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                                                                    }`}>
                                                                     {getStatusText(order.orderStatus)}
                                                                 </span>
                                                             </div>
@@ -332,7 +331,7 @@ export default function OrderHistoryPage() {
                                                                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors"
                                                             >
                                                                 <Truck className="w-4 h-4" />
-                                                                Delivery Tracking
+                                                                배송 조회
                                                             </Link>
                                                             {item.reviewId ? (
                                                                 <Link
@@ -340,15 +339,15 @@ export default function OrderHistoryPage() {
                                                                     className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
                                                                 >
                                                                     <Edit3 className="w-4 h-4" />
-                                                                    View Review
+                                                                    리뷰 보기
                                                                 </Link>
                                                             ) : (
-                                                                <button 
+                                                                <button
                                                                     onClick={() => navigate(`/product/${item.productId}/review?orderId=${order.orderId}`)}
                                                                     className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
                                                                 >
                                                                     <Edit3 className="w-4 h-4" />
-                                                                    Write Review
+                                                                    리뷰 작성
                                                                 </button>
                                                             )}
                                                         </div>
@@ -367,7 +366,7 @@ export default function OrderHistoryPage() {
                 {orders.length === 0 && (
                     <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
                         <p className="text-gray-500">
-                            {searchTerm ? 'No matching products found' : 'No orders yet'}
+                            {searchTerm ? '검색된 상품이 없습니다' : '주문 내역이 없습니다'}
                         </p>
                         {!searchTerm && (
                             <Link

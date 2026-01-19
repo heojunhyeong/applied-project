@@ -38,7 +38,7 @@ export default function SettlementPage() {
                 <div className="relative z-10 max-w-[1400px] w-full px-8 flex flex-col md:flex-row justify-between items-center gap-12">
                     <div className="text-left">
                         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                            Settlement Management
+                            정산 관리
                         </h1>
                         <p className="text-xl text-gray-300">
                             투명하고 정확한 판매 정산 현황을 확인하세요.

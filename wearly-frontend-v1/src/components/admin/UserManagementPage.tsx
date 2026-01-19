@@ -139,7 +139,7 @@ export default function UserManagementPage() {
       <AdminLayout>
         <div className="p-8">
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-600">로딩 중...</p>
+            <p className="text-gray-600">회원 목록을 불러오는 중...</p>
           </div>
         </div>
       </AdminLayout>
@@ -163,9 +163,9 @@ export default function UserManagementPage() {
       <div className="p-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">User Management</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">회원 관리</h1>
           <p className="text-sm text-gray-600 mt-2">
-            Manage all users and sellers on the platform
+            플랫폼의 모든 회원 및 판매자를 관리하세요
           </p>
         </div>
 
@@ -175,7 +175,7 @@ export default function UserManagementPage() {
             {/* User Type Filter */}
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                User Type
+                회원 유형
               </label>
               <select
                 value={userTypeFilter}
@@ -184,9 +184,9 @@ export default function UserManagementPage() {
                 }
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               >
-                <option value="All">All</option>
-                <option value="User">User</option>
-                <option value="Seller">Seller</option>
+                <option value="All">전체</option>
+                <option value="User">일반 회원</option>
+                <option value="Seller">판매자</option>
               </select>
             </div>
 
@@ -198,7 +198,7 @@ export default function UserManagementPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by ID, Email, or Nickname"
+                  placeholder="아이디, 이메일, 또는 닉네임 검색"
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                 />
               </div>
@@ -206,7 +206,7 @@ export default function UserManagementPage() {
 
             {/* Results Count */}
             <div className="ml-auto text-sm text-gray-600">
-              {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'} found
+              총 {filteredUsers.length} 명
             </div>
           </div>
         </div>
@@ -220,25 +220,25 @@ export default function UserManagementPage() {
                   ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  User ID
+                  사용자 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Email
+                  이메일
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Nickname
+                  닉네임
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  User Type
+                  유형
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Created Date
+                  가입일
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Status
+                  상태
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Action
+                  관리
                 </th>
               </tr>
             </thead>
@@ -252,11 +252,10 @@ export default function UserManagementPage() {
                     <td className="px-6 py-4 text-sm text-gray-900">{user.nickname}</td>
                     <td className="px-6 py-4 text-sm">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.userType === 'Seller'
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.userType === 'Seller'
                             ? 'bg-blue-100 text-blue-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}
+                          }`}
                       >
                         {user.userType}
                       </span>
@@ -264,11 +263,10 @@ export default function UserManagementPage() {
                     <td className="px-6 py-4 text-sm text-gray-900">{user.createdDate}</td>
                     <td className="px-6 py-4 text-sm">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.status === 'Active'
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.status === 'Active'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}
+                          }`}
                       >
                         {user.status}
                       </span>
@@ -279,11 +277,11 @@ export default function UserManagementPage() {
                           onClick={() => handleBlockUser(user.id, user.userType)}
                           className="px-4 py-2 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
                         >
-                          Block
+                          차단
                         </button>
                       ) : (
                         <span className="px-4 py-2 text-xs font-medium text-gray-400 border border-gray-200 rounded-md bg-gray-50 cursor-not-allowed inline-block">
-                          Blocked
+                          차단됨
                         </span>
                       )}
                     </td>
@@ -292,7 +290,7 @@ export default function UserManagementPage() {
               ) : (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-sm text-gray-500">
-                    No users found
+                    검색된 회원이 없습니다
                   </td>
                 </tr>
               )}

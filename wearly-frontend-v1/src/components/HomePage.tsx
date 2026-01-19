@@ -19,10 +19,10 @@ export default function HomePage() {
         </div>
         <div className="relative z-10 text-center px-6">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-            Discover Your Style with Wearly
+            Wearly에서 당신만의 스타일을 찾아보세요
           </h1>
           <p className="text-xl text-gray-200 max-w-2xl mx-auto">
-            Curated fashion from the world's leading brands
+            세계 유수의 브랜드에서 엄선한 패션 아이템
           </p>
         </div>
       </section>
@@ -31,10 +31,10 @@ export default function HomePage() {
       <section className="max-w-[1400px] mx-auto px-8 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Featured Brands
+            추천 브랜드
           </h2>
           <p className="text-gray-600">
-            Explore our curated collection of premium fashion brands
+            엄선된 프리미엄 패션 브랜드를 만나보세요
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function HomePage() {
               </div>
               <div className="px-8 py-4 bg-gray-50 border-t border-gray-100">
                 <p className="text-sm text-gray-500 text-center group-hover:text-gray-700 transition-colors">
-                  Shop Now →
+                  쇼핑하기 →
                 </p>
               </div>
             </Link>
@@ -67,7 +67,7 @@ export default function HomePage() {
       <section className="bg-white border-t border-gray-100 py-20">
         <div className="max-w-[1400px] mx-auto px-8 flex flex-col items-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Looking for something specific?
+            원하는 상품을 찾아보세요
           </h2>
           <form
             onSubmit={(e: FormEvent) => {
@@ -83,7 +83,7 @@ export default function HomePage() {
             <input
               name="q"
               type="text"
-              placeholder="Search products..."
+              placeholder="상품 검색..."
               className="w-full h-12 pl-4 pr-24 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             />
             <button

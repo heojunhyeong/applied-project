@@ -47,10 +47,10 @@ const SIZE_MAP: Record<ProductSize, string> = {
 };
 
 const SIZE_REVERSE_MAP: Record<string, ProductSize> = {
-    "S": "SMALL",
-    "M": "MEDIUM",
-    "L": "LARGE",
-    "XL": "EXTRA_LARGE"
+  "S": "SMALL",
+  "M": "MEDIUM",
+  "L": "LARGE",
+  "XL": "EXTRA_LARGE"
 };
 
 const REVIEW_REPORT_REASON_OPTIONS: { value: ReviewReportReason; label: string }[] =
@@ -173,7 +173,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-xl text-gray-600">Loading product...</div>
+        <div className="text-xl text-gray-600">상품 정보를 불러오는 중...</div>
       </div>
     );
   }
@@ -182,7 +182,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-xl text-red-600">
-          {error || "Product not found"}
+          {error || "상품을 찾을 수 없습니다"}
         </div>
       </div>
     );
@@ -227,11 +227,10 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImage === index
+                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
                       ? "border-gray-900"
                       : "border-transparent hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <ImageWithFallback
                     src={img}
@@ -387,41 +386,41 @@ export default function ProductDetailPage() {
               >
                 구매하기
               </button>
-                <button
-                    onClick={async () => {
-                        if (!selectedSize) {
-                            alert('사이즈를 선택해주세요.');
-                            return;
-                        }
-                        if (!productId) {
-                            alert('상품 정보를 불러올 수 없습니다.');
-                            return;
-                        }
+              <button
+                onClick={async () => {
+                  if (!selectedSize) {
+                    alert('사이즈를 선택해주세요.');
+                    return;
+                  }
+                  if (!productId) {
+                    alert('상품 정보를 불러올 수 없습니다.');
+                    return;
+                  }
 
-                        try {
-                            // selectedSize에 이미 백엔드 enum 값이 저장되어 있으므로 그대로 사용
-                            await apiFetch(`/api/users/cart/items`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    productId: Number(productId),
-                                    quantity: quantity,
-                                    size: selectedSize, // SIZE_REVERSE_MAP 변환 제거
-                                }),
-                            });
+                  try {
+                    // selectedSize에 이미 백엔드 enum 값이 저장되어 있으므로 그대로 사용
+                    await apiFetch(`/api/users/cart/items`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        productId: Number(productId),
+                        quantity: quantity,
+                        size: selectedSize, // SIZE_REVERSE_MAP 변환 제거
+                      }),
+                    });
 
-                            alert('장바구니에 추가되었습니다.');
-                            navigate('/cart');
-                        } catch (err: any) {
-                            alert(err.message || '장바구니 추가에 실패했습니다.');
-                        }
-                    }}
-                    className="flex-1 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                    장바구니
-                </button>
+                    alert('장바구니에 추가되었습니다.');
+                    navigate('/cart');
+                  } catch (err: any) {
+                    alert(err.message || '장바구니 추가에 실패했습니다.');
+                  }
+                }}
+                className="flex-1 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                장바구니
+              </button>
             </div>
 
             {/* Shipping Info */}
@@ -577,88 +576,88 @@ export default function ProductDetailPage() {
                       const isReporting = reportingReviewId === review.reviewId;
 
                       return (
-                      <div
-                        key={review.reviewId}
-                        className="border-b border-gray-200 pb-6"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <span className="font-medium text-gray-900">
-                              {review.reviewerName}
-                            </span>
-                            <div className="flex items-center">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${i < review.rating
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "text-gray-300"
-                                    }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-500">
-                              {new Date(review.createdDate).toLocaleDateString()}
-                            </span>
-                            {isMyProduct && (
-                              <button
-                                type="button"
-                                onClick={() => handleToggleReportPanel(review.reviewId)}
-                                className="px-3 py-1.5 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                              >
-                                신고
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-gray-700 leading-relaxed mb-3">
-                          {review.content}
-                        </p>
-
-                        {isMyProduct && isReportPanelOpen && (
-                          <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
-                            <div className="flex flex-wrap items-center gap-3">
-                              <select
-                                value={selectedReason}
-                                onChange={(event) =>
-                                  handleReportReasonChange(
-                                    review.reviewId,
-                                    event.target.value
-                                  )
-                                }
-                                className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                              >
-                                <option value="">신고 사유 선택</option>
-                                {REVIEW_REPORT_REASON_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
+                        <div
+                          key={review.reviewId}
+                          className="border-b border-gray-200 pb-6"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium text-gray-900">
+                                {review.reviewerName}
+                              </span>
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${i < review.rating
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "text-gray-300"
+                                      }`}
+                                  />
                                 ))}
-                              </select>
-                              <button
-                                type="button"
-                                onClick={() => setOpenedReportReviewId(null)}
-                                className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100"
-                              >
-                                취소
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleSubmitReport(review.reviewId)}
-                                disabled={!selectedReason || isReporting}
-                                className="px-3 py-2 text-sm border border-gray-900 text-gray-900 rounded-md hover:bg-gray-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                신고 제출
-                              </button>
+                              </div>
                             </div>
-                            {reportError && (
-                              <p className="text-sm text-red-600 mt-2">{reportError}</p>
-                            )}
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-gray-500">
+                                {new Date(review.createdDate).toLocaleDateString()}
+                              </span>
+                              {isMyProduct && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleReportPanel(review.reviewId)}
+                                  className="px-3 py-1.5 text-xs font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                                >
+                                  신고
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
+                          <p className="text-gray-700 leading-relaxed mb-3">
+                            {review.content}
+                          </p>
+
+                          {isMyProduct && isReportPanelOpen && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                              <div className="flex flex-wrap items-center gap-3">
+                                <select
+                                  value={selectedReason}
+                                  onChange={(event) =>
+                                    handleReportReasonChange(
+                                      review.reviewId,
+                                      event.target.value
+                                    )
+                                  }
+                                  className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                                >
+                                  <option value="">신고 사유 선택</option>
+                                  {REVIEW_REPORT_REASON_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => setOpenedReportReviewId(null)}
+                                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100"
+                                >
+                                  취소
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSubmitReport(review.reviewId)}
+                                  disabled={!selectedReason || isReporting}
+                                  className="px-3 py-2 text-sm border border-gray-900 text-gray-900 rounded-md hover:bg-gray-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  신고 제출
+                                </button>
+                              </div>
+                              {reportError && (
+                                <p className="text-sm text-red-600 mt-2">{reportError}</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       );
                     })
                   ) : (

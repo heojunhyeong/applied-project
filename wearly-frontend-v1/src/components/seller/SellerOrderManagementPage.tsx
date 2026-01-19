@@ -48,12 +48,12 @@ type PageResponse<T> = {
 };
 
 const DETAIL_STATUS_FILTER_OPTIONS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "WAIT_CHECK", label: "WAIT_CHECK" },
-  { value: "CHECK", label: "CHECK" },
-  { value: "IN_DELIVERY", label: "IN_DELIVERY" },
-  { value: "DELIVERY_COMPLETED", label: "DELIVERY_COMPLETED" },
-  { value: "CANCELLED", label: "CANCELLED" },
+  { value: "ALL", label: "전체" },
+  { value: "WAIT_CHECK", label: "검수 대기" },
+  { value: "CHECK", label: "검수 완료" },
+  { value: "IN_DELIVERY", label: "배송 중" },
+  { value: "DELIVERY_COMPLETED", label: "배송 완료" },
+  { value: "CANCELLED", label: "주문 취소" },
 ];
 
 const getStatusColor = (status?: string) => {
@@ -141,11 +141,11 @@ export default function SellerOrderManagementPage() {
       setTotalPages(response.totalPages ?? 0);
       setTotalElements(response.totalElements ?? 0);
       setPage(response.number ?? nextPage);
-    } catch (e: any) {
+    } catch (error: any) {
       setOrders([]);
       setTotalPages(0);
       setTotalElements(0);
-      setErrorMessage(e?.message ?? "주문 목록 조회에 실패했습니다.");
+      setErrorMessage(error.message ?? "주문 상세 목록 조회에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -305,11 +305,11 @@ export default function SellerOrderManagementPage() {
         prev.map((od) =>
           od.orderDetailId === orderDetailId
             ? {
-                ...od,
-                detailStatus: "IN_DELIVERY",
-                carrier: carrierValue as Carrier,
-                invoiceNumber: invoiceValue.trim(),
-              }
+              ...od,
+              detailStatus: "IN_DELIVERY",
+              carrier: carrierValue as Carrier,
+              invoiceNumber: invoiceValue.trim(),
+            }
             : od
         )
       );
@@ -338,9 +338,15 @@ export default function SellerOrderManagementPage() {
     <div className="p-8">
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">Order Detail List</h1>
-          <p className="text-sm text-gray-600 mt-2">OrderDetail 기준으로 쭉 보여줌</p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              주문 관리
+            </h1>
+            <p className="text-sm text-gray-600 mt-2">
+              주문 내역을 확인하고 배송 상태를 관리하세요
+            </p>
+          </div>
           {errorMessage && <p className="text-sm text-red-600 mt-3">{errorMessage}</p>}
         </div>
 
@@ -348,7 +354,7 @@ export default function SellerOrderManagementPage() {
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700">Detail Status</label>
+              <label className="text-sm font-medium text-gray-700">상세 상태</label>
               <select
                 value={statusFilter}
                 onChange={(e) => {
@@ -370,13 +376,13 @@ export default function SellerOrderManagementPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by orderId / buyer / product"
+                placeholder="주문번호 / 주문자명 / 상품명 검색"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <div className="ml-auto text-sm text-gray-600">
-              {filteredOrders.length} / {totalElements} rows
+              총 {totalElements.toLocaleString()} 건
             </div>
           </div>
         </div>
@@ -387,25 +393,25 @@ export default function SellerOrderManagementPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  ODetail ID
+                  주문상세 ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Product
+                  상품 정보
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Qty
+                  수량
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Price
+                  가격
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Buyer
+                  구매자
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Order Status
+                  주문 상태
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Detail Status
+                  상세 상태
                 </th>
               </tr>
             </thead>
@@ -414,13 +420,13 @@ export default function SellerOrderManagementPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                    Loading orders...
+                    주문 내역을 불러오는 중...
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                    No orders found
+                    주문 내역이 없습니다
                   </td>
                 </tr>
               ) : (
@@ -600,7 +606,7 @@ export default function SellerOrderManagementPage() {
                                     disabled={savingOrderDetailId === od.orderDetailId}
                                     className="px-4 py-2 text-sm border border-gray-900 text-gray-900 rounded-md hover:bg-gray-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
-                                    Save
+                                    저장
                                   </button>
                                 </div>
                               </div>
@@ -624,7 +630,7 @@ export default function SellerOrderManagementPage() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-600">{totalElements.toLocaleString()} total</div>
+          <div className="text-sm text-gray-600">총 {totalElements.toLocaleString()} 건</div>
 
           <div className="flex items-center gap-2">
             <button
@@ -632,11 +638,11 @@ export default function SellerOrderManagementPage() {
               disabled={page <= 0}
               className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Prev
+              이전
             </button>
 
             <span className="text-sm text-gray-600">
-              Page {page + 1} of {Math.max(totalPages, 1)}
+              페이지 {page + 1} / {Math.max(totalPages, 1)}
             </span>
 
             <button
@@ -644,7 +650,7 @@ export default function SellerOrderManagementPage() {
               disabled={totalPages <= 0 || page >= totalPages - 1}
               className="px-4 py-2 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              다음
             </button>
           </div>
         </div>

@@ -20,6 +20,10 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     boolean existsByUserNicknameAndIdNot(String userNickname, Long id);
 
     // 아이디(userName) 또는 닉네임(userNickname)에 키워드가 포함된 판매자 검색
-    @Query("SELECT s FROM Seller s WHERE s.userName LIKE %:keyword% OR s.userNickname LIKE %:keyword%")
+    @Query("SELECT s FROM Seller s WHERE (s.userName LIKE %:keyword% OR s.userNickname LIKE %:keyword%) AND s.deletedAt IS NULL")
     List<Seller> searchByKeyword(@Param("keyword") String keyword);
+    
+    // 차단되지 않은 모든 판매자 조회 (deletedAt이 null인 것만)
+    @Query("SELECT s FROM Seller s WHERE s.deletedAt IS NULL")
+    List<Seller> findAllActive();
 }

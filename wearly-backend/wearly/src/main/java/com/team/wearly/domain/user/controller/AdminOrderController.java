@@ -69,4 +69,21 @@ public class AdminOrderController {
         adminOrderService.cancelOrder(orderId);
         return ResponseEntity.ok("주문이 취소되었습니다.");
     }
+
+    /**
+     * 관리자 권한으로 주문을 삭제함
+     * [보안] ROLE_ADMIN 권한을 가진 사용자만 접근 가능
+     *
+     * @param orderId 삭제할 주문의 시스템 식별자
+     * @return 삭제 완료 메시지
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-19
+     * @DateOfEdit 2026-01-19
+     */
+    @DeleteMapping("/{orderId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
+        adminOrderService.deleteOrder(orderId);
+        return ResponseEntity.ok("주문이 삭제되었습니다.");
+    }
 }

@@ -190,6 +190,32 @@ export default function OrderManagementPage() {
     }
   };
 
+  // Handle order deletion
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('정말 주문을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/admin/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+
+      // Remove order from local state
+      setOrders((prevOrders) => prevOrders.filter((order) => order.orderId !== orderId));
+
+      // If the deleted order was expanded, close it
+      if (expandedOrderId === orderId) {
+        setExpandedOrderId(null);
+      }
+
+      alert('주문이 삭제되었습니다.');
+    } catch (err: any) {
+      alert(`주문 삭제 실패: ${err.message || '알 수 없는 오류가 발생했습니다.'}`);
+      console.error('Failed to delete order:', err);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Completed':
@@ -278,6 +304,9 @@ export default function OrderManagementPage() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   주문 상태
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  관리
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -333,10 +362,10 @@ export default function OrderManagementPage() {
                   {expandedOrderId === order.orderId && (
                     <tr className="bg-blue-50/30">
                       <td></td>
-                      <td colSpan={5} className="px-6 py-4">
+                      <td colSpan={6} className="px-6 py-4">
                         <div className="border border-gray-300 rounded bg-white p-4">
-                          {(order.orderStatus === 'Pending' || order.detail?.orderStatus === 'BEFORE_PAID') && (
-                            <div className="mb-4 flex justify-end">
+                          <div className="mb-4 flex justify-end gap-2">
+                            {(order.orderStatus === 'Pending' || order.detail?.orderStatus === 'BEFORE_PAID') && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -346,6 +375,51 @@ export default function OrderManagementPage() {
                               >
                                 주문 취소
                               </button>
+                            )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteOrder(order.orderId);
+                              }}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-colors"
+                            >
+                              주문 삭제
+                            </button>
+                          </div>
+                          {/* Payment Info */}
+                          {order.detail?.paymentInfo && (
+                            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                Payment Details
+                              </h4>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Amount:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.amount?.toLocaleString()}원
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Method:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.paymentMethod || '-'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Payment Date:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.paymentDate
+                                      ? new Date(order.detail.paymentInfo.paymentDate).toLocaleString('ko-KR')
+                                      : '-'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Status:</span>{' '}
+                                  <span className="font-medium text-gray-900">
+                                    {order.detail.paymentInfo.status || '-'}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           )}
 

@@ -52,7 +52,16 @@ public class AdminOrderService {
             orders = orderRepository.findAllByOrderByCreatedDateDesc();
         }
 
+        // 결제 완료(DONE) 또는 결제 실패(ABORTED, EXPIRED)된 주문만 필터링
         return orders.stream()
+                .filter(order -> {
+                    Optional<Payment> paymentOpt = paymentRepository.findByOrderId(order.getOrderId());
+                    if (paymentOpt.isEmpty()) {
+                        return false;
+                    }
+                    PaymentStatus status = paymentOpt.get().getStatus();
+                    return status == PaymentStatus.DONE || status == PaymentStatus.ABORTED || status == PaymentStatus.EXPIRED;
+                })
                 .map(this::convertToAdminOrderListResponse)
                 .collect(Collectors.toList());
     }
@@ -244,6 +253,24 @@ public class AdminOrderService {
         }
         
         order.updateStatus(OrderStatus.CANCELLED);
+    }
+
+    /**
+     * 관리자 권한으로 주문을 삭제함
+     * 주문과 연관된 OrderDetail, OrderDelivery 등도 cascade로 함께 삭제됨
+     *
+     * @param orderId 삭제할 주문의 식별자
+     * @throws IllegalArgumentException 주문을 찾을 수 없을 경우 발생
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-19
+     * @DateOfEdit 2026-01-19
+     */
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
+        
+        orderRepository.delete(order);
     }
 
 //    /**

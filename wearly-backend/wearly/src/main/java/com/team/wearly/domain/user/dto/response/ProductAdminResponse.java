@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class ProductAdminResponse {
     private Long id;                    // 상품 ID
     private Long sellerId;              // 상품을 등록한 seller의 ID
+    private String sellerName;          // 상품을 등록한 seller의 로그인 ID
     private String productName;         // 상품명
     private Long price;                 // 상품 가격
     private ProductStatus status;       // 판매 상태

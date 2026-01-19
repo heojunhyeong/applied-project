@@ -52,4 +52,21 @@ public class AdminOrderController {
         AdminOrderResponse response = adminOrderService.getOrder(orderId);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 관리자 권한으로 주문을 취소함
+     * [보안] ROLE_ADMIN 권한을 가진 사용자만 접근 가능
+     *
+     * @param orderId 취소할 주문의 시스템 식별자
+     * @return 취소 완료 메시지
+     * @author 최윤혁
+     * @DateOfCreated 2026-01-19
+     * @DateOfEdit 2026-01-19
+     */
+    @PatchMapping("/{orderId}/cancel")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<String> cancelOrder(@PathVariable Long orderId) {
+        adminOrderService.cancelOrder(orderId);
+        return ResponseEntity.ok("주문이 취소되었습니다.");
+    }
 }

@@ -13,5 +13,7 @@ public class AdminOrderListResponse {
     private Long orderId;              // 주문 ID
     private String orderNumber;        // 주문 번호
     private Long userId;               // 회원 ID
+    private String userName;           // 회원 로그인 ID
     private String paymentStatus;      // 결제 내역 (O 또는 X)
+    private Long totalAmount;          // 총 주문 금액
 }

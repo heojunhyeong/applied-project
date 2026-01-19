@@ -206,8 +206,8 @@ export default function PurchasePage() {
                 amount: finalAmount,
                 orderId: orderId,
                 orderName: orderSheet.items[0].productName + (orderSheet.items.length > 1 ? ` 외 ${orderSheet.items.length - 1}건` : ''),
-                successUrl: `http://localhost:70/payment/success`,
-                failUrl: `http://localhost:70/payment/fail`,
+                successUrl: `http://3.35.27.165:70/payment/success`,
+                failUrl: `http://3.35.27.165:70/payment/fail`,
                 method: 'CARD',
             });
 

@@ -23,7 +23,7 @@ public class UserProfileController {
 
     /**
      * SecurityContext의 인증 정보로부터 현재 로그인한 일반 사용자(User) 객체를 추출함
-     *
+     * test123
      * @param authentication 인증 정보 객체
      * @return User 엔티티 객체
      * @throws IllegalStateException USER 권한이 아닌 계정이 접근할 경우 발생

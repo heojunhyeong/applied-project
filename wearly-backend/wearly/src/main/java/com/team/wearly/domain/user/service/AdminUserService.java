@@ -39,7 +39,8 @@ public class AdminUserService {
         if (keyword != null && !keyword.isBlank()) {
             users = userRepository.searchByKeyword(keyword);
         } else {
-            users = userRepository.findAll();
+            // 차단되지 않은 사용자만 조회
+            users = userRepository.findAllActive();
         }
 
         // 가져온 User 엔티티 리스트를 UserAdminResponse DTO 리스트로 변환하여 반환
@@ -65,7 +66,8 @@ public class AdminUserService {
         if (keyword != null && !keyword.isBlank()) {
             sellers = sellerRepository.searchByKeyword(keyword);
         } else {
-            sellers = sellerRepository.findAll();
+            // 차단되지 않은 판매자만 조회
+            sellers = sellerRepository.findAllActive();
         }
 
         // 가져온 Seller 엔티티 리스트를 AdminSellerResponse DTO 리스트로 변환하여 반환

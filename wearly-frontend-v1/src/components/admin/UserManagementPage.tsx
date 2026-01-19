@@ -47,6 +47,7 @@ export default function UserManagementPage() {
           const userResponse = await apiFetch<UserResponse[]>(
             `/api/admin/users${searchQuery ? `?keyword=${encodeURIComponent(searchQuery)}` : ''}`
           );
+          // 차단된 사용자는 이미 백엔드에서 필터링되므로 모두 Active로 처리
           const mappedUsers = (userResponse || []).map((u) => ({
             id: u.id,
             userId: u.userName,
@@ -54,7 +55,7 @@ export default function UserManagementPage() {
             nickname: u.userNickname,
             userType: 'User' as const,
             createdDate: new Date(u.createdDate).toLocaleDateString(),
-            status: u.deletedAt ? ('Blocked' as const) : ('Active' as const),
+            status: 'Active' as const,
           }));
           allUsers.push(...mappedUsers);
         }
@@ -64,6 +65,7 @@ export default function UserManagementPage() {
           const sellerResponse = await apiFetch<UserResponse[]>(
             `/api/admin/users?userType=SELLER${searchQuery ? `&keyword=${encodeURIComponent(searchQuery)}` : ''}`
           );
+          // 차단된 판매자는 이미 백엔드에서 필터링되므로 모두 Active로 처리
           const mappedSellers = (sellerResponse || []).map((s) => ({
             id: s.id,
             userId: s.userName,
@@ -71,7 +73,7 @@ export default function UserManagementPage() {
             nickname: s.userNickname,
             userType: 'Seller' as const,
             createdDate: new Date(s.createdDate).toLocaleDateString(),
-            status: s.deletedAt ? ('Blocked' as const) : ('Active' as const),
+            status: 'Active' as const,
           }));
           allUsers.push(...mappedSellers);
         }
@@ -104,12 +106,8 @@ export default function UserManagementPage() {
         method: 'DELETE',
       });
 
-      // Update local state
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === id ? { ...user, status: 'Blocked' as const } : user
-        )
-      );
+      // Remove user from local state (차단된 사용자는 목록에서 제거)
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
 
       alert('회원이 차단되었습니다.');
     } catch (err: any) {

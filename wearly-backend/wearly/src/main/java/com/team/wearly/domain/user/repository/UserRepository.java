@@ -18,8 +18,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 아이디(userName) 또는 닉네임(userNickname)에 키워드가 포함된 유저 검색
     //findby 방식을 사용했을때 너무 난잡해보여서 query 어노테이션을 사용
-    @Query("SELECT u FROM User u WHERE u.userName LIKE %:keyword% OR u.userNickname LIKE %:keyword%")
+    @Query("SELECT u FROM User u WHERE (u.userName LIKE %:keyword% OR u.userNickname LIKE %:keyword%) AND u.deletedAt IS NULL")
     List<User> searchByKeyword(@Param("keyword") String keyword);
+    
+    // 차단되지 않은 모든 사용자 조회 (deletedAt이 null인 것만)
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+    List<User> findAllActive();
 
     // 내(user) 닉네임 제외 중복 체크(프로필 수정용)
     boolean existsByUserNicknameAndIdNot(String userNickname, Long id);

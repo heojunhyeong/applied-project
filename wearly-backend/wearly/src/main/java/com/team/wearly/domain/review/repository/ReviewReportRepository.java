@@ -45,7 +45,9 @@ public interface ReviewReportRepository extends JpaRepository<ReviewReport, Long
             rr.review.id,
             rr.review.product.id,
             rr.review.reviewerId,
+            COALESCE(reviewerUser.userName, reviewerSeller.userName),
             rr.reporterId,
+            COALESCE(reporterUser.userName, reporterSeller.userName),
             rr.review.content,
             rr.review.rating,
             rr.review.status,
@@ -56,6 +58,14 @@ public interface ReviewReportRepository extends JpaRepository<ReviewReport, Long
         )
         from ReviewReport rr
         join rr.review pr
+        left join com.team.wearly.domain.user.entity.User reviewerUser 
+            on reviewerUser.id = rr.review.reviewerId and reviewerUser.deletedAt is null
+        left join com.team.wearly.domain.user.entity.Seller reviewerSeller 
+            on reviewerSeller.id = rr.review.reviewerId and reviewerSeller.deletedAt is null
+        left join com.team.wearly.domain.user.entity.User reporterUser 
+            on reporterUser.id = rr.reporterId and reporterUser.deletedAt is null
+        left join com.team.wearly.domain.user.entity.Seller reporterSeller 
+            on reporterSeller.id = rr.reporterId and reporterSeller.deletedAt is null
         where (:status is null or rr.status = :status)
         """)
     Page<AdminReviewReportResponse> findAdminReviewReports(

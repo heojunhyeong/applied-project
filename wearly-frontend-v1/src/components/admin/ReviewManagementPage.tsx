@@ -8,7 +8,9 @@ interface ReviewReportResponse {
   reviewId: number;
   productId: number;
   reviewerId: number;
+  reviewerName: string | null;
   reporterId: number;
+  reporterName: string | null;
   reviewContent: string;
   reviewRating: number;
   reviewStatus: 'ACTIVE' | 'HIDDEN';
@@ -31,7 +33,9 @@ interface Review {
   reviewId: number;
   productId: number;
   reviewerId: number;
+  reviewerName: string | null;
   reporterId: number;
+  reporterName: string | null;
   reviewContent: string;
   reviewRating: number;
   status: 'PENDING' | 'RESOLVED' | 'REJECTED';
@@ -64,7 +68,9 @@ export default function ReviewManagementPage() {
           reviewId: r.reviewId,
           productId: r.productId,
           reviewerId: r.reviewerId,
+          reviewerName: r.reviewerName,
           reporterId: r.reporterId,
+          reporterName: r.reporterName,
           reviewContent: r.reviewContent,
           reviewRating: r.reviewRating,
           status: r.status,
@@ -251,11 +257,11 @@ export default function ReviewManagementPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                        {review.reportId}
+                        {review.reporterName || review.reporterId}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">{review.reviewId}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{review.productId}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{review.reviewerId}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{review.reviewerName || review.reviewerId}</td>
                       <td className="px-6 py-4 text-sm">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(

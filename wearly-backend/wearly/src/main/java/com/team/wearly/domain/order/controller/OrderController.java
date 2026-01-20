@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins  = {"http://localhost:5173", "http://3.35.27.165:70"})
 @RestController
 @RequestMapping("/api/users/orders")
 @RequiredArgsConstructor
@@ -103,9 +103,9 @@ public class OrderController {
 
     /**
      * 주문 상세 검색 API (상품명 키워드 검색)
-     * GET /api/users/orders/search?keyword=감자
-     * 키워드가 포함된 상품과 같은 날짜에 주문된 모든 상품을 반환합니다.
-     * 예: "감자"로 검색 시, 감자가 포함된 상품과 같은 날 주문된 고구마 등도 함께 반환됩니다.
+     * GET /api/users/orders/search?keyword=nike
+     * 키워드가 포함된 상품과 같은 주문에 포함된 모든 상품을 반환합니다.
+     * 예: "nike"로 검색 시, nike 상품과 함께 주문된 다른 상품들도 함께 반환됩니다.
      *
      * @param authentication 인증 정보 (사용자 ID 추출용)
      * @param keyword        상품명 검색 키워드

@@ -5,15 +5,15 @@
 
 ## 2. 기술 스택
 
-| 구분 | 기술 스택                    | 비고 |
-| :--- |:-------------------------| :--- |
-| **Backend** | Spring Boot 3.x, JPA     | 비즈니스 로직 및 API 서버 |
-| **Frontend** | React (Vite), TypeScript | 모던 UI/UX 및 반응형 디자인 |
-| **Database** | MySQL 8.0                | 데이터 영속성 관리 |
-| **Security** | Spring Security, JWT     | 사용자 인증 및 판매자 권한 제어 |
-| **Payment** | Toss Payments API        | 일반 결제 및 정기 빌링 결제 연동 |
-| **Infra** | Docker, Nginx, AWS EC2   | 컨테이너 기반 배포 및 리버스 프록시 |
-| **Batch** | Spring Scheduling        | 정산 자동화 스케줄링 |
+| 구분 | 기술 스택                          | 비고 |
+| :--- |:-------------------------------| :--- |
+| **Backend** | Spring Boot 3.x, JPA           | 비즈니스 로직 및 API 서버 |
+| **Frontend** | React (Vite), TypeScript       | 모던 UI/UX 및 반응형 디자인 |
+| **Database** | MySQL 8.0                      | 데이터 영속성 관리 |
+| **Security** | Spring Security, JWT           | 사용자 인증 및 판매자 권한 제어 |
+| **Payment** | Toss Payments API              | 일반 결제 및 정기 빌링 결제 연동 |
+| **Infra** | Docker, Nginx, AWS EC2, AWS S3 | 컨테이너 기반 배포 및 리버스 프록시 |
+| **Batch** | Spring Scheduling              | 정산 자동화 스케줄링 |
 
 ---
 

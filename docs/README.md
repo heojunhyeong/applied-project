@@ -17,6 +17,7 @@
 | **프록시** | Nginx | 리버스 프록시 및 정적 파일 서빙 |
 | **컨테이너** | Docker, Docker Compose | 환경 격리 및 배포 자동화 |
 | **배포** | AWS EC2 | 클라우드 인프라 |
+| **스토리지** | AWS S3 | 이미지 저장소 | 
 | **실시간 통신** | WebSocket, SSE | 실시간 알림 및 상태 업데이트 |
 | **보안** | Spring Security, JWT | 사용자 인증 및 권한(RBAC) 관리 |
 
@@ -33,6 +34,8 @@
 
 ```text
 applied-project
+├─ .github/   
+│  └─ workflows/                # GitHub Action CI/CD
 ├─ docs/                        # 프로젝트 설계 및 API 상세 문서
 │  ├─ 01-project-design.md
 │  ├─ 02-dependencies.md

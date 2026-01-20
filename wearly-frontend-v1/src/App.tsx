@@ -29,6 +29,7 @@ import SellerProductManagementPage from "./components/seller/SellerProductManage
 import SellerOrderManagementPage from "./components/seller/SellerOrderManagementPage";
 
 import SettlementPage from './components/SettlementPage';
+import Footer from "./components/Footer";
 
 import {
   ShoppingCart,
@@ -447,7 +448,7 @@ function Header({ brandItems }: { brandItems: typeof BRANDS }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex flex-col">
         <Header brandItems={BRANDS} />
 
         <Routes>
@@ -513,6 +514,7 @@ export default function App() {
           <Route path="/seller/settlement" element={<SettlementPage />} />
 
         </Routes>
+          <Footer/>
       </div>
     </BrowserRouter>
   );

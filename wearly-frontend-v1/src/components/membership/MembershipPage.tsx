@@ -348,8 +348,7 @@ export default function MembershipPage() {
                                 <ul className="space-y-1 text-sm text-gray-700">
                                     <li>• 월 4,900원으로 프리미엄 혜택 이용</li>
                                     <li>• 전 상품 무료배송</li>
-                                    <li>• 멤버십 전용 쿠폰 제공</li>
-                                    <li>• 우선 고객 지원</li>
+                                    <li>• 멤버십 전용 쿠폰 월 2장 제공</li>
                                 </ul>
                             </div>
                         </div>
@@ -395,15 +394,7 @@ export default function MembershipPage() {
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span>멤버십 전용 쿠폰 월 1장 제공</span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span>우선 고객 지원</span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span>신상품 조기 접근</span>
+                                        <span>멤버십 전용 쿠폰 월 2장 제공</span>
                                     </li>
                                 </ul>
                             </div>

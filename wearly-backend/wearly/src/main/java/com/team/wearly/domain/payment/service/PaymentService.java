@@ -67,7 +67,7 @@ public class PaymentService {
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문 정보를 찾을 수 없습니다."));
 
-        long expectedAmount = order.getTotalPrice();
+        long expectedAmount = order.getTotalPrice() - order.getCouponDiscountPrice();
         if (expectedAmount != amount) {
             throw new IllegalArgumentException("결제 금액 정합성 오류");
         }

@@ -166,7 +166,7 @@ export default function PurchasePage() {
 
             // 직접 fetch로 호출하여 에러 응답 상세 확인
             const token = localStorage.getItem("accessToken");
-            const response = await fetch(`http://3.35.27.165:70/api/users/orders`, {
+            const response = await fetch(`/api/users/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
